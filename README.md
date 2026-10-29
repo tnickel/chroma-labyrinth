@@ -4,6 +4,16 @@ Prozedurales 3D-Labyrinth für Godot 4.7.2 mit Forward+. Vier animierte Menschen
 
 ![Nocturne mit echten Wand- und Bodenreflexionen](doc/showcase/nocturne.png)
 
+## 🎥 Video-Showcases auf YouTube
+
+* **Teil 1: Labyrinth, Beleuchtung & Kunstgalerien:** [https://youtu.be/B02GJjcgpKk](https://youtu.be/B02GJjcgpKk)  
+  *Vorstellung des 3-stöckigen Museums, SDFGI, Reflexionen und der thematischen Galerien.*
+* **Teil 2: Flugterminal-Anbau & Rundflug in den Orbit:** [https://youtu.be/k2gzdX22JTw](https://youtu.be/k2gzdX22JTw)  
+  *Der neue Flughafen, Einstieg in den Orbit Liner, Echtzeit-Raumflug und Einblicke in den iterativen KI-Workflow.*
+
+> **Showcase-Hintergrund:** Entwickelt in nur **3–4 Stunden** mit der **Astra-KI** (GPT-4 Astra / Codex) und Godot 4 – ohne Vorkenntnisse in 3D-Grafikprogrammierung. Ausführliche Doku: [doc/PROJEKT_DOKUMENTATION.md](doc/PROJEKT_DOKUMENTATION.md) & [doc/HOMEPAGE_SHOWCASE_BLOG.md](doc/HOMEPAGE_SHOWCASE_BLOG.md).
+
+
 ## Starten
 
 1. Repository klonen oder als ZIP herunterladen und entpacken. Die Modelle sind enthalten; Git LFS ist nicht nötig.
@@ -69,6 +79,29 @@ Start-, Lande- und Rollbewegungen zu sehen. Die eigene Maschine besitzt
 Triebwerke und eine schließbare Einstiegstür. Die Fenster sind echte Öffnungen
 mit transparentem Glas, keine Bilder an einer geschlossenen Wand.
 
+Die überarbeitete Ausstattung verwendet mitgelieferte PBR-Texturen für Stein,
+Leder, Gewebe, Holz, Beton und Asphalt sowie einen fotografischen HDR-Himmel.
+Rauheit und feine Normalmaps reagieren auf das Licht; Holzlamellen, Fensterfalze,
+Dichtungen, gerundete Polster, Nähte und Armaturen geben den Oberflächen Volumen.
+Die Lounge ergänzt texturierte glTF-Sessel, Tische und Topfpflanzen.
+Quellen und Nutzungsbedingungen stehen unter `assets/airport/`.
+
+**22 zusätzliche Menschen** beleben den Flughafen: sechs gehen zwischen Eingang,
+Gate und Aussicht umher, sechs warten sitzend, vier sind bereits in der Maschine
+und sechs steigen zeitversetzt ein. Das Boarding führt über die tatsächliche
+Brücke und den Mittelgang zu reservierten Innensitzen. Die vorhandene
+`Sit_Stand`-Animation wird an die Sitzhöhe angepasst; Hände ruhen auf dem Schoß.
+Nach der Landung steigen einige wieder aus. Die 18 Fensterplätze bleiben für
+den Spieler verfügbar. Bei besetztem Türbereich wartet der Abflug auf einen
+freien Durchgang. Außerhalb der Reichweite schlafen Bewegung und Animation;
+entferntere sichtbare Posen laufen reduziert mit zehn Aktualisierungen pro Sekunde.
+
+Ein **1,90 × 18 m großes Glasdach**, ein **2 × 1,6 m großes Bodenfenster** im
+vorderen Kabinenbereich und ein **0,86 × 16,8 m langer Glasgang** erlauben den
+Blick nach oben und unten. Die Rumpfhülle ist dort wirklich geöffnet; das
+Bodenglas bleibt begehbar. Das ist ein gestaltetes Panorama-Flugzeug, kein
+Nachbau einer zugelassenen Verkehrsmaschine.
+
 1. Über Gate A01 und die Glasbrücke in die Maschine gehen.
 2. Mit **E** neben einer Sitzreihe einen Fensterplatz einnehmen.
 3. **R** drücken oder nach **Esc** den Button **RUNDFLUG STARTEN** anklicken.
@@ -83,7 +116,10 @@ mit transparentem Glas, keine Bilder an einer geschlossenen Wand.
 Das ist ein inszenierter Passagier-Erlebnisflug: Ein gewöhnliches Verkehrsflugzeug
 fliegt nicht ins All. Die Kabine behält stabile Physikkoordinaten; bewegte
 Landschaft, gestaffelte Wolken, Himmel und gekrümmter Planet erzeugen das
-Panorama. Der Planet ist prozedural und keine geografisch genaue Erdkarte.
+Panorama. Die Erdoberfläche verwendet NASAs Blue-Marble-Satellitenkomposit
+vom Juli 2004; Atmosphäre, Wolken und Reiseverlauf sind inszeniert und keine
+Live-Daten. Die Wolkenreise kombiniert den fotografischen Himmel mit bewegten
+Wolkenschichten. Im Orbitalabschnitt wechseln auch die Reflexionen zum Nachthimmel.
 Leises Triebwerksrauschen und ein Kabinensignal entstehen ebenfalls im Code.
 Während des Fluges bleibt die Weltenauswahl gesperrt, bis das ursprüngliche
 Gate samt Kamera, Umgebung, Licht und Steuerung wiederhergestellt ist.
@@ -92,9 +128,13 @@ Das vollständige Konzept steht in [doc/Flugterminal-Konzept.txt](doc/Flugtermin
 Module: `scripts/airport/`; Außenwelt- und Terminal-Shader: `shaders/airport_*.gdshader`.
 `Tests/AirportRegression.gd` prüft den realen Hin-/Rückweg mit der Player-Kapsel,
 E/R/L/Tab-Eingaben, alle Flugphasen, zwei Flüge und die vollständige Rückkehr.
-Der Abschlusslauf bestand 3.923 Prüfungen mit 1.344 Wegproben. Zusätzlich sind
+Der Abschlusslauf bestand 3.926 Prüfungen mit 1.344 Wegproben. Zusätzlich sind
 Flugstart während eines Weltwechsels und die Sitzsperre beim Menüschließen
-abgedeckt. Die Weltenauswahl bestand weitere 3.276 Prüfungen mit acht Zielen.
+abgedeckt. Die Weltenauswahl bestand weitere 3.278 Prüfungen mit acht Zielen.
+`Tests/AircraftPanoramaRegression.gd` prüft echte Mesh-Dreiecke entlang der
+Sichtstrahlen sowie Glaskollisionen, Fensterfugen und Sitzanker.
+`Tests/AirportPassengersRegression.gd` prüft Boarding, Rückkehr, Sitzhaltung,
+Vorwärtsgehen, Render-Layer und das Schlafen entfernter Passagiere.
 `tools/airport_review.gd` erzeugt echte Forward+-Aufnahmen; `tools/airport_benchmark.gd`
 misst die laufende Hauptszene mit normalem HUD, Besuchern und Flugverkehr.
 
@@ -104,7 +144,8 @@ Forward+-Aufnahmen aus der tatsächlichen Hauptszene:
 ![Begehbare Kabine mit Fensterplätzen](doc/airport/airport_cabin.png)
 ![Orbitalpanorama vom Fensterplatz](doc/airport/airport_space.png)
 
-Leistungsstichprobe vom 29.10.2026, RTX 4070, Godot 4.7.2, 1920×1080,
+Leistungsstichprobe der ersten Flughafenfassung **vor der Material- und
+Passagierüberarbeitung** vom 29.10.2026, RTX 4070, Godot 4.7.2, 1920×1080,
 ohne VSync und ohne parallele Lasttests. Je Ansicht 2,5 Sekunden Aufwärmzeit
 und drei Sekunden Messung, normale Besucher-/Verkehrslogik und HUD aktiv:
 

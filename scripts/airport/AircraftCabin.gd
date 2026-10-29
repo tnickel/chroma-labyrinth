@@ -92,7 +92,7 @@ func _make_materials() -> void:
 	_materials.rubber = _material(Color("101419"), 0.94, 0.0)
 	_materials.teal = _material(Color("167e91"), 0.26, 0.35)
 	_materials.white_light = _emissive(Color("ffe5b7"), 2.0)
-	_materials.blue_light = _emissive(Color("62c8de"), 1.2)
+	_materials.blue_light = _emissive(Color("bbc9c4"), 0.18)
 	_materials.red_light = _emissive(Color("ff4735"), 2.0)
 	_materials.green_light = _emissive(Color("58dd91"), 2.0)
 	var glass := _material(Color(0.74, 0.87, 0.91, 0.045), 0.035, 0.0)
@@ -256,7 +256,7 @@ func _tube_path(points: PackedVector3Array, radius: float, close := true) -> Arr
 			var n0 := side * cos(TAU * float(corner) / 6.0) + up * sin(TAU * float(corner) / 6.0)
 			var n1 := side * cos(TAU * float(next) / 6.0) + up * sin(TAU * float(next) / 6.0)
 			var vertices := [a + n0 * radius, a + n1 * radius, b + n1 * radius, b + n0 * radius]
-			for index in [0, 1, 2, 0, 2, 3]:
+			for index in [0, 2, 1, 0, 3, 2]:
 				surface.set_normal(n0 if index == 0 or index == 3 else n1)
 				surface.add_vertex(vertices[index])
 	return surface.commit()
@@ -284,7 +284,9 @@ func _build_observation_floor() -> void:
 		glass.position = Vector3(0, 0.0, z)
 		glass.set_meta("observation_window", "floor")
 		glass.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		_collider(Vector3(0, -0.06, z), Vector3(aperture * 2.0, 0.12, length), "ObservationGlassFloorCollision")
+		# A small hidden overlap prevents floating-point gaps at exact panel
+		# boundaries. The visible glass and opaque aperture retain their size.
+		_collider(Vector3(0, -0.06, z), Vector3(aperture * 2.0 + 0.008, 0.12, length + 0.008), "ObservationGlassFloorCollision")
 		for frame_z in [start, finish]:
 			_box(Vector3(0, -0.012, frame_z), Vector3(aperture * 2.0 + 0.06, 0.035, 0.05), _materials.metal, "ObservationGlassCrossFrame")
 		var well := _surface()
@@ -295,7 +297,7 @@ func _build_observation_floor() -> void:
 		_mesh(well.commit(), lining, "TaperedObservationWell")
 	for z in [-5.3, -1.6, 2.1, 5.8]:
 		_box(Vector3(0, -0.012, z), Vector3(0.92, 0.035, 0.045), _materials.metal, "StructuralGlassJoint")
-	_label("PANORAMA DECK  /  CLEAR VIEW BELOW", Vector3(0, 0.012, -9.45), 0.0018, Color("d9cba6"), Vector3(-PI * 0.5, 0, 0))
+	_label("PANORAMA DECK  /  CLEAR VIEW BELOW", Vector3(0, 0.012, -9.45), 0.0018, Color("d9cba6"), Vector3(-PI * 0.5, 0, PI))
 
 func _build_airframe() -> void:
 	_build_observation_floor()
@@ -475,7 +477,10 @@ func _build_windows() -> void:
 			_box(Vector3(side * 1.61, 2.30, z + 0.50), Vector3(1.03, 0.02, 0.035), _materials.metal, "LockerSeam", ROOF_LAYER)
 		# Light ribbons flank the glass roof instead of obscuring its centre.
 		_box(Vector3(side * 1.035, 3.04, 0.1), Vector3(0.035, 0.026, 21.3), _materials.white_light, "CeilingLightRibbon", ROOF_LAYER)
-		_box(Vector3(side * 0.51, 0.012, 0.2), Vector3(0.018, 0.008, 21.4), _materials.blue_light, "AisleGuide")
+		# The broad vestibule pane has its own illuminated outer frame. A
+		# continuous aisle strip would otherwise float across its clear glass.
+		for limits in [Vector2(-10.5, -9.25), Vector2(-7.55, 10.9)]:
+			_box(Vector3(side * 0.51, 0.012, (limits.x + limits.y) * 0.5), Vector3(0.018, 0.008, limits.y - limits.x), _materials.blue_light, "AisleGuide")
 
 func _rounded_profile(half_width: float, half_height: float, radius: float) -> PackedVector2Array:
 	var points := PackedVector2Array()
@@ -483,34 +488,76 @@ func _rounded_profile(half_width: float, half_height: float, radius: float) -> P
 		var centre := Vector2(half_width - radius, half_height - radius)
 		centre.x *= 1.0 if corner == 0 or corner == 3 else -1.0
 		centre.y *= 1.0 if corner < 2 else -1.0
-		for sample in 9:
-			var angle := float(corner) * PI * 0.5 + float(sample) / 8.0 * PI * 0.5
+		for sample in 17:
+			var angle := float(corner) * PI * 0.5 + float(sample) / 16.0 * PI * 0.5
 			points.append(centre + Vector2(cos(angle), sin(angle)) * radius)
 	return points
 
 func _window(side: float, z: float) -> void:
 	var inner := _rounded_profile(0.43, 0.46, 0.27)
+	var mouth := _rounded_profile(0.46, 0.49, 0.29)
 	var outer := _rounded_profile(0.56, 0.51, 0.015)
 	var frame := _surface()
-	var reveal := _surface()
 	var glazing := _surface()
+	var gasket := _surface()
+	var gasket_outer := _rounded_profile(0.448, 0.478, 0.288)
 	for index in inner.size():
 		var next := (index + 1) % inner.size()
-		var a := Vector3(side * 2.13, 1.55 + inner[index].y, z + inner[index].x)
-		var b := Vector3(side * 2.13, 1.55 + inner[next].y, z + inner[next].x)
+		var a := Vector3(side * 2.105, 1.55 + mouth[index].y, z + mouth[index].x)
+		var b := Vector3(side * 2.105, 1.55 + mouth[next].y, z + mouth[next].x)
 		var c := Vector3(side * 2.13, 1.55 + outer[next].y, z + outer[next].x)
 		var d := Vector3(side * 2.13, 1.55 + outer[index].y, z + outer[index].x)
 		_quad(frame, a, b, c, d)
-		_quad(reveal, a, a + Vector3(side * 0.16, 0, 0), b + Vector3(side * 0.16, 0, 0), b)
-		_triangle(glazing, Vector3(side * 2.29, 1.55, z), a + Vector3(side * 0.16, 0, 0), b + Vector3(side * 0.16, 0, 0))
+		var ga := Vector3(side * 2.279, 1.55 + inner[index].y, z + inner[index].x)
+		var gb := Vector3(side * 2.279, 1.55 + inner[next].y, z + inner[next].x)
+		_quad(gasket, ga, gb,
+			Vector3(side * 2.279, 1.55 + gasket_outer[next].y, z + gasket_outer[next].x),
+			Vector3(side * 2.279, 1.55 + gasket_outer[index].y, z + gasket_outer[index].x))
+		_triangle(glazing, Vector3(side * 2.29, 1.55, z),
+			Vector3(side * 2.29, 1.55 + inner[index].y, z + inner[index].x),
+			Vector3(side * 2.29, 1.55 + inner[next].y, z + inner[next].x))
+	# The planar reveal previously met a deeper wall face at a zero-width
+	# butt joint. These opaque overlaps seal the slit even at grazing angles.
+	for edge in [-1.0, 1.0]:
+		_box(Vector3(side * 2.245, 1.55, z + edge * 0.56), Vector3(0.25, 1.07, 0.055), _materials.lining, "WindowPanelJointCover")
+		_box(Vector3(side * 2.245, 1.55 + edge * 0.51, z), Vector3(0.25, 0.055, 1.17), _materials.lining, "WindowPanelHeaderOverlap")
 	var trim := _materials.lining.duplicate() as StandardMaterial3D
 	trim.cull_mode = BaseMaterial3D.CULL_DISABLED
 	_mesh(frame.commit(), trim, "RoundedWindowFrame")
 	var polished := _materials.lining.duplicate() as StandardMaterial3D
 	polished.cull_mode = BaseMaterial3D.CULL_DISABLED
-	_mesh(reveal.commit(), polished, "WindowReveal")
+	polished.roughness = 0.57
+	polished.normal_enabled = false
+	_mesh(_window_reveal(side, z), polished, "WindowReveal")
+	var seal := _materials.rubber.duplicate() as StandardMaterial3D
+	seal.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_mesh(gasket.commit(), seal, "WindowPressureGasket")
 	var glass := _mesh(glazing.commit(), _materials.glass, "WindowGlass")
 	glass.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+
+func _window_reveal(side: float, z: float) -> ArrayMesh:
+	var surface := _surface()
+	var rings := [_rounded_profile(0.46, 0.49, 0.29),
+		_rounded_profile(0.436, 0.466, 0.276), _rounded_profile(0.43, 0.46, 0.27)]
+	var depths := [2.105, 2.135, 2.285]
+	for band in rings.size() - 1:
+		for index in rings[band].size():
+			var next: int = (index + 1) % rings[band].size()
+			var vertices: Array[Vector3] = []
+			var normals: Array[Vector3] = []
+			for pair in [Vector2i(band, index), Vector2i(band, next), Vector2i(band + 1, next), Vector2i(band + 1, index)]:
+				var profile: PackedVector2Array = rings[pair.x]
+				var point := profile[pair.y]
+				var tangent := (profile[(pair.y + 1) % profile.size()] - profile[posmod(pair.y - 1, profile.size())]).normalized()
+				var outward := Vector2(tangent.y, -tangent.x)
+				var radial_change: Vector2 = rings[band + 1][pair.y] - rings[band][pair.y]
+				var slope := radial_change.dot(outward) / float(depths[band + 1] - depths[band])
+				vertices.append(Vector3(side * depths[pair.x], 1.55 + point.y, z + point.x))
+				normals.append(Vector3(side * slope, -outward.y, -outward.x).normalized())
+			for corner in [0, 1, 2, 0, 2, 3]:
+				surface.set_normal(normals[corner])
+				surface.add_vertex(vertices[corner])
+	return surface.commit()
 
 func _build_seating() -> void:
 	var back_path := PackedVector3Array()

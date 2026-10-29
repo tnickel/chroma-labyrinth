@@ -18,11 +18,22 @@ Flugzeug: Ursprung X=106/Y=0/Z=2, Nase nach -Z, Einstieg links vorne.
 Vorfeld liegt tiefer; Kabinen- und Terminalboden sind stufenlos verbunden.
 
 Gestaltung
-Petrolfarbene Konstruktion, helle Sitze, Messingakzente, gerahmte große
-Glasflächen, klare Gate- und Rückwegschilder. Das Licht im Terminal ist ruhig
-und lesbar. Die Kabine bekommt separate Sitznummern, Handauflagen, Gepäckfächer,
-Innenbeleuchtung und Fensterrahmen. Modelle, Oberflächen und Szenerien werden
-prozedural erzeugt; zusätzliche externe Asset-Downloads sind nicht notwendig.
+Graue Steinplatten, Aluminiumprofile, Fensterdichtungen, Holzlamellen und
+petrolfarbene Wartepolster geben dem Terminal einen ruhigen Materialmaßstab.
+Gate- und Rückwegschilder sitzen auf sichtbaren Trägern; Panoramafenster geben
+den Blick aufs Vorfeld frei. Die Kabine besitzt 36 Sitze, davon 18 nutzbare
+Fensterplätze, außerdem Sitznummern, Handauflagen, Gepäckfächer, Innenbeleuchtung
+und Fensterrahmen. Architektur und Flugzeuggeometrie entstehen im Code.
+Fotografische CC0-PBR-Texturen für Stein, Leder, Gewebe, Holz, Beton und Asphalt
+sowie ein fotografischer HDR-Himmel werden mitgeliefert.
+
+Zwei Lounge-Inseln im südlichen Terminal ergänzen acht tatsächlich modellierte
+Ledersessel, fünf Stein-/Holztische und vier Topfpflanzen aus drei texturierten
+glTF-Assets. Drei dieser Tische ersetzen die früheren primitiven Tische zwischen
+den Wartebänken; zwei Pflanzen stehen am Eingang. Die Lounge-Sessel sind separate
+Ausstattung und verändern die 36 bestehenden Warte-Sitzanker nicht. Importierte
+Mesh-LODs, gemeinsame Mesh-/Materialressourcen und 45 m Sichtweite begrenzen den
+Renderaufwand. Zur Laufzeit sind keine externen Asset-Downloads notwendig.
 
 Interaktion und Ablauf
 E: Fensterplatz einnehmen / wieder im Mittelgang aufstehen.
@@ -35,7 +46,7 @@ Automatischer Ablauf, insgesamt etwa 150 Sekunden:
 Tür schließen 4 s; Rollen 8 s; Start 12 s; Steigflug 24 s;
 Wolkenreise 18 s; Orbitalpanorama 28 s; Sinkflug 24 s;
 Landeanflug 16 s; Landung 10 s; Andocken 6 s.
-Ab der Wolkenreise kann die Rückkehr mit L zusätzlich vorgezogen werden.
+Während Wolkenreise und Orbitalpanorama kann mit L der Sinkflug vorgezogen werden.
 H blendet die Fluginstrumente aus; M schaltet das prozedurale Triebwerksrauschen
 stumm. Esc gibt die Maus für die Bildschirmbuttons frei.
 Ankunft stellt Terminalansicht, Bedienung und offene Tür wieder her.
@@ -52,17 +63,49 @@ Präzisionsfehler oder aufwändige mitbewegte CharacterBody-Physik.
 Module und Darstellung
 AirportConnection: realer Anschluss, Bodenpfeile und Rückweg.
 AirportTerminal: Wartehalle, Jetbridge, Vorfeld und analytischer Flugverkehr.
+AirportFurnishings: mitgelieferte glTF-Lounge und einfache Möbelkollisionen.
 AircraftCabin: Flugzeug, Sitzplätze, Fensteröffnungen und schließbare Tür.
 FlightScenery: eigene Außenwelt mit Rollbahn, Landschaft, Wolken, Erde und Sternen.
 AirportSystem: Zustandsautomat, Sitzinteraktion, Fluginstrumente und Rückkehr.
 AirportAudio: einmalig erzeugtes Motorrauschen und Kabinensignal ohne Audiodateien.
+AirportMaterials/AirportLighting: PBR-Oberflächen, HDR-Tageslicht, SSAO, SSIL,
+SSR und lokale statische Reflexionen. Der Flughafen verwendet ein eigenes
+Umgebungsprofil ohne SDFGI und volumetrischen Nebel; die Galerieeinstellungen
+werden beim Verlassen wiederhergestellt.
+AirportPassengers/AirportPassenger/PassengerSeatedPose: geplante Wege,
+Boarding, Rückkehr sowie Sitz- und Handhaltung der Flughafenbesucher.
 Die Galerie-Layer 1/2 bleiben erhalten. Die Kabine trägt zusätzlich eigene
 Masken; im Flug sieht die Kamera ausschließlich Kabine und Flugwelt. Globale
 Umgebung und Kameraeinstellungen werden bei Rückkehr wiederhergestellt.
-Kein dauerndes Cubemap-Capturing, keine zusätzlichen CPU-Passagiersimulationen.
+Die lokale Cubemap wird einmal aufgenommen; sie enthält keine bewegten Menschen.
+Die zusätzliche Passagierlogik läuft nur in Flughafennähe. Eine viermal pro
+Sekunde ausgeführte Distanzprüfung bleibt auch außerhalb des Bereichs aktiv.
 Die Wolken bestehen aus fünf gestaffelten Schichten und 112 weich schattierten
 Sprites in einem gemeinsamen GPU-Batch; es gibt keine volumetrische Wetterphysik.
-Der Planet zeigt eine prozedurale Landschaft, keine geografisch genaue Erdkarte.
+Die Erdoberfläche verwendet NASAs Blue-Marble-Komposit (Juli 2004); Wolken,
+Beleuchtung und Flugverlauf bleiben eine Inszenierung, keine Live-Daten.
+
+Erweiterung: Menschen und Panoramafenster
+22 Flughafenpassagiere mit gezielten Routen, Sitzanimation, Boarding und Rückkehr.
+Sechs gehen, sechs warten sitzend, vier beginnen in der Kabine, sechs steigen ein.
+Innensitze sind reserviert; Fensterplätze und Mittelgang bleiben für den Spieler.
+Bei besetzter Tür wird der Start abgewiesen, ohne Menschen zu teleportieren.
+Entfernte Bewegung, Animation und Skelette schlafen. Unter 18 m werden Posen
+voll aktualisiert, darüber mit etwa 10 Hz; die Sichtbarkeit verwendet 48/55 m
+Hysterese. Während des Fluges schlafen Menschen außerhalb der Kabine.
+Das große Glasdach misst 1,90 x 18 m. Begehbare Bodenfenster messen 2 x 1,6 m vorn und
+0,86 x 16,8 m im Gang; auch die darunterliegende Rumpfhaut hat echte Öffnungen.
+
+Mitgelieferte Quellen und Rechte
+Die Poly-Haven-Materialien, der HDR-Himmel und die drei Möbelmodelle sind CC0.
+assets/airport/LICENSES.txt und sources.json dokumentieren Flächen und Himmel;
+assets/airport/models/LICENSES.txt und model-sources.json dokumentieren die
+Modelle einschließlich aller glTF-Abhängigkeiten, Download-URLs und MD5-Werte.
+Die NASA-Erdkarte ist separat unter assets/airport/EARTH-SOURCE.txt mit Quelle,
+SHA-256 und NASA-Nutzungsbedingungen verzeichnet; sie wird nicht als CC0-Asset
+ausgegeben. Die unveränderte Karte wird im Shader auf den gestalteten Planeten
+gelegt. Quellen der bereits vorhandenen Menschenmodelle stehen in
+assets/people/ASSET-LICENSES.md.
 
 Abnahmekriterien
 Durchgehender kapselbreiter Weg Atrium–Terminal–Kabine–zurück.

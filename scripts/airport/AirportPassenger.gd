@@ -7,6 +7,7 @@ signal seat_finished(passenger)
 signal stand_finished(passenger)
 
 const Attention = preload("res://scripts/VisitorAttention.gd")
+const SeatedPose = preload("res://scripts/airport/PassengerSeatedPose.gd")
 var model_scene: PackedScene
 var serial := 0
 var role := "walker"
@@ -68,6 +69,10 @@ func _ready() -> void:
 		animation.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
 	_attention = Attention.new()
 	_attention.configure(skeleton)
+	var seated_pose := SeatedPose.new()
+	seated_pose.name = "HandsRestingOnLap"
+	skeleton.add_child(seated_pose)
+	seated_pose.setup(self)
 	_play("Idle_Standing")
 	animation.seek(float(serial % 11) * 0.11, true)
 	set_on_board(false)

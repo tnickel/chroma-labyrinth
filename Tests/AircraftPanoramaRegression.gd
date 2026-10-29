@@ -44,6 +44,7 @@ func _run() -> void:
 	# Sample centres and off-centre viewpoints, avoiding the deliberate narrow
 	# structural joints. Rays extend through the belly and beyond the outer roof.
 	for point in [Vector3(0, 0.8, -8.4), Vector3(0.65, 0.8, -8.4), Vector3(-0.65, 0.8, -8.4),
+		Vector3(-0.51, 0.8, -8.4), Vector3(0.51, 0.8, -8.4),
 		Vector3(0, 0.8, -6.5), Vector3(0.20, 0.8, 0), Vector3(-0.20, 0.8, 8.4)]:
 		_optical_path(point, point - Vector3.UP * 4.0, "floor/belly")
 		var query := PhysicsRayQueryParameters3D.create(point, point - Vector3.UP * 2.0, 1)
@@ -58,6 +59,13 @@ func _run() -> void:
 		var point: Vector3 = seat.position + Vector3.UP * float(seat.eye_height)
 		var direction := Vector3(-1, 0, 0) if point.x < 0 else Vector3(1, 0, 0)
 		_optical_path(point, point + direction * 2.0, "side window")
+	_window_joints()
+	for z in [-9.2, -7.6, 9.2]:
+		for x in [-0.20, 0.0, 0.20]:
+			var query := PhysicsRayQueryParameters3D.create(Vector3(x, 0.14, z), Vector3(x, -0.26, z), 1)
+			var hit := cabin.get_world_3d().direct_space_state.intersect_ray(query)
+			_check(not hit.is_empty(), "Exact glass-panel seam has a ray-sized collision gap at %s" % Vector2(x, z))
+	_check_tube_winding(cabin)
 	_walkability(cabin)
 	_check(cabin.seats.size() == 18, "The eighteen player window seats changed")
 	_check(cabin.passenger_seats.size() == 18, "Expected eighteen distinct inner passenger seats")
@@ -82,7 +90,7 @@ func _collect_geometry(cabin: Node3D) -> void:
 		if material != null and material.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED:
 			continue
 		if node is MeshInstance3D:
-			_add_geometry(node.mesh, node.transform, node.name)
+			_add_geometry(node.mesh, cabin.global_transform.affine_inverse() * node.global_transform, node.name)
 		elif node is MultiMeshInstance3D:
 			var multi: MultiMesh = node.multimesh
 			var authored: Array = multi.get_meta("authored_transforms", [])
@@ -90,7 +98,7 @@ func _collect_geometry(cabin: Node3D) -> void:
 			for index in authored.size():
 				if DisplayServer.get_name() != "headless":
 					_check(authored[index].is_equal_approx(multi.get_instance_transform(index)), "Rendered aircraft batch differs from authored transforms")
-				_add_geometry(multi.mesh, node.transform * authored[index], str(node.name) + ":" + str(index))
+				_add_geometry(multi.mesh, cabin.global_transform.affine_inverse() * node.global_transform * authored[index], str(node.name) + ":" + str(index))
 
 func _add_geometry(mesh: Mesh, transform: Transform3D, label: String) -> void:
 	if mesh == null:
@@ -102,6 +110,10 @@ func _add_geometry(mesh: Mesh, transform: Transform3D, label: String) -> void:
 
 func _optical_path(start: Vector3, finish: Vector3, purpose: String) -> void:
 	optical_rays += 1
+	var occluder := _opaque_at(start, finish)
+	_check(occluder.is_empty(), "%s sightline at %s is blocked by opaque geometry %s" % [purpose, start, occluder])
+
+func _opaque_at(start: Vector3, finish: Vector3) -> String:
 	var occluder := ""
 	for data in _opaque:
 		var a: Vector3 = data.inverse * start
@@ -116,7 +128,35 @@ func _optical_path(start: Vector3, finish: Vector3, purpose: String) -> void:
 				break
 		if not occluder.is_empty():
 			break
-	_check(occluder.is_empty(), "%s sightline at %s is blocked by opaque geometry %s" % [purpose, start, occluder])
+	return occluder
+
+func _window_joints() -> void:
+	for row in Cabin.ROWS:
+		var z := Cabin.FIRST_ROW + float(row) * Cabin.ROW_PITCH
+		for side in [-1.0, 1.0]:
+			for edge in [-1.0, 1.0]:
+				var seam: float = z + edge * 0.56
+				for angle in [-1.0, 1.0]:
+					var occluder := _opaque_at(Vector3(side * 1.65, 1.55, seam - angle * 0.08), Vector3(side * 2.55, 1.55, seam + angle * 0.08))
+					_check(not occluder.is_empty(), "Open side-window panel seam at %s" % Vector2(side, seam))
+
+func _check_tube_winding(cabin: Node3D) -> void:
+	for node: MultiMeshInstance3D in cabin.find_children("*", "MultiMeshInstance3D", true, false):
+		if not ("StitchPiping" in node.name or "PanoramaRoofRibs" in node.name):
+			continue
+		var arrays: Array = node.multimesh.mesh.surface_get_arrays(0)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+		var valid := true
+		for index in range(0, vertices.size(), 3):
+			# Godot uses clockwise front-face winding. Supplied smooth normals
+			# must agree with that front face, otherwise the visible tube is culled.
+			var front := (vertices[index + 2] - vertices[index]).cross(vertices[index + 1] - vertices[index]).normalized()
+			var shading := (normals[index] + normals[index + 1] + normals[index + 2]).normalized()
+			if front.dot(shading) < 0.50:
+				valid = false
+				break
+		_check(valid, "Piping/roof-rib triangle winding faces inside the tube")
 
 func _walkability(cabin: Node3D) -> void:
 	var capsule := CapsuleShape3D.new()

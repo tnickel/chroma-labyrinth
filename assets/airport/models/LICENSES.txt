@@ -1,0 +1,20 @@
+Poly Haven airport lounge models
+
+The model geometry and supplied textures in the three subdirectories are
+licensed by Poly Haven under Creative Commons CC0 1.0 Universal.
+They may be copied, modified and redistributed, including commercially.
+No attribution is required; this provenance is retained voluntarily.
+
+Official asset license: https://polyhaven.com/license
+CC0 deed: https://creativecommons.org/publicdomain/zero/1.0/
+CC0 legal code: https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+Assets (unmodified source downloads, 1K glTF texture set):
+- Modern Arm Chair 01: https://polyhaven.com/a/modern_arm_chair_01
+- Modern Coffee Table 01: https://polyhaven.com/a/modern_coffee_table_01
+- Potted Plant 01: https://polyhaven.com/a/potted_plant_01
+
+model-sources.json records every download URL, original MD5, byte count and
+retrieval date. All downloaded bytes were checked against those MD5 values.
+Godot-generated .import metadata and project placement code are separate
+from the original asset files. No Poly Haven website art or logos are bundled.

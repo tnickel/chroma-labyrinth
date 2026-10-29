@@ -1,16 +1,43 @@
 # Chroma — Spaces in Motion: Projektdokumentation
 
-## 1. Projektübersicht
+## 1. Projektübersicht & Entstehungsgeschichte
 
-**Chroma — Spaces in Motion** (Projektordner `GDotLabyrith2`) ist eine interaktive 3D-Echtzeit-Erfahrung in der **Godot Engine 4** (Forward+ Renderer / Vulkan), die vollständig durch dialogbasierte KI-Programmierung (GPT-4 Astra / Codex / Antigravity) entstanden ist.
+**Chroma — Spaces in Motion** (Projektordner `GDotLabyrith2`) ist ein 3D-Showcase-Projekt für die **Godot Engine 4** (Forward+ Renderer / Vulkan), das die Leistungsfähigkeit moderner KI-gestützter Spieleentwicklung demonstriert.
 
-Das Projekt demonstriert modernes prozedurales Leveldesign, High-End-Echtzeitgrafik in Godot (SDFGI, SSR-Spiegelungen, volumetrischer Nebel, prozedurale Custom-Shader) sowie ein iteratives Entwicklungsmodell: Komplexe Spiel- und Architektur-Elemente werden nicht durch einen einzigen Prompt "aus der Konserve" generiert, sondern Schritt für Schritt interaktiv aufgebaut, getestet und verfeinert.
+### Kern-Fakten:
+* **Entwicklungszeit:** Innerhalb von nur **3 bis 4 Stunden** von Grund auf entwickelt.
+* **Entwickler-Hintergrund:** Erstellt von Thomas Nickel ohne tiefere Vorkenntnisse in 3D-Grafikprogrammierung, Shadern oder Vektormathematik.
+* **Entwicklungsmethode:** Vollständig dialogbasiert mit der **Astra-KI** (GPT-4 Astra / Codex). Die KI erzeugte den GDScript-Code, Shader-Dateien, Szenenstrukturen und automatische Regressionstests.
+* **Showcase-Zweck:** Das Projekt beweist, wie schnell und zugänglich High-End-3D-Entwicklung in Godot 4 durch iterative KI-Führung wird.
 
 ---
 
-## 2. Architektur & Spielwelt
+## 2. Die Video-Showcases auf YouTube
 
-### 2.1 Multi-Etagen-Labyrinth & Kunstgalerien
+Zur Veranschaulichung und Präsentation des Projekts existieren zwei begleitende YouTube-Videos:
+
+### Video 1: Aufbau des Chroma-Museums (Labyrinth, Beleuchtung & Kunstgalerien)
+* **URL:** [https://youtu.be/B02GJjcgpKk](https://youtu.be/B02GJjcgpKk)
+* **Schwerpunkte:**
+  - Aufbau des 3-stöckigen Gebäudes mit über 6.500 m² Grundfläche (80,83 × 80,83 m).
+  - Implementierung von SDFGI (Signed Distance Field Global Illumination), Screen-Space Reflections (SSR) und volumetrischem Nebel.
+  - Großes Atrium mit der kinetischen Metallskulptur *"Chroma — Engine of Light"*.
+  - Vorstellung der Galeriewelten (Solar, Nocturne, Glacier, Spectrum, Ember, Afterglow).
+  - Animierte Passanten und begehbare Verbindungsrampen mit zweifarbigem Wegeleitsystem.
+
+### Video 2: Flughafen-Anbau, Orbit Liner & KI-Entwicklungs-Workflow
+* **URL:** [https://youtu.be/k2gzdX22JTw](https://youtu.be/k2gzdX22JTw)
+* **Schwerpunkte:**
+  - Warum One-Shot-Prompts bei komplexen Projekten nicht genügen und wie iteratives Prompting mit kontinuierlicher Verfeinerung zum Erfolg führt.
+  - Der neue Anbau: Begehbarer Flugterminal mit Wartehalle, Abflugtafel, Rollfeld und autonomen Flugzeugen.
+  - Fluggastbrücke Gate A01 und Betreten des *Chroma Orbit Liners* (36 Sitze, 18 reale Fensterplätze).
+  - 150-Sekunden-Rundflug in Echtzeit: Start, Wolkenschichten, Steigflug bis in den Orbit mit Erdkrümmung und Sternenhimmel, Landeanflug und Rückkehr ins Terminal.
+
+---
+
+## 3. Architektur & Spielwelt
+
+### 3.1 Multi-Etagen-Labyrinth & Kunstgalerien
 - **Fläche & Maßstab:** Grundfläche von ca. 80,83 × 80,83 m (~6.534 m²) über 3 Stockwerke mit jeweils 6 m Deckenhöhe.
 - **Rampen- und Wegeleitsystem:** Die Etagen sind über großzügige 22-Meter-Rampen verbunden. Ein dynamisches, pfadbasiertes Wegweisungssystem auf dem Boden führt die Besucher:
   - **Cyan-Pfeile:** Führen nach oben.
@@ -18,7 +45,7 @@ Das Projekt demonstriert modernes prozedurales Leveldesign, High-End-Echtzeitgra
   - Meterangaben an Abzweigungen berechnen die tatsächliche Labyrinth-Distanz (keine bloße Luftlinie).
 - **Zentrales Atrium:** Großes, offenes Atrium mit der kinetischen Metallskulptur *"Chroma — Engine of Light"*, Reflexionsböden und Glasbrüstungen.
 
-### 2.2 Die Galeriewelten
+### 3.2 Die Galeriewelten
 1. **01 Atrium (Chroma):** 12 Meter kinetisches Metall, ständige dynamische Lichtbrechung.
 2. **02 Solar:** Warmer Mineralsaal, goldene Sonnensegel, gefiltertes Sonnenlicht.
 3. **03 Nocturne:** Obsidianboden, kosmische Tiefen, Sternenhimmel und Planarspiegel.
@@ -29,15 +56,15 @@ Das Projekt demonstriert modernes prozedurales Leveldesign, High-End-Echtzeitgra
 
 ---
 
-## 3. Der Flugterminal-Anbau: Chroma Orbit
+## 4. Der Flugterminal-Anbau: Chroma Orbit
 
 Im Erdgeschoss führt eine beschilderte Ostachse vom Atrium durch einen realen Durchbruch in der Außenwand zum **Flugterminal**:
 
-### 3.1 Terminal & Fluggastbrücke
+### 4.1 Terminal & Fluggastbrücke
 - **Wartehalle:** Verglaste Lounge mit Anzeigetafeln, Sitzgruppen, Blick auf das Rollfeld und autonomen Flugverkehr (startende, landende und rollende Maschinen).
 - **Gate A01 & Jetbridge:** Ein stufenlos verbundener Glasgang führt direkt zur Passagiermaschine ("Chroma Orbit Liner").
 
-### 3.2 Die Passagiermaschine & der Orbit-Rundflug
+### 4.2 Die Passagiermaschine & der Orbit-Rundflug
 - **Kabine:** 36 Sitze, 18 reale Fensterplätze mit Blick nach außen, Gepäckablagen, Mittelgang und physisch schließbare Einstiegstür.
 - **Flugablauf (~150 Sekunden):**
   1. *Boarding & Tür schließen:* Einstiegstür schließt automatisch.
@@ -50,7 +77,7 @@ Im Erdgeschoss führt eine beschilderte Ostachse vom Atrium durch einen realen D
 
 ---
 
-## 4. Steuerung & Tastenbelegung
+## 5. Steuerung & Tastenbelegung
 
 | Taste / Eingabe | Funktion |
 | :--- | :--- |
@@ -72,7 +99,7 @@ Im Erdgeschoss führt eine beschilderte Ostachse vom Atrium durch einen realen D
 
 ---
 
-## 5. Technische Highlights & Render-Pipeline
+## 6. Technische Highlights & Render-Pipeline
 
 - **Engine-Version:** Godot 4.3+ / 4.7.2 Forward+ (Vulkan Rendering Backend).
 - **Echtzeitbeleuchtung:**

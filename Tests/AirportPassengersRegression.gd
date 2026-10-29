@@ -18,7 +18,11 @@ func _run() -> void:
 	var scene: Node3D = load("res://Main.tscn").instantiate()
 	root.add_child(scene)
 	var airport: Node3D = scene.get_node("AirportSystem")
-	var crowd: Node3D = airport.get_node("AirportPassengers")
+	var crowd: Node3D = airport.get_node_or_null("AirportPassengers")
+	if crowd == null:
+		push_error("Airport passenger integration did not build; inspect preceding parser/runtime diagnostics")
+		quit(1)
+		return
 	var player: CharacterBody3D = scene.get_node("Player")
 	airport.set_process(false)
 	player.set_physics_process(false)
@@ -63,6 +67,13 @@ func _run() -> void:
 		if actor.role == "boarder":
 			_check(actor.mode == "seated" and actor.on_board, "A boarder remains wandering instead of seated")
 			_pose_check(actor)
+		if actor.mode == "seated":
+			var modifier: SkeletonModifier3D = actor.skeleton.get_node("HandsRestingOnLap")
+			_check(modifier.last_hand_positions.size() == 2, "Seated hands are never adapted to the actual chair")
+			_check(modifier.maximum_limb_error < 0.001, "Seated arm adaptation changes anatomical limb lengths")
+			for point: Vector3 in modifier.last_hand_positions:
+				var local: Vector3 = actor.to_local(point)
+				_check(absf(local.x) < 0.22 and local.y > 0.63 and local.y < 0.75, "A seated hand remains in the armrest instead of above the lap")
 		if actor.role == "walker":
 			_check(actor.distance_walked > 10.0, "Terminal walker never completes purposeful travel")
 		_check(actor.animation_updates > 0, "Nearby passenger pose never updates")
@@ -83,11 +94,11 @@ func _run() -> void:
 	airport.stand_up()
 	player.set_physics_process(false)
 	player.global_position = Vector3(72, 0.04, 4)
-	for tick in 7200:
+	for tick in 10800:
 		await physics_frame
 	_check(crowd.returns_completed >= 3, "Passengers cannot leave the cabin through the real bridge after landing")
 	_check(crowd.boarding_completed >= 7, "Returning visitors cannot board another flight")
-	if crowd.returns_completed < 3:
+	if crowd.returns_completed < 3 or crowd.boarding_completed < 7:
 		for actor in crowd.actors:
 			if actor.role == "boarder":
 				print("PASSENGER_DIAGNOSTIC ", actor.serial, " ", actor.journey, " / ", actor.mode, " at ", actor.global_position, " toward ", actor.remaining_target(), " factor ", actor.traffic_factor)

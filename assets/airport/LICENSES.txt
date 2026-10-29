@@ -6,7 +6,7 @@ License: https://polyhaven.com/license
 CC0 deed: https://creativecommons.org/publicdomain/zero/1.0/
 
 Original asset pages:
-https://polyhaven.com/a/terrazzo_tiles
+https://polyhaven.com/a/large_floor_tiles_02
 https://polyhaven.com/a/wood_table_001
 https://polyhaven.com/a/leather_white
 https://polyhaven.com/a/denmin_fabric_02

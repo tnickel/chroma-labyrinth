@@ -1,0 +1,13 @@
+earth_july_5400.jpg
+NASA Earth Observatory: Blue Marble Next Generation, July 2004 base map.
+Original global satellite composite: 5400 x 2700 pixels, 8 km/pixel.
+Source: https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/
+Download: https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/july/world.200407.3x5400x2700.jpg
+SHA256: f55226d46d27e05511f2118dc6aa24f5dbf9b6b2cddc87cc6e0e7dd067c00b11
+
+NASA imagery used under the NASA Images and Media Usage Guidelines:
+https://www.nasa.gov/nasa-brand-center/images-and-media/
+This satellite composite is acknowledged as NASA content, separate from the
+Poly Haven CC0 materials. NASA does not endorse this project.
+The image is unchanged. Shader mapping, lighting, atmosphere and cloud overlays
+are artistic additions. This is not live satellite data or a flight navigation map.

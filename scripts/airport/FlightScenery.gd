@@ -27,6 +27,9 @@ var _markers: MultiMeshInstance3D
 var _trees: MultiMeshInstance3D
 var _world_origin := Vector3.ZERO
 var _noise_texture: NoiseTexture2D
+var _daylight_sky: Sky
+var _orbital_sky: Sky
+var _orbital_reflections := false
 
 func build() -> void:
 	if _built:
@@ -59,6 +62,7 @@ func build() -> void:
 	_sun.light_color = Color("fff0d6")
 	_sun.light_energy = 1.25
 	_sun.light_cull_mask = CABIN_LIGHT_MASK
+	_sun.shadow_caster_mask = CABIN_LIGHT_MASK
 	_sun.shadow_enabled = true
 	_sun.directional_shadow_max_distance = 55.0
 	_sun.light_angular_distance = 0.8
@@ -75,6 +79,17 @@ func _build_environment() -> void:
 	sky.sky_material = panorama
 	sky.radiance_size = Sky.RADIANCE_SIZE_256
 	environment.sky = sky
+	_daylight_sky = sky
+	var orbital_atmosphere := ProceduralSkyMaterial.new()
+	orbital_atmosphere.sky_top_color = Color(0.001, 0.002, 0.008)
+	orbital_atmosphere.sky_horizon_color = Color("071b36")
+	orbital_atmosphere.ground_horizon_color = Color("175b8a")
+	orbital_atmosphere.ground_bottom_color = Color("12324e")
+	orbital_atmosphere.sky_energy_multiplier = 0.35
+	orbital_atmosphere.ground_energy_multiplier = 0.7
+	_orbital_sky = Sky.new()
+	_orbital_sky.sky_material = orbital_atmosphere
+	_orbital_sky.radiance_size = Sky.RADIANCE_SIZE_128
 	environment.background_mode = Environment.BG_COLOR
 	environment.background_color = Color("030611")
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
@@ -105,6 +120,7 @@ func _build_sky() -> void:
 	_sky_material.shader = SKY_SHADER
 	_sky_material.set_shader_parameter("noise_texture", _noise_texture)
 	_sky_material.set_shader_parameter("daylight_panorama", load("res://assets/airport/daylight_2k.hdr"))
+	_sky_material.set_shader_parameter("earth_albedo", load("res://assets/airport/earth_july_5400.jpg"))
 	_sky_material.set_shader_parameter("stage_origin", _world_origin)
 	var sky := _mesh(self, dome, _sky_material, "AtmosphereAndOrbitalEarth")
 	sky.extra_cull_margin = 10.0
@@ -280,6 +296,10 @@ func set_flight_sample(height: float, airspeed: float, distance: float, bank: fl
 	_trees.position = Vector3(0, -altitude, fposmod(travel + 900.0, 1800.0) - 900.0)
 	_trees.visible = altitude < 1600.0
 	var darkening := smoothstep(12000.0, 75000.0, altitude)
+	var use_orbital := altitude > 35000.0
+	if use_orbital != _orbital_reflections:
+		_orbital_reflections = use_orbital
+		environment.sky = _orbital_sky if use_orbital else _daylight_sky
 	environment.ambient_light_color = Color("c0d9f0").lerp(Color("6d87b7"), darkening)
 	environment.ambient_light_energy = lerpf(0.62, 0.32, darkening)
 	environment.background_energy_multiplier = lerpf(0.7, 0.15, darkening)

@@ -6,6 +6,7 @@ const APRON_Y := -3.2
 const RUNWAY_X := 155.0
 const ROUTE_SECONDS := 114.0
 const Materials = preload("res://scripts/airport/AirportMaterials.gd")
+const Furnishings = preload("res://scripts/airport/AirportFurnishings.gd")
 
 var transit_points := PackedVector3Array([
 	Vector3(54, 0.1, 0), Vector3(60, 0.1, 0), Vector3(67, 0.1, 0),
@@ -35,6 +36,7 @@ func build() -> void:
 	_terminal_shell()
 	_facade_details()
 	_terminal_furniture()
+	Furnishings.build(self)
 	_jetbridge()
 	_airfield()
 	_flush_batches()
@@ -66,9 +68,6 @@ func _make_materials() -> void:
 	_materials.gasket = _material(Color("111819"), 0.82, 0.0)
 	_materials.luggage = _material(Color("495761"), 0.54, 0.08)
 	_materials.paper = _material(Color("e4e1d4"), 0.87, 0.0)
-	_materials.leaf = _material(Color("29563b"), 0.78, 0.0)
-	_materials.leaf.cull_mode = BaseMaterial3D.CULL_DISABLED
-	_materials.soil = _material(Color("30281e"), 1.0, 0.0)
 	_materials.aircraft = _material(Color("dce8e8"), 0.29, 0.25)
 	_materials.aircraft.cull_mode = BaseMaterial3D.CULL_DISABLED
 	_materials.accent = _material(Color("217d93"), 0.32, 0.45)
@@ -328,16 +327,7 @@ func _terminal_furniture() -> void:
 		for index in 4:
 			_seat(Vector3(x, 0, -11.78 + float(index) * 0.72), -PI * 0.5)
 		_bench_frame(Vector3(x, 0, -10.70), -PI * 0.5)
-	# Low timber tables and service blocks create scale and readable function.
-	for point in [Vector3(63, 0, 9), Vector3(70, 0, 9), Vector3(78, 0, 9)]:
-		_rounded(point + Vector3(0, 0.47, 0), Vector3(1.75, 0.10, 0.68), 0.045, "wood", 0.0, true)
-		for side in [-1.0, 1.0]:
-			_rod(point + Vector3(side * 0.55, 0.07, 0), point + Vector3(side * 0.55, 0.42, 0), 0.033, "metal")
-			_rounded(point + Vector3(side * 0.55, 0.045, 0), Vector3(0.12, 0.05, 0.48), 0.024, "metal")
-		_rounded(point + Vector3(-0.38, 0.526, 0.08), Vector3(0.26, 0.012, 0.34), 0.005, "paper", 0.22)
-		_rounded(point + Vector3(-0.36, 0.536, 0.08), Vector3(0.23, 0.008, 0.31), 0.004, "seat_dark", 0.16)
-		_rod(point + Vector3(0.42, 0.53, -0.04), point + Vector3(0.42, 0.63, -0.04), 0.039, "paper")
-		_rod(point + Vector3(0.42, 0.631, -0.04), point + Vector3(0.42, 0.637, -0.04), 0.041, "dark")
+	# Actual glTF coffee tables and lounge islands are built by Furnishings.
 	_rounded(Vector3(80, 0.52, -13), Vector3(3.5, 1.04, 1.0), 0.07, "wood", 0.0, true)
 	_rounded(Vector3(80, 1.085, -13), Vector3(3.66, 0.09, 1.12), 0.035, "wall")
 	_box(Vector3(80, 0.11, -12.49), Vector3(3.3, 0.10, 0.04), "metal")
@@ -351,7 +341,7 @@ func _terminal_furniture() -> void:
 	_label("A01", Vector3(80, 0.65, -12.492), 60, Color("e3e2da"), 0.008)
 	# A deep, legible flight information blade, readable from the entrance.
 	_box(Vector3(72, 3.67, 0), Vector3(0.20, 1.55, 7.4), "dark")
-	_box(Vector3(72, 4.50, 0), Vector3(0.22, 0.035, 7.4), "cyan")
+	_box(Vector3(72, 4.50, 0), Vector3(0.22, 0.035, 7.4), "metal")
 	for z in [-2.7, 2.7]:
 		_rod(Vector3(72, 4.45, z), Vector3(72, 5.08, z), 0.02, "metal")
 	_label("DEPARTURES / ABFLUG", Vector3(71.88, 4.12, 0), 46, Color("d2e4df"), 0.009, -PI * 0.5)
@@ -373,9 +363,6 @@ func _terminal_furniture() -> void:
 	# Observation rail below the panorama is a real safety boundary.
 	for interval in [Vector2(-16, -9.15), Vector2(-6.85, 20)]:
 		_box(Vector3(83.55, 0.92, (interval.x + interval.y) * 0.5), Vector3(0.05, 0.05, interval.y - interval.x), "metal")
-	# Two quiet planters flank the entrance rather than blocking the centre.
-	for z in [-3.8, 3.8]:
-		_planter(Vector3(56.5, 0, z))
 	_terminal_props()
 
 func _seat(position: Vector3, yaw: float) -> void:
@@ -415,33 +402,6 @@ func _monitor(position: Vector3, yaw: float) -> void:
 		_box(position + basis * Vector3(-0.043, 0.45 - float(row) * 0.037, 0.029), Vector3(0.36, 0.006, 0.002), "white", false, 1, yaw)
 	_box(position + basis * Vector3(-0.21, 0.36, 0.029), Vector3(0.025, 0.235, 0.002), "accent", false, 1, yaw)
 	_rod(position + basis * Vector3(0.25, 0.211, 0.022), position + basis * Vector3(0.25, 0.211, 0.027), 0.0035, "green")
-
-func _planter(position: Vector3) -> void:
-	_rounded(position + Vector3(0, 0.35, 0), Vector3(0.88, 0.70, 0.88), 0.085, "wall", 0.0, true)
-	_rounded(position + Vector3(0, 0.69, 0), Vector3(0.79, 0.045, 0.79), 0.07, "gasket")
-	_rounded(position + Vector3(0, 0.714, 0), Vector3(0.72, 0.015, 0.72), 0.065, "soil")
-	if not _detail_meshes.has("leaf"):
-		var surface := SurfaceTool.new()
-		surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-		for row in 9:
-			for across in 2:
-				for point in [Vector2i(across, row), Vector2i(across + 1, row), Vector2i(across, row + 1), Vector2i(across, row + 1), Vector2i(across + 1, row), Vector2i(across + 1, row + 1)]:
-					var t := float(point.y) / 9.0
-					var side := float(point.x) - 1.0
-					var width := pow(sin(t * PI), 0.7) * 0.13
-					surface.set_uv(Vector2((side + 1.0) * 0.5, t))
-					surface.add_vertex(Vector3(side * width, t, t * t * 0.25 + absf(side) * width * 0.17))
-		surface.generate_normals()
-		surface.index()
-		_detail_meshes.leaf = surface.commit()
-	for index in 18:
-		var angle := float(index) * 2.39996
-		var spread := 0.46 + float(index % 4) * 0.15
-		var length := 0.67 + float(index % 5) * 0.095
-		var basis := Basis(Vector3.UP, angle) * Basis(Vector3.BACK, spread)
-		var leaf_base := position + Vector3(cos(angle) * 0.10, 0.86 + float(index % 3) * 0.13, sin(angle) * 0.10)
-		_rod(position + Vector3(0, 0.71, 0), leaf_base + basis * Vector3(0, length * 0.55, 0), 0.007, "leaf")
-		_shape(_detail_meshes.leaf, Transform3D(basis.scaled(Vector3.ONE * length), leaf_base), "leaf")
 
 func _terminal_props() -> void:
 	# Small service objects are grouped away from the walking spine. Their

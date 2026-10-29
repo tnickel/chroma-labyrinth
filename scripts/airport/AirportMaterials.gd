@@ -19,7 +19,7 @@ static func get_material(key: String) -> StandardMaterial3D:
 	match key:
 		"terminal_floor":
 			folder = "stone"
-			repeat = 0.3125 # Four tiles in a 3.2 m texture period.
+			repeat = 0.3125 # Three large stone tiles in a 3.2 m texture period.
 			material.albedo_color = Color(0.87, 0.94, 1.0)
 			material.roughness = 0.52
 			material.normal_scale = 0.24

@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $airportAssetRoot = Join-Path $ProjectRoot 'assets/airport'
 New-Item -ItemType Directory -Path $airportAssetRoot -Force | Out-Null
 $airportSelections = @(
-    @{ id='terrazzo_tiles'; resolution='2k'; folder='stone' },
+    @{ id='large_floor_tiles_02'; resolution='2k'; folder='stone' },
     @{ id='wood_table_001'; resolution='1k'; folder='wood' },
     @{ id='leather_white'; resolution='1k'; folder='leather' },
     @{ id='denmin_fabric_02'; resolution='1k'; folder='fabric' },
@@ -41,3 +41,10 @@ if ((Get-FileHash -LiteralPath $airportSkyPath -Algorithm MD5).Hash.ToLower() -n
 $airportManifest += @{file='daylight_2k.hdr'; asset=$airportSkyId; source=('https://polyhaven.com/a/' + $airportSkyId); url=$airportSkyRemote.url; md5=$airportSkyRemote.md5; license='CC0-1.0'}
 $airportManifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $airportAssetRoot 'sources.json') -Encoding utf8
 Write-Output 'All airport texture checksums verified.'
+$airportEarthPath = Join-Path $airportAssetRoot 'earth_july_5400.jpg'
+$airportEarthHash = 'f55226d46d27e05511f2118dc6aa24f5dbf9b6b2cddc87cc6e0e7dd067c00b11'
+if (-not (Test-Path -LiteralPath $airportEarthPath) -or (Get-FileHash -LiteralPath $airportEarthPath -Algorithm SHA256).Hash.ToLower() -ne $airportEarthHash) {
+    Invoke-WebRequest -Uri 'https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/july/world.200407.3x5400x2700.jpg' -OutFile $airportEarthPath
+}
+if ((Get-FileHash -LiteralPath $airportEarthPath -Algorithm SHA256).Hash.ToLower() -ne $airportEarthHash) { throw 'NASA image checksum mismatch' }
+Write-Output 'NASA Earth composite SHA256 verified (separate usage terms in EARTH-SOURCE.txt).'

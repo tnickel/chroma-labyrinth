@@ -8,6 +8,7 @@ uniform float travel = 0.0;
 uniform vec3 stage_origin = vec3(0.0);
 uniform sampler2D noise_texture : repeat_enable, filter_linear_mipmap;
 uniform sampler2D daylight_panorama : repeat_enable, filter_linear_mipmap;
+uniform sampler2D earth_albedo : source_color, repeat_enable, filter_linear_mipmap;
 varying vec3 world_point;
 
 void vertex() { world_point = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz; }
@@ -69,17 +70,19 @@ void fragment() {
         float t = -b - sqrt(discriminant);
         vec3 surface = normalize(vec3(0.0, radius_from_center, 0.0) + d * t);
         vec2 continent_uv = surface.xz * 26.0 + vec2(5.2, 3.7 + travel * 0.000002);
-        float continents = fbm(continent_uv);
-        float coast = smoothstep(0.45, 0.51, continents);
-        float desert = smoothstep(0.5, 0.68, fbm(continent_uv * 0.8 + 29.0));
-        float relief = fbm(continent_uv * 14.0 + 19.0);
-        vec3 land = mix(vec3(0.045, 0.17, 0.085), vec3(0.39, 0.27, 0.13), desert);
-        land *= 0.72 + relief * 0.55;
-        float ridges = smoothstep(0.64, 0.82, relief) * smoothstep(0.53, 0.67, continents);
-        land = mix(land, vec3(0.52, 0.49, 0.43), ridges * 0.60);
-        float ocean_depth = smoothstep(0.30, 0.47, continents);
-        vec3 ocean = mix(vec3(0.013, 0.048, 0.15), vec3(0.025, 0.23, 0.33), ocean_depth);
-        vec3 planet = mix(ocean, land, coast);
+        // Blue Marble satellite composite, geographically mapped on the same
+        // sphere used for the horizon. Local up starts above the Mediterranean.
+        float latitude = 0.646 + travel / 6371000.0;
+        float longitude = 0.244;
+        vec3 geo_up = vec3(cos(latitude) * cos(longitude), sin(latitude), cos(latitude) * sin(longitude));
+        vec3 geo_east = vec3(-sin(longitude), 0.0, cos(longitude));
+        vec3 geo_north = vec3(-sin(latitude) * cos(longitude), cos(latitude), -sin(latitude) * sin(longitude));
+        // The aircraft flies toward local -Z: +Z is geographic south. This
+        // right-handed frame keeps satellite ground moving toward +Z as
+        // latitude advances north, matching the runway and cloud parallax.
+        vec3 geographic = geo_east * surface.x + geo_up * surface.y - geo_north * surface.z;
+        vec2 earth_uv = vec2(atan(geographic.z, geographic.x) / 6.2831853 + 0.5, acos(clamp(geographic.y, -1.0, 1.0)) / 3.14159265);
+        vec3 planet = texture(earth_albedo, earth_uv).rgb * 1.1;
         vec2 cloud_uv = continent_uv * 2.5 + vec2(3.0, -2.0);
         cloud_uv += vec2(sin(cloud_uv.y * 0.22), cos(cloud_uv.x * 0.18)) * 1.2;
         float cloud_density = fbm(cloud_uv) * 0.75 + fbm(cloud_uv * 5.3 + 17.0) * 0.25;
