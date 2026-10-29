@@ -1,0 +1,33 @@
+# Godot's generated imports, shader cache and editor state.
+.godot/
+.import/
+.export/
+export_credentials.cfg
+mono_crash.*.json
+
+# Local engine installations, exports and machine-specific launcher settings.
+/start.local.bat
+/build/
+/builds/
+/dist/
+/exports/
+*.exe
+*.pck
+*.zip
+*.7z
+
+# Credentials and local tooling files.
+.env
+.env.*
+!.env.example
+*.pem
+*.pfx
+*.key
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Keep *.uid and Godot 4 *.import sidecars: they are project metadata.

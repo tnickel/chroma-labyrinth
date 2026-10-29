@@ -1,0 +1,100 @@
+[
+	{
+		"draw_calls": 2407.0,
+		"frames": 492,
+		"height": 1080,
+		"median_fps": 166.195778627223,
+		"median_ms": 6.017,
+		"p95_ms": 8.001,
+		"reflection_captures_in_sample": {
+			"NocturnePlanarMirror": 0,
+			"NocturneReflectingFloor": 0
+		},
+		"width": 1920,
+		"world": "CHROMA"
+	},
+	{
+		"draw_calls": 2893.0,
+		"frames": 475,
+		"height": 1080,
+		"median_fps": 162.786911932281,
+		"median_ms": 6.143,
+		"p95_ms": 8.636,
+		"reflection_captures_in_sample": {
+			"NocturnePlanarMirror": 0,
+			"NocturneReflectingFloor": 0
+		},
+		"width": 1920,
+		"world": "SOLAR"
+	},
+	{
+		"draw_calls": 2971.0,
+		"frames": 583,
+		"height": 1080,
+		"median_fps": 211.774671749259,
+		"median_ms": 4.722,
+		"p95_ms": 7.267,
+		"reflection_captures_in_sample": {
+			"NocturnePlanarMirror": 72,
+			"NocturneReflectingFloor": 60
+		},
+		"width": 1920,
+		"world": "NOCTURNE"
+	},
+	{
+		"draw_calls": 2693.0,
+		"frames": 502,
+		"height": 1080,
+		"median_fps": 171.350239890336,
+		"median_ms": 5.836,
+		"p95_ms": 7.203,
+		"reflection_captures_in_sample": {
+			"NocturnePlanarMirror": 0,
+			"NocturneReflectingFloor": 0
+		},
+		"width": 1920,
+		"world": "GLACIER"
+	},
+	{
+		"draw_calls": 2922.0,
+		"frames": 486,
+		"height": 1080,
+		"median_fps": 164.068908941756,
+		"median_ms": 6.095,
+		"p95_ms": 7.995,
+		"reflection_captures_in_sample": {
+			"NocturnePlanarMirror": 0,
+			"NocturneReflectingFloor": 0
+		},
+		"width": 1920,
+		"world": "SPECTRUM"
+	},
+	{
+		"draw_calls": 2384.0,
+		"frames": 585,
+		"height": 1080,
+		"median_fps": 201.288244766506,
+		"median_ms": 4.968,
+		"p95_ms": 6.165,
+		"reflection_captures_in_sample": {
+			"NocturnePlanarMirror": 0,
+			"NocturneReflectingFloor": 0
+		},
+		"width": 1920,
+		"world": "EMBER"
+	},
+	{
+		"draw_calls": 2751.0,
+		"frames": 505,
+		"height": 1080,
+		"median_fps": 175.039383861369,
+		"median_ms": 5.713,
+		"p95_ms": 8.03,
+		"reflection_captures_in_sample": {
+			"NocturnePlanarMirror": 0,
+			"NocturneReflectingFloor": 0
+		},
+		"width": 1920,
+		"world": "AFTERGLOW"
+	}
+]

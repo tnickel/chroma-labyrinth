@@ -1,0 +1,21 @@
+Erstelle ein Godot 4.3+ (Forward+) 3D-Projekt in GDScript für ein grafisch hochgradig beeindruckendes, mehrstöckiges First-Person-Labyrinth ("Chroma-Labyrinth").
+
+Bitte implementiere zuerst Stufe 1 und 2 vollständig modular und ohne externe Asset-Abhängigkeiten (nutze prozedurale Meshes, NoiseTextures, StandardMaterial3D und eigene .gdshader, damit alles sofort lauffähig ist):
+
+1. Projekt- & Render-Architektur:
+- Konfiguriere eine Hauptszene `Main.tscn` mit einem `WorldEnvironment` (SDFGI aktiviert, Volumetric Fog, Glow/Bloom, SSR, SSAO, SSIL).
+- Nutze Render-Layer: Layer 1 für Böden, Wände, Treppen und Skulpturen. Layer 2 ausschließlich für Raumdecken.
+
+2. First-Person-Player & 3D-Minimap (`Player.tscn` & `Player.gd`):
+- `CharacterBody3D` mit flüssiger WASD-Steuerung, Sprinten, Springen, Treppensteigen und Mouse-Look (`Camera3D` rendert Layer 1 und 2) sowie einer per Taste (F) schaltbaren Taschenlampe (`SpotLight3D`).
+- Unten links im HUD (`CanvasLayer`) ein `SubViewportContainer` (260x260px) mit Rahmen und einem `SubViewport`.
+- Im SubViewport eine `Camera3D` (Orthogonal, Size = 25, Rotation X = -90 Grad), die NUR Render-Layer 1 sieht (damit die Decken den Blick von oben nicht verdecken).
+- Die Minimap-Kamera folgt der X/Z-Position des Spielers und passt ihre Y-Höhe sowie Near/Far-Clipping dynamisch an die aktuelle Etage des Spielers an, sodass immer nur das aktuelle Stockwerk auf der Minimap sichtbar ist. Füge einen zentralen Spieler-Richtungspfeil im UI hinzu.
+
+3. Multi-Etagen-Labyrinth-Generator (`LabyrinthGenerator.gd`):
+- Generiere ein Labyrinth über 3 Etagen (Y = 0m, Y = 6m, Y = 12m), verbunden durch begehbare Treppen/Rampen und ein großes offenes Atrium in der Mitte.
+- Jede Etage hat schmale Gänge UND mindestens 2 große Hallen (z.B. 18x18 Meter).
+- Weise verschiedenen Gängen und Räumen unterschiedliche Farbthemen, Beleuchtungen (`OmniLight3D`, `SpotLight3D` in verschiedenen Farben) und Oberflächen zu (Hochglanz-Spiegelboden, rauer Stein mit Noise-Bump-Map, leuchtende Neon-Streifen und gerahmte Shader-Wandbilder).
+- Platziere in den großen Hallen erste prozedurale Skulpturen (z.B. rotierende Torus-/Kristall-Kombinationen mit Glas-/Metall-Materialien und Spotlights).
+
+Liefere die komplette Ordnerstruktur, alle `.gd`-Skripte, `.gdshader`-Dateien und ein Hauptskript, das die Szenen bei Bedarf direkt im Code zusammenbaut, damit ich das Projekt sofort in Godot 4 starten kann.
