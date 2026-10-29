@@ -7,6 +7,8 @@ const RUNWAY_X := 155.0
 const ROUTE_SECONDS := 114.0
 const Materials = preload("res://scripts/airport/AirportMaterials.gd")
 const Furnishings = preload("res://scripts/airport/AirportFurnishings.gd")
+const Terrain = preload("res://scripts/airport/AirportTerrain.gd")
+const Architecture = preload("res://scripts/airport/TerminalArchitecture.gd")
 
 var transit_points := PackedVector3Array([
 	Vector3(54, 0.1, 0), Vector3(60, 0.1, 0), Vector3(67, 0.1, 0),
@@ -35,6 +37,7 @@ func build() -> void:
 	_make_materials()
 	_terminal_shell()
 	_facade_details()
+	Architecture.build(self)
 	_terminal_furniture()
 	Furnishings.build(self)
 	_jetbridge()
@@ -59,9 +62,8 @@ func _make_materials() -> void:
 	_materials.seat = _textured("leather", Color("264850"))
 	_materials.seat_dark = _textured("leather", Color("182b32"))
 	_materials.carpet = _textured("carpet", Color("6a7778"))
-	_materials.tarmac = _textured("concrete", Color("b5bab6"))
+	_materials.tarmac = _textured("apron_concrete", Color.WHITE)
 	_materials.runway = _textured("asphalt", Color("7c8488"))
-	_materials.grass = _material(Color("60766b"), 0.96, 0.0)
 	_materials.white = _material(Color("eee9d7"), 0.53, 0.0)
 	_materials.yellow = _material(Color("d4a83c"), 0.5, 0.1)
 	_materials.black = _material(Color("0c1820"), 0.7, 0.0)
@@ -213,7 +215,9 @@ func _rod(a: Vector3, b: Vector3, radius: float, material: String, layer := 1) -
 	var axis := b - a
 	if axis.length_squared() < 0.000001:
 		return
-	var basis := Basis(Quaternion(Vector3.UP, axis.normalized())).scaled(Vector3(radius, axis.length(), radius))
+	# Size the unit cylinder in its own axes before aiming it at the endpoint.
+	# World-axis scaling after rotation stretches diagonal rods into fins.
+	var basis := Basis(Quaternion(Vector3.UP, axis.normalized())) * Basis.from_scale(Vector3(radius, axis.length(), radius))
 	_shape(_detail_meshes.rod, Transform3D(basis, (a + b) * 0.5), material, layer)
 
 func _terminal_shell() -> void:
@@ -244,13 +248,7 @@ func _terminal_shell() -> void:
 	for x in [57.0, 63.0, 69.0, 75.0, 81.0]:
 		_box(Vector3(x, 5.2, 2), Vector3(5.45, 0.20, 36.6), "wall", true, 2)
 		_box(Vector3(x + 2.85, 5.24, 2), Vector3(0.55, 0.08, 36.6), "glass", false, 2)
-		# Real acoustic timber blades and recessed light channels, not wood
-		# wallpaper stretched across one enormous flat ceiling rectangle.
-		for blade in 18:
-			_box(Vector3(x - 2.46 + float(blade) * 0.29, 4.98, 2), Vector3(0.065, 0.19, 35.7), "ceiling_wood", false, 2)
-		for z in [-8.0, 7.0]:
-			_rounded(Vector3(x, 4.84, z), Vector3(0.16, 0.085, 8.0), 0.025, "metal", 0.0, false, 2)
-			_box(Vector3(x, 4.79, z), Vector3(0.11, 0.016, 7.85), "warm", false, 2)
+		# Suspended acoustic cassettes are added in TerminalArchitecture.
 	for z in [-12.5, -4.5, 3.5, 11.5, 19.0]:
 		# Slender deep-section beams express a repeating portal frame.
 		_box(Vector3(69, 4.8, z), Vector3(30.5, 0.28, 0.18), "dark", false, 2)
@@ -339,23 +337,7 @@ func _terminal_furniture() -> void:
 	_rounded(Vector3(81.35, 1.26, -12.79), Vector3(0.24, 0.26, 0.28), 0.024, "dark")
 	_box(Vector3(81.35, 1.395, -12.79), Vector3(0.14, 0.008, 0.18), "screen")
 	_label("A01", Vector3(80, 0.65, -12.492), 60, Color("e3e2da"), 0.008)
-	# A deep, legible flight information blade, readable from the entrance.
-	_box(Vector3(72, 3.67, 0), Vector3(0.20, 1.55, 7.4), "dark")
-	_box(Vector3(72, 4.50, 0), Vector3(0.22, 0.035, 7.4), "metal")
-	for z in [-2.7, 2.7]:
-		_rod(Vector3(72, 4.45, z), Vector3(72, 5.08, z), 0.02, "metal")
-	_label("DEPARTURES / ABFLUG", Vector3(71.88, 4.12, 0), 46, Color("d2e4df"), 0.009, -PI * 0.5)
-	_label("A01     CHROMA ORBIT     BOARDING", Vector3(71.88, 3.65, 0), 40, Color("9de3d7"), 0.009, -PI * 0.5)
-	_status_label = _label("RUNWAY 18 / 36      LIVE AIR TRAFFIC", Vector3(71.88, 3.18, 0), 30, Color("a4b9bc"), 0.009, -PI * 0.5)
-	_label("CHROMA AIR", Vector3(54.16, 3.7, 8.5), 72, Color("1e5968"), 0.012, PI * 0.5)
-	_label("TERMINAL A / OBSERVATION LOUNGE", Vector3(54.16, 2.85, 8.5), 30, Color("24444d"), 0.012, PI * 0.5)
-	_box(Vector3(81, 3.1, -8), Vector3(0.12, 0.62, 4.3), "dark")
-	_box(Vector3(57, 2.9, 0), Vector3(0.12, 0.56, 4.3), "dark")
-	for z in [-1.7, 1.7]:
-		_rod(Vector3(81, 3.41, -8 + z), Vector3(81, 5.07, -8 + z), 0.016, "metal")
-		_rod(Vector3(57, 3.18, z), Vector3(57, 5.07, z), 0.016, "metal")
-	_label("A01  >  BOARDING", Vector3(80.93, 3.1, -8), 46, Color("c8e1d9"), 0.008, -PI * 0.5)
-	_label("<  CHROMA / GALERIEN", Vector3(57.07, 2.9, 0), 36, Color("c8e1d9"), 0.008, PI * 0.5)
+	# Framed information displays and gate typography live in Architecture.
 	for x in [58.0, 64.0, 70.0, 76.0]:
 		_arrow(Vector3(x, 0.011, 1.9), PI * 0.5)
 	_arrow(Vector3(78, 0.011, -4), PI)
@@ -371,6 +353,14 @@ func _seat(position: Vector3, yaw: float) -> void:
 	_rounded(position + basis * Vector3(0, 0.43, -0.01), Vector3(0.59, 0.14, 0.59), 0.057, "seat", yaw, true)
 	_rounded(position + basis * Vector3(0, 0.81, 0.27), Vector3(0.65, 0.76, 0.095), 0.04, "metal", yaw, false, 1, -0.11)
 	_rounded(position + basis * Vector3(0, 0.82, 0.215), Vector3(0.58, 0.66, 0.13), 0.054, "seat", yaw, true, 1, -0.11)
+	# The visible back is a recessed walnut shell with an aluminium perimeter,
+	# not one blank metal plate. Separate lumbar and shoulder pads give the
+	# front a softer ergonomic profile without changing the seated anchors.
+	_rounded(position + basis * Vector3(0, 0.83, 0.335), Vector3(0.535, 0.575, 0.032), 0.034, "wood", yaw, false, 1, -0.11)
+	_rounded(position + basis * Vector3(0, 0.64, 0.135), Vector3(0.48, 0.17, 0.06), 0.035, "seat", yaw, false, 1, -0.11)
+	_rounded(position + basis * Vector3(0, 1.025, 0.185), Vector3(0.48, 0.14, 0.045), 0.025, "seat", yaw, false, 1, -0.11)
+	for side in [-1.0, 1.0]:
+		_rod(position + basis * Vector3(side * 0.245, 0.60, 0.346), position + basis * Vector3(side * 0.245, 0.60, 0.36), 0.012, "metal")
 	# Raised seams, upholstered arm pads, capped tubular mounts and feet are
 	# genuinely rounded silhouettes with smooth bevel normals.
 	for x in [-0.245, 0.245]:
@@ -493,7 +483,7 @@ func _jetbridge() -> void:
 	_label("TERMINAL / GALERIEN", Vector3(98.02, 2.3, -8), 28, Color("e8d4a6"), 0.006, PI * 0.5)
 
 func _airfield() -> void:
-	_box(Vector3(240, APRON_Y - 0.3, 0), Vector3(380, 0.6, 720), "grass")
+	Terrain.build(self)
 	_box(Vector3(112, APRON_Y - 0.12, 0), Vector3(86, 0.24, 210), "tarmac")
 	_box(Vector3(RUNWAY_X, APRON_Y + 0.005, 0), Vector3(22, 0.04, 560), "runway")
 	_box(Vector3(123, APRON_Y + 0.009, 0), Vector3(9, 0.04, 510), "runway")
@@ -525,16 +515,6 @@ func _airfield() -> void:
 	_box(Vector3(203, APRON_Y + 25.0, 33), Vector3(11.0, 3.2, 11.0), "dark")
 	_box(Vector3(203, APRON_Y + 25.2, 33), Vector3(11.1, 2.2, 11.1), "glass")
 	_box(Vector3(203, APRON_Y + 27.0, 33), Vector3(12.2, 0.5, 12.2), "metal", false, 2)
-	for index in 14:
-		var z := -340.0 + float(index) * 53.0
-		var mountain := SphereMesh.new()
-		mountain.radius = 1.0
-		mountain.height = 2.0
-		mountain.radial_segments = 12
-		mountain.rings = 5
-		var mesh := _mesh(self, mountain, _materials.grass, "DistantHill")
-		mesh.position = Vector3(425 + float(index % 3) * 40, -11.0, z)
-		mesh.scale = Vector3(95, 27 + float(index % 4) * 9, 65)
 	# Two distant apron lamps are sufficient; runway dots are emissive geometry.
 	for z in [-35.0, 36.0]:
 		_box(Vector3(116, 7, z), Vector3(0.18, 20.4, 0.18), "metal")

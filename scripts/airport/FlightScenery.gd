@@ -3,10 +3,13 @@ extends Node3D
 ## only the scenery moves. No colliders, camera teleport or far-away physics.
 const SKY_SHADER = preload("res://shaders/airport_flight_sky.gdshader")
 const GROUND_SHADER = preload("res://shaders/airport_flight_ground.gdshader")
-const CLOUD_SHADER = preload("res://shaders/airport_flight_clouds.gdshader")
+const CloudVolume = preload("res://scripts/airport/FlightCloudVolume.gd")
 const LAYER := 16
 const CABIN_LIGHT_MASK := 112 # scenery16 + cabin32 + cabin roof64
 const DOME_RADIUS := 6000.0
+# Brightest solar pixel (1218,239) in the shipped 2048x1024 HDR panorama,
+# converted with the exact spherical UV convention used by the flight shader.
+const DAYLIGHT_SUN_DIRECTION := Vector3(-0.376731, 0.741980, 0.554562)
 
 var environment: Environment
 var altitude := 0.0
@@ -17,11 +20,11 @@ var active := false
 var _built := false
 var _sky_material: ShaderMaterial
 var _ground_material: ShaderMaterial
-var _cloud_materials: Array[ShaderMaterial] = []
+
 var _landscape: Node3D
 var _ground: MeshInstance3D
-var _cloud_planes: Array[MeshInstance3D] = []
-var _puffs: MultiMeshInstance3D
+
+var _cloud_volume: MeshInstance3D
 var _sun: DirectionalLight3D
 var _markers: MultiMeshInstance3D
 var _trees: MultiMeshInstance3D
@@ -58,10 +61,11 @@ func build() -> void:
 	_build_landmarks()
 	_sun = DirectionalLight3D.new()
 	_sun.name = "FlightSun"
-	_sun.rotation_degrees = Vector3(-32, -37, 0)
+	_sun.basis = Basis.looking_at(-DAYLIGHT_SUN_DIRECTION.normalized())
 	_sun.light_color = Color("fff0d6")
 	_sun.light_energy = 1.25
 	_sun.light_cull_mask = CABIN_LIGHT_MASK
+	_sun.layers = CABIN_LIGHT_MASK
 	_sun.shadow_caster_mask = CABIN_LIGHT_MASK
 	_sun.shadow_enabled = true
 	_sun.directional_shadow_max_distance = 55.0
@@ -94,7 +98,7 @@ func _build_environment() -> void:
 	environment.background_color = Color("030611")
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color("c0d9f0")
-	environment.ambient_light_energy = 0.62
+	environment.ambient_light_energy = 0.28
 	environment.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	environment.tonemap_mode = Environment.TONE_MAPPER_AGX
 	environment.tonemap_exposure = 1.0
@@ -102,8 +106,14 @@ func _build_environment() -> void:
 	environment.glow_intensity = 0.27
 	environment.glow_hdr_threshold = 2.0
 	environment.ssao_enabled = true
-	environment.ssao_radius = 0.35
-	environment.ssao_intensity = 0.8
+	environment.ssao_radius = 0.55
+	environment.ssao_intensity = 1.05
+	environment.ssao_power = 1.25
+	environment.ssao_detail = 0.65
+	environment.ssao_light_affect = 0.12
+	environment.ssil_enabled = true
+	environment.ssil_intensity = 0.65
+	environment.ssil_radius = 2.0
 	environment.ssr_enabled = true
 	environment.ssr_max_steps = 48
 	environment.fog_enabled = false
@@ -121,6 +131,7 @@ func _build_sky() -> void:
 	_sky_material.set_shader_parameter("noise_texture", _noise_texture)
 	_sky_material.set_shader_parameter("daylight_panorama", load("res://assets/airport/daylight_2k.hdr"))
 	_sky_material.set_shader_parameter("earth_albedo", load("res://assets/airport/earth_july_5400.jpg"))
+	_sky_material.set_shader_parameter("earth_region", load("res://assets/airport/earth_mediterranean_500m.jpg"))
 	_sky_material.set_shader_parameter("stage_origin", _world_origin)
 	var sky := _mesh(self, dome, _sky_material, "AtmosphereAndOrbitalEarth")
 	sky.extra_cull_margin = 10.0
@@ -130,66 +141,18 @@ func _build_ground() -> void:
 	plane.size = Vector2(14000, 14000)
 	_ground_material = ShaderMaterial.new()
 	_ground_material.shader = GROUND_SHADER
+	# Ground fades into the sky, but must composite before the cloud volume.
+	# Otherwise its transparent pass paints over all clouds seen from above.
+	_ground_material.render_priority = -110
 	_ground_material.set_shader_parameter("noise_texture", _noise_texture)
+	_ground_material.set_shader_parameter("aerial_texture", load("res://assets/airport/ground/lancaster_naip_2022.jpg"))
 	_ground = _mesh(_landscape, plane, _ground_material, "RunwayAndContinentalFields")
 	_ground.position.y = -3.2
 
 func _build_clouds() -> void:
-	for index in 5:
-		var sheet := PlaneMesh.new()
-		sheet.size = Vector2(11000, 11000)
-		sheet.subdivide_width = 24
-		sheet.subdivide_depth = 24
-		var material := ShaderMaterial.new()
-		material.shader = CLOUD_SHADER
-		material.set_shader_parameter("noise_texture", _noise_texture)
-		material.set_shader_parameter("cloud_seed", float(index) * 4.17)
-		material.set_shader_parameter("cloud_scale", [0.0028, 0.0018, 0.00105, 0.0016, 0.0014][index])
-		material.set_shader_parameter("opacity", [0.83, 0.76, 0.65, 0.82, 0.76][index])
-		material.set_shader_parameter("stage_origin", _world_origin)
-		_cloud_materials.append(material)
-		var cloud := _mesh(_landscape, sheet, material, "CloudDeck_%d" % index)
-		cloud.extra_cull_margin = 70.0
-		cloud.set_meta("base_height", [650.0, 1400.0, 2600.0, 4250.0, 6100.0][index])
-		_cloud_planes.append(cloud)
-	var billboards := MultiMesh.new()
-	billboards.transform_format = MultiMesh.TRANSFORM_3D
-	billboards.use_custom_data = true
-	var quad := QuadMesh.new()
-	quad.size = Vector2(480, 290)
-	billboards.mesh = quad
-	billboards.instance_count = 112
-	var random := RandomNumberGenerator.new()
-	random.seed = 419723
-	for index in 112:
-		var position: Vector3
-		if index < 48:
-			position = Vector3(random.randf_range(-2200, 2200), random.randf_range(420, 1500), random.randf_range(-2800, 2800))
-		else:
-			# Four staggered high-altitude bands fill the side-window view during
-			# the cloud cruise. Lower decks alone would lie below the wing.
-			var band := (index - 48) / 16
-			var base_height: float = [4150.0, 4800.0, 5650.0, 6450.0][band]
-			var side := -1.0 if index % 2 == 0 else 1.0
-			position = Vector3(side * random.randf_range(380, 2100), base_height + random.randf_range(-130, 130), random.randf_range(-2800, 2800))
-		billboards.set_instance_transform(index, Transform3D(Basis.IDENTITY, position))
-		billboards.set_instance_custom_data(index, Color(random.randf(), random.randf(), 0, 1))
-	var puff_material := ShaderMaterial.new()
-	puff_material.shader = CLOUD_SHADER
-	puff_material.set_shader_parameter("noise_texture", _noise_texture)
-	puff_material.set_shader_parameter("billboard_cloud", true)
-	puff_material.set_shader_parameter("opacity", 0.88)
-	puff_material.set_shader_parameter("stage_origin", _world_origin)
-	_cloud_materials.append(puff_material)
-	_puffs = MultiMeshInstance3D.new()
-	_puffs.name = "ParallaxCumulusBanks"
-	_puffs.multimesh = billboards
-	_puffs.material_override = puff_material
-	_puffs.layers = LAYER
-	_puffs.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
-	_puffs.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_puffs.custom_aabb = AABB(Vector3(-2700, -12600, -3200), Vector3(5400, 20100, 6400))
-	_landscape.add_child(_puffs)
+	_cloud_volume = CloudVolume.new()
+	add_child(_cloud_volume)
+	_cloud_volume.build(_world_origin)
 
 func _build_landmarks() -> void:
 	# Runway-edge lamps and distant tree masses supply true near-ground parallax.
@@ -272,6 +235,11 @@ func set_flight_sample(height: float, airspeed: float, distance: float, bank: fl
 	travel = distance
 	space_mix = clampf(orbital_mix, 0.0, 1.0)
 	var roll := clampf(bank, -0.20, 0.20)
+	# The bank rotates the exterior panorama, direct sunlight and its reflection
+	# together. The shader receives the actual direction toward this light.
+	_sun.basis = Basis(Vector3.BACK, -roll) * Basis.looking_at(-DAYLIGHT_SUN_DIRECTION.normalized())
+	environment.sky_rotation = Vector3(0.0, 0.0, -roll)
+	_sky_material.set_shader_parameter("sun_direction_world", _sun.global_basis.z.normalized())
 	_sky_material.set_shader_parameter("altitude", altitude)
 	_sky_material.set_shader_parameter("space_mix", space_mix)
 	_sky_material.set_shader_parameter("bank", roll)
@@ -281,15 +249,7 @@ func set_flight_sample(height: float, airspeed: float, distance: float, bank: fl
 	_ground.visible = altitude < 14000.0
 	_ground_material.set_shader_parameter("travel", travel)
 	_ground_material.set_shader_parameter("altitude", altitude)
-	for index in _cloud_planes.size():
-		var cloud := _cloud_planes[index]
-		var base: float = cloud.get_meta("base_height")
-		cloud.position.y = base - altitude
-		cloud.visible = altitude < 12500.0 and absf(base - altitude) < 5500.0
-	for material in _cloud_materials:
-		material.set_shader_parameter("travel", travel)
-		material.set_shader_parameter("altitude", altitude)
-	_puffs.visible = altitude < 12500.0
+	_cloud_volume.set_sample(altitude, travel, roll, _sun.global_basis.z.normalized())
 	# A repeating kilometre of markers is invisible at its wrap boundary.
 	_markers.position = Vector3(0, -altitude, fposmod(travel + 540.0, 1080.0) - 540.0)
 	_markers.visible = altitude < 180.0
@@ -301,6 +261,6 @@ func set_flight_sample(height: float, airspeed: float, distance: float, bank: fl
 		_orbital_reflections = use_orbital
 		environment.sky = _orbital_sky if use_orbital else _daylight_sky
 	environment.ambient_light_color = Color("c0d9f0").lerp(Color("6d87b7"), darkening)
-	environment.ambient_light_energy = lerpf(0.62, 0.32, darkening)
+	environment.ambient_light_energy = lerpf(0.28, 0.12, darkening)
 	environment.background_energy_multiplier = lerpf(0.7, 0.15, darkening)
 	_sun.light_energy = lerpf(1.25, 1.5, darkening)

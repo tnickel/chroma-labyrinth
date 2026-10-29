@@ -6,9 +6,13 @@ uniform float space_mix = 0.0;
 uniform float bank = 0.0;
 uniform float travel = 0.0;
 uniform vec3 stage_origin = vec3(0.0);
+uniform vec3 sun_direction_world = vec3(-0.376731, 0.741980, 0.554562);
 uniform sampler2D noise_texture : repeat_enable, filter_linear_mipmap;
 uniform sampler2D daylight_panorama : repeat_enable, filter_linear_mipmap;
 uniform sampler2D earth_albedo : source_color, repeat_enable, filter_linear_mipmap;
+uniform sampler2D earth_region : source_color, repeat_disable, filter_linear_mipmap_anisotropic;
+// GIBS native 500-m region: west -4.5, east31.5, north54, south18 degrees.
+uniform vec4 earth_region_uv_rect = vec4(0.4875, 0.2, 0.1, 0.2);
 varying vec3 world_point;
 
 void vertex() { world_point = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz; }
@@ -33,16 +37,20 @@ float fbm(vec2 p) {
 
 void fragment() {
     vec3 d = normalize(world_point - CAMERA_POSITION_WORLD);
+    float sun_alignment = max(dot(d, normalize(sun_direction_world)), 0.0);
     d.xy = mat2(vec2(cos(bank), sin(bank)), vec2(-sin(bank), cos(bank))) * d.xy;
     float orbital = max(space_mix, smoothstep(14000.0, 70000.0, altitude));
-    vec3 sun_direction = normalize(vec3(-0.54, 0.43, -0.72));
-    float sun_alignment = max(dot(d, sun_direction), 0.0);
+    vec3 sun_direction = normalize(sun_direction_world);
+    sun_direction.xy = mat2(vec2(cos(bank), sin(bank)), vec2(-sin(bank), cos(bank))) * sun_direction.xy;
     float y = max(d.y, 0.0);
     vec3 daylight = mix(vec3(0.63, 0.78, 0.91), vec3(0.055, 0.27, 0.65), pow(y, 0.32));
     daylight += vec3(1.0, 0.72, 0.42) * pow(sun_alignment, 18.0) * 0.25;
-    vec2 panorama_uv = vec2(atan(d.x, d.z) / 6.2831853 + 0.5, acos(clamp(d.y, -1.0, 1.0)) / 3.14159265);
+    // Match PanoramaSkyMaterial/SKY_COORDS, including horizontal orientation,
+    // so the photographed sky and reflected cubemap place the sun identically.
+    vec2 panorama_uv = vec2(fract(atan(d.x, -d.z) / 6.2831853), acos(clamp(d.y, -1.0, 1.0)) / 3.14159265);
     vec3 photographed_sky = texture(daylight_panorama, panorama_uv).rgb * 0.75;
-    daylight = mix(photographed_sky, daylight, smoothstep(7000.0, 20000.0, altitude));
+    float procedural_sky_mix = smoothstep(7000.0, 20000.0, altitude);
+    daylight = mix(photographed_sky, daylight, procedural_sky_mix);
     vec3 color = mix(daylight, vec3(0.0008, 0.0013, 0.004), orbital);
 
     // Spherical sky cells generate fixed stars; they do not flicker or move
@@ -82,7 +90,12 @@ void fragment() {
         // latitude advances north, matching the runway and cloud parallax.
         vec3 geographic = geo_east * surface.x + geo_up * surface.y - geo_north * surface.z;
         vec2 earth_uv = vec2(atan(geographic.z, geographic.x) / 6.2831853 + 0.5, acos(clamp(geographic.y, -1.0, 1.0)) / 3.14159265);
-        vec3 planet = texture(earth_albedo, earth_uv).rgb * 1.1;
+        vec2 regional_uv = (earth_uv - earth_region_uv_rect.xy) / earth_region_uv_rect.zw;
+        vec2 edge_distance = min(regional_uv, vec2(1.0) - regional_uv);
+        float regional_weight = smoothstep(0.0, 0.025, min(edge_distance.x, edge_distance.y));
+        vec3 global_color = texture(earth_albedo, earth_uv).rgb;
+        vec3 regional_color = texture(earth_region, clamp(regional_uv, vec2(0.0), vec2(1.0))).rgb;
+        vec3 planet = mix(global_color, regional_color, regional_weight) * 1.1;
         vec2 cloud_uv = continent_uv * 2.5 + vec2(3.0, -2.0);
         cloud_uv += vec2(sin(cloud_uv.y * 0.22), cos(cloud_uv.x * 0.18)) * 1.2;
         float cloud_density = fbm(cloud_uv) * 0.75 + fbm(cloud_uv * 5.3 + 17.0) * 0.25;
@@ -101,7 +114,7 @@ void fragment() {
     float atmosphere_rim = exp(-abs(d.y - horizon_y) / rim_width);
     color += vec3(0.055, 0.24, 0.63) * atmosphere_rim * (0.25 + orbital * 1.25);
     // Far cumuliform banks keep a natural layered horizon behind the close
-    // 3D cloud sheets. Their fade ends before the orbital part of the flight.
+    // volumetric clouds. Their fade ends before the orbital part of the flight.
     vec2 bank_uv = angular * vec2(9.0, 29.0) + vec2(travel * 0.000035, altitude * 0.00007);
     float bank_noise = fbm(bank_uv) * 0.74 + fbm(bank_uv * 3.1 + 17.0) * 0.26;
     float bank_coverage = smoothstep(0.48, 0.66, bank_noise);
@@ -111,6 +124,8 @@ void fragment() {
     color = mix(color, distant_cloud, bank_coverage * bank_height * bank_fade * 0.72);
     float solar_disc = smoothstep(0.99990, 0.99996, sun_alignment);
     float corona = pow(sun_alignment, 450.0) * 0.28;
-    color += vec3(1.0, 0.87, 0.67) * (solar_disc * 7.0 + corona);
+    // The photograph already contains the real solar disc. Introduce its
+    // aligned analytic replacement only as that photograph fades into space.
+    color += vec3(1.0, 0.87, 0.67) * (solar_disc * 7.0 + corona) * procedural_sky_mix;
     ALBEDO = color;
 }

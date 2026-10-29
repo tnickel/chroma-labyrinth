@@ -1,0 +1,22 @@
+{
+  "download": "https://ambientcg.com/get?file=Tiles040_2K-JPG.zip",
+  "maps": [
+    {
+      "sha256": "e3f383c750a78b2c878afd3b2d22d9f2743540b1dd473cc5a4df67a7e182a78b",
+      "file": "albedo.jpg"
+    },
+    {
+      "sha256": "49357b2eb961de0e0ac2f4a827493cf30ae1cc3ee2986a66770dd2bffe15b681",
+      "file": "normal.jpg"
+    },
+    {
+      "sha256": "4a22e3686508356e26f64ee48ac4d1650062fee26c05279455e2c6135eb790f0",
+      "file": "roughness.jpg"
+    }
+  ],
+  "archive_sha256": "ecd585bf86cb1a12281b8ddc67cb068626b79abd35d163db5d8867a79ba8c0f7",
+  "asset": "Tiles040",
+  "source": "https://ambientcg.com/a/Tiles040",
+  "license": "CC0-1.0",
+  "license_url": "https://docs.ambientcg.com/license/"
+}

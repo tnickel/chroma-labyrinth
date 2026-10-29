@@ -85,3 +85,4 @@ Ein zentraler Punkt im Video ist das Mindset beim Entwickeln mit KI:
 > Wie viel GameDev-Erfahrung braucht man heute noch, um beeindruckende 3D-Welten mit Reflexionen, Shadern und eigener Flugmechanik zu bauen? Fast keine – wenn man die richtige KI an seiner Seite hat.  
 > In diesem Showcase-Projekt zeigen wir, wie mit der Godot Engine 4 und Astra-KI in nur einem Nachmittag ein vollständiges Labyrinth mit 8 Themenwelten und echtem Orbit-Flug entstanden ist.  
 > 📺 Jetzt beide Videos ansehen und den Code auf GitHub ausprobieren!
+

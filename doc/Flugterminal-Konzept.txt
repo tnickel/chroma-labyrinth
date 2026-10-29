@@ -16,10 +16,17 @@ Wartehalle: X=54..84 m, Z=-16..20 m, Boden Y=0, Decke etwa Y=5,2 m.
 Fluggastbrücke: X=84..103,8 m, Mitte Z=-8 m, Boden Y=0.
 Flugzeug: Ursprung X=106/Y=0/Z=2, Nase nach -Z, Einstieg links vorne.
 Vorfeld liegt tiefer; Kabinen- und Terminalboden sind stufenlos verbunden.
+Heckkuppel: Mittelpunkt lokal X=0/Y=1,8/Z=19,5, Radius 4,8 m. Außen reicht
+die Kugel bis Z=24,3. Ihr tiefster Punkt liegt Y=-3,0, 20 cm über dem Vorfeld.
+Der kreisförmige Glasboden liegt wie die Kabine bei Y=0, Durchmesser rund 8,90 m.
+Ein zwei Meter breiter Gang verbindet die geöffnete Heckwand bei Z=11,3 mit
+der echten Kugelöffnung; seine Bodenplatte reicht überlappend bis Z=15,4.
 
 Gestaltung
-Graue Steinplatten, Aluminiumprofile, Fensterdichtungen, Holzlamellen und
-petrolfarbene Wartepolster geben dem Terminal einen ruhigen Materialmaßstab.
+Fotografische Stein-/Terrazzoplatten, Aluminiumprofile, Fensterdichtungen,
+petrolfarbene Wartepolster und Walnuss-Rückenschalen geben dem Terminal einen
+ruhigen Materialmaßstab. Die Decke besitzt tiefe helle Akustikkassetten,
+einzelne Holzrandfelder, gerahmte Lüftungsgitter und sichtbare Trägeranschlüsse.
 Gate- und Rückwegschilder sitzen auf sichtbaren Trägern; Panoramafenster geben
 den Blick aufs Vorfeld frei. Die Kabine besitzt 36 Sitze, davon 18 nutzbare
 Fensterplätze, außerdem Sitznummern, Handauflagen, Gepäckfächer, Innenbeleuchtung
@@ -27,7 +34,7 @@ und Fensterrahmen. Architektur und Flugzeuggeometrie entstehen im Code.
 Fotografische CC0-PBR-Texturen für Stein, Leder, Gewebe, Holz, Beton und Asphalt
 sowie ein fotografischer HDR-Himmel werden mitgeliefert.
 
-Zwei Lounge-Inseln im südlichen Terminal ergänzen acht tatsächlich modellierte
+Eine Lounge am Eingang und eine Panorama-Lounge ergänzen acht tatsächlich modellierte
 Ledersessel, fünf Stein-/Holztische und vier Topfpflanzen aus drei texturierten
 glTF-Assets. Drei dieser Tische ersetzen die früheren primitiven Tische zwischen
 den Wartebänken; zwei Pflanzen stehen am Eingang. Die Lounge-Sessel sind separate
@@ -35,10 +42,21 @@ Ausstattung und verändern die 36 bestehenden Warte-Sitzanker nicht. Importierte
 Mesh-LODs, gemeinsame Mesh-/Materialressourcen und 45 m Sichtweite begrenzen den
 Renderaufwand. Zur Laufzeit sind keine externen Asset-Downloads notwendig.
 
+Das Vorfeld liegt in einer zusammenhängenden Landschaft statt vor einzelnen
+ellipsoidförmigen Hügeln. Fotografierte Gras- und Fels-/Vegetationskarten werden
+in realen Größenordnungen gemischt. Außerhalb von Rollbahn und Hangars steigt
+eine durchgehend verbundene Oberfläche mit glatten Normalen zu unregelmäßigen
+Höhenzügen an. Fünf statische Meshes mit insgesamt 12.546 Dreiecken benötigen
+keine laufende Terrainberechnung, zusätzlichen Lichter oder Landschaftsphysik.
+
 Interaktion und Ablauf
 E: Fensterplatz einnehmen / wieder im Mittelgang aufstehen.
 R oder der Bildschirmbutton: Rundflug starten, nur innerhalb der Kabine.
 Der Start setzt den Spieler an einen Fensterplatz und schließt die Einstiegstür.
+Ausnahme Heckkuppel: Dort startet der Rundflug im Stehen ohne Ortswechsel.
+Mausblick und Gehen bleiben frei; die kugelförmige Außenkollision verhindert
+das Verlassen während des Fluges. Nach der Landung bleibt der Spieler ebenfalls
+in der Kuppel und geht durch denselben Heckgang zurück zur Kabine und zum Gate.
 Mausblick bleibt frei. Während des Fluges kann man aufstehen und in der Kabine
 gehen; die geschlossene Tür verhindert das Verlassen.
 
@@ -63,15 +81,39 @@ Präzisionsfehler oder aufwändige mitbewegte CharacterBody-Physik.
 Module und Darstellung
 AirportConnection: realer Anschluss, Bodenpfeile und Rückweg.
 AirportTerminal: Wartehalle, Jetbridge, Vorfeld und analytischer Flugverkehr.
+TerminalArchitecture: Akustikdecke, gefasster Gate-Servicebereich, West-Servicezone
+und gerahmte Informationsanzeigen mit klarer typografischer Hierarchie.
+AirportTerrain: fotografisch texturiertes Grasvorfeld und zusammenhängender Horizont.
 AirportFurnishings: mitgelieferte glTF-Lounge und einfache Möbelkollisionen.
 AircraftCabin: Flugzeug, Sitzplätze, Fensteröffnungen und schließbare Tür.
+AircraftFuselage: glatt schattierte Druckhülle, echte ovale Seitenöffnungen,
+angepasster elliptischer Bug, gewölbte Cockpitverglasung und durchgehende
+Heckverkleidung bis zum geometrisch geschlossenen Kuppel-Anschlussring.
+AircraftWings: geschlossene profilierte Tragflächen, gerundete Wurzeln, gebogene
+Winglets, Höhenleitwerke und zwei profilierte Finnen.
+AircraftPropulsion: hohle Triebwerke mit Lippen, Kanal, je 22 geschwungenen
+Fanblättern, Spinner und Auslass sowie geformte Pylone und detailliertes Fahrwerk.
+Diese drei Module bauen statische Meshes mit gemeinsam genutzten Materialien;
+es kommen keine pro Frame berechneten Bauteile oder zusätzlichen Renderpässe hinzu.
+AircraftObservationDome: hohle Glaskugel mit echter Eingangsöffnung, transparentem
+begehbarem Deck, beidseitiger Hüllenkollision, sechs gerundeten Tragprofilen,
+Deck-/Dachring, Dichtungen und Anschlussbeschlägen. Die Kuppel verwendet neun
+statische Render-Meshes und keine eigene laufende Logik.
+Die oberen Glas-/Rahmenteile tragen Dachlayer66, Deck/Seiten den Kabinenlayer33.
+Der bisherige Heckkegel entfällt; eine hohle Verkleidung und zwei seitliche Finnen
+lassen Zugang, Glasboden und Panorama frei. Licht im Verbindungsgang verwendet
+die gleichen Kamera-/Empfängermasken wie die übrige Kabine.
+CabinSeating/CabinInterior/CabinMesh: konturierte Sitzschalen, gepolsterte Flächen,
+gewölbte Gepäckfächer und gemeinsame wiederverwendete Meshes.
 FlightScenery: eigene Außenwelt mit Rollbahn, Landschaft, Wolken, Erde und Sternen.
+FlightCloudVolume: tiefenabhängiger Raymarch durch ein gemeinsames 3D-Rauschvolumen.
 AirportSystem: Zustandsautomat, Sitzinteraktion, Fluginstrumente und Rückkehr.
 AirportAudio: einmalig erzeugtes Motorrauschen und Kabinensignal ohne Audiodateien.
 AirportMaterials/AirportLighting: PBR-Oberflächen, HDR-Tageslicht, SSAO, SSIL,
 SSR und lokale statische Reflexionen. Der Flughafen verwendet ein eigenes
-Umgebungsprofil ohne SDFGI und volumetrischen Nebel; die Galerieeinstellungen
-werden beim Verlassen wiederhergestellt.
+Umgebungsprofil mit zwei SDFGI-Kaskaden für indirektes Licht und Abschattung,
+ohne volumetrischen Nebel. Die Galerieeinstellungen werden beim Verlassen
+wiederhergestellt.
 AirportPassengers/AirportPassenger/PassengerSeatedPose: geplante Wege,
 Boarding, Rückkehr sowie Sitz- und Handhaltung der Flughafenbesucher.
 Die Galerie-Layer 1/2 bleiben erhalten. Die Kabine trägt zusätzlich eigene
@@ -80,9 +122,18 @@ Umgebung und Kameraeinstellungen werden bei Rückkehr wiederhergestellt.
 Die lokale Cubemap wird einmal aufgenommen; sie enthält keine bewegten Menschen.
 Die zusätzliche Passagierlogik läuft nur in Flughafennähe. Eine viermal pro
 Sekunde ausgeführte Distanzprüfung bleibt auch außerhalb des Bereichs aktiv.
-Die Wolken bestehen aus fünf gestaffelten Schichten und 112 weich schattierten
-Sprites in einem gemeinsamen GPU-Batch; es gibt keine volumetrische Wetterphysik.
-Die Erdoberfläche verwendet NASAs Blue-Marble-Komposit (Juli 2004); Wolken,
+Zwei räumliche Wolkenbänder werden in einem Renderpass mit maximal 64 Schritten
+und zwei Lichtproben je dichter Probe gezeichnet. Der Tiefenpuffer schließt
+opake Kabinenteile und Flügel aus. Eigenverschattung und Parallaxe stammen aus
+dem Volumen; eine Wetterphysik gibt es nicht. Oberhalb 13.500 m schläft der Pass.
+Die Landschaft in Bodennähe verwendet eine echte USDA/USGS-NAIP-Aufnahme von
+Lancaster County, Pennsylvania (2022, 4000 x 4000 Pixel, etwa 1,7 m/Pixel).
+Gespiegelte Wiederholung vermeidet harte Texturkanten. Es bleibt eine gestaltete
+Kulisse, kein geografisch konsistenter Übergang zur Mittelmeer-Erde im Orbit.
+Die Erdoberfläche verwendet NASAs Blue-Marble-Komposite. Der regionale Ausschnitt
+von Nordafrika, Mittelmeer und Europa stammt aus dem statischen GIBS-Layer
+BlueMarble_NextGeneration und ist mit 8192 x 8192 Pixeln mitgeliefert. Außerhalb
+der Region dient die globale Karte vom Juli 2004 als Fernfallback. Wolken,
 Beleuchtung und Flugverlauf bleiben eine Inszenierung, keine Live-Daten.
 
 Erweiterung: Menschen und Panoramafenster
@@ -93,18 +144,29 @@ Bei besetzter Tür wird der Start abgewiesen, ohne Menschen zu teleportieren.
 Entfernte Bewegung, Animation und Skelette schlafen. Unter 18 m werden Posen
 voll aktualisiert, darüber mit etwa 10 Hz; die Sichtbarkeit verwendet 48/55 m
 Hysterese. Während des Fluges schlafen Menschen außerhalb der Kabine.
+PassengerAppearance trennt die Texturwiederholung des Stoffgewebes von den
+UV-Koordinaten der Falten-Normalmap. Materialvarianten werden gemeinsam gecacht;
+die originalen vier glTF-Rigs und ihre Animationen bleiben unverändert.
 Das große Glasdach misst 1,90 x 18 m. Begehbare Bodenfenster messen 2 x 1,6 m vorn und
 0,86 x 16,8 m im Gang; auch die darunterliegende Rumpfhaut hat echte Öffnungen.
 
 Mitgelieferte Quellen und Rechte
 Die Poly-Haven-Materialien, der HDR-Himmel und die drei Möbelmodelle sind CC0.
+Der zusätzliche Terrazzo-Boden stammt von ambientCG (Tiles040), ebenfalls CC0;
+assets/airport/terrazzo/source.json dokumentiert diese Quelle separat.
+Das USDA/USGS-Luftbild ist Public Domain. Exakte Rasterquellen, Copyright-Angaben,
+Aufnahmejahr, Exportgrenzen und Prüfsummen stehen in assets/airport/ground/.
+tools/fetch_airport_ground.py reproduziert den begrenzten Bilddownload.
 assets/airport/LICENSES.txt und sources.json dokumentieren Flächen und Himmel;
 assets/airport/models/LICENSES.txt und model-sources.json dokumentieren die
 Modelle einschließlich aller glTF-Abhängigkeiten, Download-URLs und MD5-Werte.
-Die NASA-Erdkarte ist separat unter assets/airport/EARTH-SOURCE.txt mit Quelle,
-SHA-256 und NASA-Nutzungsbedingungen verzeichnet; sie wird nicht als CC0-Asset
-ausgegeben. Die unveränderte Karte wird im Shader auf den gestalteten Planeten
-gelegt. Quellen der bereits vorhandenen Menschenmodelle stehen in
+Die sechs Landschaftskarten sind separat unter assets/airport/terrain/ mit
+eigenem CC0-Lizenztext und Quellenmanifest dokumentiert.
+Die NASA-Karten sind unter assets/airport/EARTH-SOURCE.txt und
+earth-region-source.json mit Quellen, SHA-256 und NASA-Nutzungsbedingungen
+verzeichnet; sie werden nicht als CC0-Assets ausgegeben. Der regionale Ausschnitt
+setzt vier originale WMS-Bilder ohne Neuskalierung zusammen. Im Shader liegen
+diese Kartendaten auf dem gestalteten Planeten. Quellen der Menschenmodelle stehen in
 assets/people/ASSET-LICENSES.md.
 
 Abnahmekriterien
@@ -115,3 +177,6 @@ Alle Phasen einschließlich Rückkehr funktionieren in zwei aufeinanderfolgenden
 Flügen. Sitzen/Aufstehen und Menüschutz dürfen keine Bewegungssperre hinterlassen.
 Kamera, Umgebung, Licht und HUD sind nach Landung wieder im ursprünglichen Zustand.
 Echte Forward+-Renderkontrolle: Terminal, Kabine am Gate, Wolkenflug, Weltraum.
+Heckkuppel: Hin- und Rückweg mit echter Spielerphysik, geschlossene Hülle,
+144 Bodenstützproben, reale horizontale/vertikale Sichtstrahlen, Start und Landung
+im Stehen ohne Teleport sowie Rundumblick im echten Forward+-Renderer geprüft.

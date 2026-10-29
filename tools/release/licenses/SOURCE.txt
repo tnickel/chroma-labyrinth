@@ -1,0 +1,11 @@
+Godot Engine 4.7.2 (official release).
+License texts copied unchanged from the matching official source tag:
+https://github.com/godotengine/godot/blob/4.7.2-stable/LICENSE.txt
+https://github.com/godotengine/godot/blob/4.7.2-stable/COPYRIGHT.txt
+
+Official export templates:
+https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz
+SHA256 f298490b8d44d934be425a5a65a51bf15f422428b229a06a6e11d9ffea248011
+
+These notices apply to the bundled Godot runtime and its dependencies.
+They do not change the licensing of the Chroma-Labyrinth project or its assets.

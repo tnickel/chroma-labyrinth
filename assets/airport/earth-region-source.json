@@ -1,0 +1,74 @@
+{
+  "file": "earth_mediterranean_500m.jpg",
+  "source": "NASA EOSDIS GIBS / Blue Marble Next Generation (MODIS)",
+  "layer": "BlueMarble_NextGeneration",
+  "matrix_set": "500m",
+  "dimensions": [
+    8192,
+    8192
+  ],
+  "bounds_degrees": {
+    "west": -4.5,
+    "east": 31.5,
+    "south": 18,
+    "north": 54
+  },
+  "degrees_per_pixel": 0.00439453125,
+  "equatorial_meters_per_pixel": 489.19698,
+  "transformation": "Four native-resolution 4096-square WMS images assembled without resampling; JPEG quality95, 4:4:4",
+  "sha256": "e2d174bcb19fc52ff0c8877ca2cdf2370b6c5a068f60d16084bea03031d82a5e",
+  "sources": [
+    {
+      "name": "northwest",
+      "url": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=BlueMarble_NextGeneration&STYLES=&FORMAT=image%2Fjpeg&CRS=EPSG%3A4326&BBOX=36%2C-4.5%2C54%2C13.5&WIDTH=4096&HEIGHT=4096",
+      "sha256": "75d36a86bea9a37b8d0c037b4426f8a4f53655a860e3b60ea85ecb796e2fb961",
+      "bytes": 2001103,
+      "bbox_south_west_north_east": [
+        36,
+        -4.5,
+        54,
+        13.5
+      ]
+    },
+    {
+      "name": "northeast",
+      "url": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=BlueMarble_NextGeneration&STYLES=&FORMAT=image%2Fjpeg&CRS=EPSG%3A4326&BBOX=36%2C13.5%2C54%2C31.5&WIDTH=4096&HEIGHT=4096",
+      "sha256": "db1f8a7259c822cd68e5aca011956d59625b8ce04812efcf022664faaa6d1467",
+      "bytes": 2119976,
+      "bbox_south_west_north_east": [
+        36,
+        13.5,
+        54,
+        31.5
+      ]
+    },
+    {
+      "name": "southwest",
+      "url": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=BlueMarble_NextGeneration&STYLES=&FORMAT=image%2Fjpeg&CRS=EPSG%3A4326&BBOX=18%2C-4.5%2C36%2C13.5&WIDTH=4096&HEIGHT=4096",
+      "sha256": "9f5fb4764812ef627d896e641564fc688f60807b4ac007ca5cc1e00d835f906c",
+      "bytes": 1183164,
+      "bbox_south_west_north_east": [
+        18,
+        -4.5,
+        36,
+        13.5
+      ]
+    },
+    {
+      "name": "southeast",
+      "url": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=BlueMarble_NextGeneration&STYLES=&FORMAT=image%2Fjpeg&CRS=EPSG%3A4326&BBOX=18%2C13.5%2C36%2C31.5&WIDTH=4096&HEIGHT=4096",
+      "sha256": "c79971506a35b2102198a581596bc6f1726827453c745073791cb3d18126554f",
+      "bytes": 987596,
+      "bbox_south_west_north_east": [
+        18,
+        13.5,
+        36,
+        31.5
+      ]
+    }
+  ],
+  "source_download_bytes": 6291839,
+  "output_bytes": 12072381,
+  "documentation": "https://nasa-gibs.github.io/gibs-api-docs/access-basics/",
+  "usage": "https://www.nasa.gov/nasa-brand-center/images-and-media/"
+}

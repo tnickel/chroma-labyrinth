@@ -8,7 +8,7 @@ const PlantScene = preload("res://assets/airport/models/potted_plant_01/potted_p
 const Materials = preload("res://scripts/airport/AirportMaterials.gd")
 const VIEW_DISTANCE := 45.0
 static var _material_cache: Dictionary = {}
-static var _rug_mesh: BoxMesh
+static var _rug_meshes: Dictionary = {}
 
 static func build(terminal: Node3D) -> Node3D:
 	if terminal.has_node("AirportLoungeFurnishings"):
@@ -16,19 +16,24 @@ static func build(terminal: Node3D) -> Node3D:
 	var furnishings := Node3D.new()
 	furnishings.name = "AirportLoungeFurnishings"
 	terminal.add_child(furnishings)
-	# These southern islands leave the 36 established waiting-seat anchors,
-	# the observation walk at X=81, and all gate/return routes untouched.
-	for center_x in [64.0, 73.8]:
-		_rug(furnishings, Vector3(center_x, 0, 16.4))
+	# An entrance lounge and a panorama lounge create distinct destinations.
+	# The 36 established waiting-seat anchors and all gate routes stay fixed.
+	for center: Vector3 in [Vector3(58.3, 0, -6.8), Vector3(73.8, 0, 16.4)]:
+		_rug(furnishings, center)
 		for side in [-1.0, 1.0]:
 			for row in [-1.0, 1.0]:
-				var position := Vector3(center_x + side * 1.1, 0, 16.4 + row * 1.32)
+				var position := center + Vector3(side * 1.1, 0, row * 1.32)
 				# The source chair faces +Z: its measured backrest is at Z=-.46.
 				var chair := _instance(furnishings, ChairScene, position, 0.0 if row < 0 else PI, 1.0, -0.000382)
 				_box_collider(chair, Vector3(0.82, 1.023, 0.987), Vector3(0.0034, 0.512, -0.0822))
-		var table := _instance(furnishings, TableScene, Vector3(center_x, 0, 16.4), PI * 0.5, 1.0, 0.000115)
+		var table := _instance(furnishings, TableScene, center, PI * 0.5, 1.0, 0.000115)
 		_box_collider(table, Vector3(0.60, 0.39, 1.202), Vector3(0, 0.195, 0.00025))
-		_plant(furnishings, Vector3(center_x + 3.1, 0, 16.4), 0.4)
+		_plant(furnishings, center + Vector3(3.1, 0, 0), 0.4)
+	# Flush carpet fields visually gather the waiting rows into islands while
+	# preserving the stone circulation spine and every collision/seat anchor.
+	for x in [63.0, 70.0, 78.0]:
+		_rug(furnishings, Vector3(x, 0, 9.0), Vector2(4.45, 9.1))
+	_rug(furnishings, Vector3(65, 0, -10.7), Vector2(9.3, 4.0))
 	# The three existing bench islands also receive the actual stone-and-wood
 	# table asset, replacing the former boxes and symbolic tabletop stripes.
 	for x in [63.0, 70.0, 78.0]:
@@ -102,13 +107,15 @@ static func _box_collider(parent: Node3D, size: Vector3, center: Vector3) -> voi
 	body.add_child(collider)
 	parent.add_child(body)
 
-static func _rug(parent: Node3D, position: Vector3) -> void:
+static func _rug(parent: Node3D, position: Vector3, size := Vector2(4.2, 4.4)) -> void:
 	var mesh := MeshInstance3D.new()
 	mesh.name = "LoungeCarpet"
-	if _rug_mesh == null:
-		_rug_mesh = BoxMesh.new()
-		_rug_mesh.size = Vector3(4.2, 0.006, 4.4)
-	mesh.mesh = _rug_mesh
+	var key := str(size)
+	if not _rug_meshes.has(key):
+		var rectangle := BoxMesh.new()
+		rectangle.size = Vector3(size.x, 0.006, size.y)
+		_rug_meshes[key] = rectangle
+	mesh.mesh = _rug_meshes[key]
 	mesh.position = position + Vector3.UP * 0.003
 	mesh.material_override = Materials.get_material("carpet")
 	mesh.layers = 1

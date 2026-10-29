@@ -141,9 +141,10 @@ func start_flight() -> bool:
 		return false
 	# Starting from the vestibule places the visitor at a genuine window seat,
 	# so neither body nor camera straddles the closing boarding-door collider.
-	if seated_index < 0:
+	var observation_departure: bool = cabin.is_in_observation_dome(_player.global_position)
+	if seated_index < 0 and not observation_departure:
 		sit_down(_nearest_seat(false))
-	if seated_index < 0:
+	if seated_index < 0 and not observation_departure:
 		return false
 	var camera: Camera3D = _player.view_camera
 	_saved_view = {"environment": camera.environment, "mask": camera.cull_mask,
@@ -337,10 +338,13 @@ func _update_ui() -> void:
 	if _panel == null:
 		return
 	var on_board: bool = cabin.contains(_player.global_position)
+	var in_observatory: bool = cabin.is_in_observation_dome(_player.global_position)
 	var airport_zone := _player.global_position.x > 40.0 and _player.global_position.y < 5.5
 	_panel.visible = (airport_zone or flight_active) and not _showcase._menu_open and not _showcase._transition and not _cinematic_hidden
 	_status.text = PHASES[phase_index] if flight_active else ("WILLKOMMEN ZURÜCK / A01" if completed_flights > 0 else "BOARDING / GATE A01")
 	_description.text = "E: Aufstehen / Fensterplatz  ·  H: HUD  ·  M: Ton" if flight_active else ("E: Fensterplatz / Aufstehen   ·   R: Rundflug starten" if on_board else "Zur Maschine: Gate A01 → Fluggastbrücke\nRückweg: CHROMA / GALERIEN ←")
+	if in_observatory:
+		_description.text = "360° PANORAMAKUPPEL  ·  Frei umsehen und gehen\nH: HUD  ·  M: Ton" if flight_active else "360° PANORAMAKUPPEL  ·  Glasboden\nR: Rundflug hier starten  ·  Rückweg durch die Kabine"
 	if _boarding_notice_remaining > 0.0 and not flight_active:
 		_description.text = "Ein Passagier steigt gerade ein.\nSobald die Tür frei ist, R erneut drücken."
 	_instruments.text = "%s m   /   %d km/h   /   %d s bis Gate" % [_format_height(current_altitude), roundi(current_speed * 3.6), ceili(_remaining_time())] if flight_active else "Rundflug ca. 2:30 min  ·  Esc: Maus für Buttons freigeben"
@@ -349,7 +353,7 @@ func _update_ui() -> void:
 	_start_button.visible = not flight_active
 	_start_button.disabled = not on_board
 	_start_button.text = "RUNDFLUG STARTEN  [R]" if on_board else "ZUERST ÜBER GATE A01 EINSTEIGEN"
-	_seat_button.visible = on_board
+	_seat_button.visible = on_board and not in_observatory
 	_seat_button.text = "AUFSTEHEN  [E]" if seated_index >= 0 else "AM FENSTER PLATZ NEHMEN  [E]"
 	_seat_button.disabled = seated_index < 0 and _nearest_seat(true) < 0
 	_return_button.visible = flight_active

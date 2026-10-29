@@ -1,0 +1,37 @@
+Airport refinement validation — 2026-10-29
+Godot 4.7.2 stable, Forward+, NVIDIA GeForce RTX 4070
+
+Headless production regressions (all exit 0):
+Tests/AirportRegression.gd: 3937 checks, 1344 route samples, two flights.
+Tests/AirportPassengersRegression.gd: 11598 checks, 2892 route samples,
+  22 passengers, nine completed boardings and three return journeys.
+Tests/AirportLightingRegression.gd: 68 checks including airport/museum
+  environment restoration, GI contributors and flight light visibility.
+Tests/ShowcaseRegression.gd: 3278 checks, eight destinations.
+Tests/AircraftPanoramaRegression.gd: 401 geometry/collision/window checks.
+Tests/AircraftSeatingRegression.gd: 72 checks of actual mesh triangles,
+  cushion contact, backrest lean, thin shell, overhead door clearance,
+  and window edge visibility with front-face culling.
+
+Headless editor import completed without errors.
+tools/airport_review.gd: 21 actual Main.tscn captures at 1920x1080;
+  one completed flight with the door reopened. Screenshots are unedited.
+  Final visual correction: outward-facing window edge returns close the
+  slits that were visible from oblique cabin views.
+Additional cloud A/B capture checked that the new volumetric pass appears
+  outside the cabin and composites before glass, after the aerial ground.
+tools/airport_benchmark.gd: ten live-production samples at 1920x1080,
+  vsync disabled, 2.5 s warmup and 3 s measurement per view. No concurrent
+  GPU review or headless regression process during this benchmark.
+  The ten-passenger sample explicitly stages all reserved seats; actual
+  boarding correctness is tested separately. See benchmark JSON for data.
+
+Known warnings remain visible:
+- MinimapCamera interpolation warning during accelerated headless route tests.
+- Seven leaked Texture RIDs at renderer shutdown after a ReflectionProbe
+  capture, independently reproduced by tools/reflection_shutdown_probe.gd.
+No script or shader errors occurred in the final Forward+ review/benchmark.
+
+Remaining visual limits: the four bundled character rigs, their faces/hair,
+procedural exterior aircraft/hangars and repeated scenery are still simplified.
+This is a detailed stylized realtime demo, not a claim of complete photorealism.

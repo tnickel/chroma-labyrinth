@@ -1,4 +1,4 @@
-param([string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot))
+param([string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot), [string]$PythonExecutable = 'python')
 $ErrorActionPreference = 'Stop'
 $airportAssetRoot = Join-Path $ProjectRoot 'assets/airport'
 New-Item -ItemType Directory -Path $airportAssetRoot -Force | Out-Null
@@ -8,6 +8,7 @@ $airportSelections = @(
     @{ id='leather_white'; resolution='1k'; folder='leather' },
     @{ id='denmin_fabric_02'; resolution='1k'; folder='fabric' },
     @{ id='smooth_concrete_floor'; resolution='1k'; folder='concrete' },
+    @{ id='concrete_tiles_02'; resolution='2k'; folder='apron_concrete'; normal_format='jpg' },
     @{ id='clean_asphalt'; resolution='1k'; folder='asphalt' }
 )
 $airportManifest = @()
@@ -17,7 +18,7 @@ foreach ($selection in $airportSelections) {
     New-Item -ItemType Directory -Path $folder -Force | Out-Null
     foreach ($map in @(@{api='Diffuse';name='albedo'}, @{api='nor_gl';name='normal'}, @{api='Rough';name='roughness'})) {
         $formats = $files.($map.api).($selection.resolution)
-        $format = if ($map.name -eq 'normal' -and $formats.png) { 'png' } else { 'jpg' }
+        $format = if ($map.name -eq 'normal' -and $selection.normal_format) { $selection.normal_format } elseif ($map.name -eq 'normal' -and $formats.png) { 'png' } else { 'jpg' }
         $remote = $formats.($format)
         if (-not $remote.url) { throw ('Missing map: ' + $selection.id + '/' + $map.api) }
         $relative = $selection.folder + '/' + $map.name + '.' + $format
@@ -48,3 +49,10 @@ if (-not (Test-Path -LiteralPath $airportEarthPath) -or (Get-FileHash -LiteralPa
 }
 if ((Get-FileHash -LiteralPath $airportEarthPath -Algorithm SHA256).Hash.ToLower() -ne $airportEarthHash) { throw 'NASA image checksum mismatch' }
 Write-Output 'NASA Earth composite SHA256 verified (separate usage terms in EARTH-SOURCE.txt).'
+$airportRegionalPath = Join-Path $airportAssetRoot 'earth_mediterranean_500m.jpg'
+$airportRegionalManifest = Get-Content -LiteralPath (Join-Path $airportAssetRoot 'earth-region-source.json') -Raw | ConvertFrom-Json
+if (-not (Test-Path -LiteralPath $airportRegionalPath) -or (Get-FileHash -LiteralPath $airportRegionalPath -Algorithm SHA256).Hash.ToLower() -ne $airportRegionalManifest.sha256) {
+    & $PythonExecutable (Join-Path $PSScriptRoot 'fetch_airport_earth.py') --project-root $ProjectRoot
+    if ($LASTEXITCODE -ne 0) { throw 'NASA regional image rebuild failed (requires Python 3 and Pillow).' }
+}
+Write-Output 'NASA 500-m Mediterranean region verified.'

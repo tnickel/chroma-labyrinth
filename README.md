@@ -14,7 +14,18 @@ Prozedurales 3D-Labyrinth für Godot 4.7.2 mit Forward+. Vier animierte Menschen
 > **Showcase-Hintergrund:** Entwickelt in nur **3–4 Stunden** mit der **Astra-KI** (GPT-4 Astra / Codex) und Godot 4 – ohne Vorkenntnisse in 3D-Grafikprogrammierung. Ausführliche Doku: [doc/PROJEKT_DOKUMENTATION.md](doc/PROJEKT_DOKUMENTATION.md) & [doc/HOMEPAGE_SHOWCASE_BLOG.md](doc/HOMEPAGE_SHOWCASE_BLOG.md).
 
 
-## Starten
+## Windows-Download
+
+Die startfertige Windows-x64-Demo gibt es unter
+[GitHub Releases](https://github.com/tnickel/chroma-labyrinth/releases/latest).
+Das Windows-ZIP vollständig entpacken und `Start-Chroma.bat` starten.
+Godot ist enthalten; ein Editor, Python und Downloads beim Spielen sind nicht nötig.
+Die Demo verwendet weiterhin Forward+ und benötigt eine Vulkan-fähige Grafikkarte.
+Beim ersten Start werden Shader für die vorhandene Grafikkarte vorbereitet.
+Bedienung und Lizenznachweise liegen im ZIP; die veröffentlichte SHA256-Datei
+erlaubt den Vergleich mit dem heruntergeladenen Archiv.
+
+## Aus dem Quellcode starten
 
 1. Repository klonen oder als ZIP herunterladen und entpacken. Die Modelle sind enthalten; Git LFS ist nicht nötig.
 2. [Godot 4.7.2](https://godotengine.org/download/archive/4.7.2-stable/) installieren. Die Demo wurde mit dieser Version und dem Vulkan-Renderer Forward+ geprüft.
@@ -34,6 +45,29 @@ Diese zwei Zeilen als `start.local.bat` speichern; die Datei bleibt über
 `godot --path .` ausführen. Die Engine selbst und generierte Caches sind nicht
 Bestandteil des Repositorys. Quellen und Lizenzangaben der mitgelieferten Modelle
 stehen in [assets/people/ASSET-LICENSES.md](assets/people/ASSET-LICENSES.md).
+Die mitgelieferte Flughafen-Ausstattung hat eigene Quellenlisten:
+[Materialien und HDR-Himmel](assets/airport/LICENSES.txt),
+[glTF-Möbel](assets/airport/models/LICENSES.txt),
+[Gelände](assets/airport/terrain/LICENSES.txt) und
+[NASA-Erdkarten](assets/airport/EARTH-SOURCE.txt). Beim Spielen wird nichts heruntergeladen.
+Der neue Boden verwendet [ambientCG-Terrazzo](assets/airport/terrazzo/source.json);
+die Fluglandschaft ein [USDA/USGS-Luftbild](assets/airport/ground/SOURCE.txt).
+
+### Windows-Release selbst bauen
+
+Godot 4.7.2 und die passenden offiziellen Windows-x64-Exportvorlagen installieren,
+die gewünschten Änderungen committen und aus einem sauberen Checkout ausführen:
+
+```powershell
+.\tools\build_release.ps1 -GodotExe 'C:\Tools\Godot\Godot_v4.7.2-stable_win64_console.exe' -Version '0.1.0'
+```
+
+Das Skript importiert und exportiert mit `export_presets.cfg`, prüft Fehler und
+die erzeugten EXE/PCK-Dateien und legt ZIP, SHA256 sowie Build-Logs unter `build/`
+ab. `BUILD-INFO.json` im Paket nennt den exakten Commit, die Engineversion und
+Dateiprüfsummen. Tests, Werkzeuge, Screenshots und lokale Konfigurationen werden
+nicht in die Spieldaten exportiert. Asset- und Engine-Lizenznachweise werden
+separat beigelegt. Das Skript veröffentlicht selbst nichts.
 
 Der Grundriss hat **50 % mehr Fläche** als die ursprüngliche Demo: rund
 **80,83 × 80,83 m** statt 66 × 66 m, entsprechend **6.534 m²** statt 4.356 m²
@@ -84,6 +118,16 @@ Leder, Gewebe, Holz, Beton und Asphalt sowie einen fotografischen HDR-Himmel.
 Rauheit und feine Normalmaps reagieren auf das Licht; Holzlamellen, Fensterfalze,
 Dichtungen, gerundete Polster, Nähte und Armaturen geben den Oberflächen Volumen.
 Die Lounge ergänzt texturierte glTF-Sessel, Tische und Topfpflanzen.
+Tiefe Akustikkassetten, gefasste Servicebereiche und gerahmte Anzeigen gliedern
+die Wartehalle. Zwei lokale SDFGI-Kaskaden liefern indirektes Licht; Lampen
+werfen Schatten unter Möbeln und hinter Sitzen. Beim Verlassen des Flughafens
+wird dessen Beitrag zur indirekten Beleuchtung deaktiviert.
+Die Kabine hat konturierte Sitzpolster, geneigte dünne Rückenschalen,
+gekrümmte Seitenverkleidung und einzelne gewölbte Gepäckfachklappen.
+Das Vorfeld geht in zusammenhängende, texturierte Hügel mit glatten Normalen über.
+Die eigenen Flügel haben gewölbte Profile, getrennte Steuerflächen und gebogene
+Flügelspitzen. Kabinenlampen und Flugsonne bleiben auch für die isolierte
+Flugkamera sichtbar; Empfänger- und Kamera-Lichtmasken werden getrennt gesetzt.
 Quellen und Nutzungsbedingungen stehen unter `assets/airport/`.
 
 **22 zusätzliche Menschen** beleben den Flughafen: sechs gehen zwischen Eingang,
@@ -95,6 +139,10 @@ Nach der Landung steigen einige wieder aus. Die 18 Fensterplätze bleiben für
 den Spieler verfügbar. Bei besetztem Türbereich wartet der Abflug auf einen
 freien Durchgang. Außerhalb der Reichweite schlafen Bewegung und Animation;
 entferntere sichtbare Posen laufen reduziert mit zehn Aktualisierungen pro Sekunde.
+Stoffgewebe und Falten-Normalmaps verwenden ihre jeweils richtigen UV-Skalen;
+mehrere zurückhaltende Kleidungsfarben reduzieren sichtbare Wiederholungen.
+Haut und Stoff reflektieren weniger stark. Die vier vorhandenen Menschenmodelle
+bleiben erkennbar vereinfacht; neue gescannte Personen sind nicht enthalten.
 
 Ein **1,90 × 18 m großes Glasdach**, ein **2 × 1,6 m großes Bodenfenster** im
 vorderen Kabinenbereich und ein **0,86 × 16,8 m langer Glasgang** erlauben den
@@ -102,11 +150,41 @@ Blick nach oben und unten. Die Rumpfhülle ist dort wirklich geöffnet; das
 Bodenglas bleibt begehbar. Das ist ein gestaltetes Panorama-Flugzeug, kein
 Nachbau einer zugelassenen Verkehrsmaschine.
 
+Am **Heck** führt der Mittelgang jetzt durch einen zwei Meter breiten Zugang
+in eine **kugelförmige 360°-Panoramakuppel**. Die Kugel misst außen 9,6 m;
+der begehbare Glasboden hat knapp 8,90 m Durchmesser. Auch die untere Kugelhälfte
+ist transparent: Landschaft, Wolken und Erde bleiben unter den Füßen sichtbar.
+Sechs gerundete Tragprofile, ein umlaufender Deckring, Dichtungen und ein Dachring
+fassen den Rundumblick. Der Anschluss zum Flugzeug bleibt ein tatsächlich offener Gang. Zwei seitliche Leitwerksfinnen
+ersetzen das mittige Heckleitwerk. Die Kuppel ist am Gate und während des Fluges
+frei begehbar; ihre Glashülle verhindert, dass man hinausfällt.
+
+Die Außenkonstruktion wurde nochmals überarbeitet: Eine durchgehende, glatt
+schattierte Rumpfhaut besitzt echte ovale Fensteröffnungen mit bündigen Rändern.
+Die längere Nase geht vom Kabinenprofil in einen elliptischen Bug über; die
+Cockpitscheiben folgen seiner Wölbung. Eine geformte Heckverkleidung reicht
+lückenlos bis zum Kuppelanschluss und enthält den gerundeten Durchgang.
+
+Tragflächen und beide Heckleitwerke sind geschlossene, profilierte Volumen mit
+geformten Wurzeln und gebogenen Winglets. Die beiden Triebwerke besitzen hohle
+Einläufe, gerundete Lippen, jeweils 22 geschwungene Fanblätter, Spinner, Pylone
+und Auslässe. Runde Reifen, Naben und Federbeine ersetzen die einfachen Scheiben.
+Lack, Metall, Dichtungen und Glas sind getrennte PBR-Materialien; dezente
+Mikrorauheit, ein aufliegender Farbstreifen und die Aurora-Beschriftung ergänzen
+die Oberflächen. Das Vorfeld verwendet fotografischen warmgrauen CC0-Beton von
+Poly Haven (`concrete_tiles_02`, 2K mit Normal- und Roughness-Map). Er ersetzt
+die vorherige rostbraune Textur und ihre starke indirekte Rotfärbung am Rumpf.
+Die Module erzeugen statische Geometrie einmal beim Aufbau;
+es gibt dafür keine neue Berechnung pro Frame oder zusätzliche Spiegelkamera.
+Die Konstruktion ist weiterhin eine gestaltete Spezialmaschine, keine
+flugmechanisch oder strukturell validierte Flugzeugentwicklung.
+
 1. Über Gate A01 und die Glasbrücke in die Maschine gehen.
 2. Mit **E** neben einer Sitzreihe einen Fensterplatz einnehmen.
 3. **R** drücken oder nach **Esc** den Button **RUNDFLUG STARTEN** anklicken.
    Der Start ist nur an Bord möglich und setzt den Spieler nötigenfalls an
-   einen Fensterplatz. Der Mausblick bleibt frei.
+   einen Fensterplatz. **In der Heckkuppel startet R den Flug direkt im Stehen**;
+   Position und freie Bewegung bleiben erhalten. Der Mausblick bleibt frei.
 4. Der rund **150 Sekunden** lange Flug führt automatisch über Rollen, Start,
    Wolken, Orbitalpanorama und Landung zurück zum Gate. **E** erlaubt auch
    währenddessen das Aufstehen und Gehen in der geschlossenen Kabine.
@@ -115,11 +193,19 @@ Nachbau einer zugelassenen Verkehrsmaschine.
 
 Das ist ein inszenierter Passagier-Erlebnisflug: Ein gewöhnliches Verkehrsflugzeug
 fliegt nicht ins All. Die Kabine behält stabile Physikkoordinaten; bewegte
-Landschaft, gestaffelte Wolken, Himmel und gekrümmter Planet erzeugen das
-Panorama. Die Erdoberfläche verwendet NASAs Blue-Marble-Satellitenkomposit
-vom Juli 2004; Atmosphäre, Wolken und Reiseverlauf sind inszeniert und keine
-Live-Daten. Die Wolkenreise kombiniert den fotografischen Himmel mit bewegten
-Wolkenschichten. Im Orbitalabschnitt wechseln auch die Reflexionen zum Nachthimmel.
+Landschaft, räumliche Wolken, Himmel und gekrümmter Planet erzeugen das
+Panorama. In Bodennähe ersetzt eine echte USDA/USGS-NAIP-Luftaufnahme aus
+Lancaster County (2022, 4000² Pixel, etwa 1,7 m/Pixel) die früheren Farbfelder.
+Sie ist eine amerikanische Landschaftskulisse und wird gespiegelt wiederholt;
+der Übergang zum Mittelmeer ist eine Inszenierung, keine geografisch konsistente Route.
+Die Erdoberfläche verwendet eine statische NASA-GIBS-Region des
+Mittelmeerraums mit 8192² Pixeln und etwa 500 m Rasterweite. Außerhalb dieses
+Ausschnitts dient das globale Blue-Marble-Komposit vom Juli 2004 als Fallback.
+Atmosphäre, Wolken und Reiseverlauf sind inszeniert und keine Live-Daten.
+Die Wolkenreise kombiniert den fotografischen Himmel mit zwei volumetrischen
+Wolkenbändern. Ein Tiefenpuffer-bewusster Raymarch durch eine gemeinsame
+3D-Rauschtextur erzeugt Parallaxe und Eigenverschattung. Im Orbitalabschnitt
+wird dieser Pass abgeschaltet; auch die Reflexionen wechseln zum Nachthimmel.
 Leises Triebwerksrauschen und ein Kabinensignal entstehen ebenfalls im Code.
 Während des Fluges bleibt die Weltenauswahl gesperrt, bis das ursprüngliche
 Gate samt Kamera, Umgebung, Licht und Steuerung wiederhergestellt ist.
@@ -128,48 +214,119 @@ Das vollständige Konzept steht in [doc/Flugterminal-Konzept.txt](doc/Flugtermin
 Module: `scripts/airport/`; Außenwelt- und Terminal-Shader: `shaders/airport_*.gdshader`.
 `Tests/AirportRegression.gd` prüft den realen Hin-/Rückweg mit der Player-Kapsel,
 E/R/L/Tab-Eingaben, alle Flugphasen, zwei Flüge und die vollständige Rückkehr.
-Der Abschlusslauf bestand 3.926 Prüfungen mit 1.344 Wegproben. Zusätzlich sind
+Der Abschlusslauf mit Heckkuppel bestand 4.147 Prüfungen mit 1.448 Wegproben. Zusätzlich sind
 Flugstart während eines Weltwechsels und die Sitzsperre beim Menüschließen
 abgedeckt. Die Weltenauswahl bestand weitere 3.278 Prüfungen mit acht Zielen.
-`Tests/AircraftPanoramaRegression.gd` prüft echte Mesh-Dreiecke entlang der
-Sichtstrahlen sowie Glaskollisionen, Fensterfugen und Sitzanker.
+`Tests/AircraftPanoramaRegression.gd` bestand 459 Prüfungen echter Mesh-Dreiecke
+entlang der Sichtstrahlen sowie der Glaskollisionen, Fensterfugen und Sitzanker.
+`Tests/AircraftSeatingRegression.gd` prüft zusätzlich Sitzkontur, Schalenstärke
+und Lehnenneigung sowie Fensterkanten und Gepäckfachklappen: 72 Prüfungen bestanden.
+`Tests/AirportLightingRegression.gd` bestand 68 Prüfungen des GI-Beitrags,
+der Fluglichtmasken und der Wiederherstellung der Museumsbeleuchtung.
 `Tests/AirportPassengersRegression.gd` prüft Boarding, Rückkehr, Sitzhaltung,
-Vorwärtsgehen, Render-Layer und das Schlafen entfernter Passagiere.
+Vorwärtsgehen, Render-Layer und das Schlafen entfernter Passagiere: 11.598 Prüfungen,
+2.892 Wegproben, neun abgeschlossene Boardings und drei Rückkehrer ohne Fehler.
+`tools/airport_light_probe.gd` vergleicht tatsächliche Kabinenbilder mit den
+Produktions-Lichtmasken und absichtlich ausgeblendeten Lampen; dadurch wird der
+behobene Fehler der Flugbeleuchtung auch optisch geprüft.
 `tools/airport_review.gd` erzeugt echte Forward+-Aufnahmen; `tools/airport_benchmark.gd`
 misst die laufende Hauptszene mit normalem HUD, Besuchern und Flugverkehr.
+`Tests/AircraftDomeRegression.gd` prüft den neuen Heckzugang mit der echten
+Spielerkapsel, 144 Bodenproben, die geschlossene Glashülle, Sichtstrahlen durch
+reale Meshes und den stehenden Rundflug samt Rückkehr: 1.519 Prüfungen bestanden.
+Die anschließende sichtbare Schottkorrektur wurde zusätzlich durch den kompletten
+GPU-Rundgang mit Flug, Landung und Rückweg geprüft.
+`tools/airport_dome_review.gd` läuft per Spielerphysik hinein und wieder hinaus;
+es zeigt die Kuppel am Gate, im Wolkenflug, in sechs Orbitalrichtungen und von außen.
+`tools/airport_dome_benchmark.gd` misst vier Kuppelansichten und die gesamte
+Maschine von außen. `--exterior-only` beim Dome-Review erzeugt acht Außenansichten
+mit dokumentierter Kameraposition, darunter Nase, Fenster, Triebwerk und Anschluss.
+`Tests/AircraftExteriorRegression.gd` prüft echte Dreiecke, Wicklung, Normalen,
+geschlossene Volumen und die freien Fensteröffnungen: 1.202 Prüfungen bestanden,
+darunter 216 Fensterfeld-Eckstrahlen und 162 Strahlen durch freie Fenster.
+Die komplette Prüfserie und
+gezielte Nachtests stehen in `doc/airport/aircraft-redesign-validation.txt`.
+`Tests/AirportTerminalGeometryRegression.gd` prüft Endkappen, Länge und Radius
+schräger Terminalstreben: 65 Prüfungen, einschließlich einer zuvor durch das
+Dach ragenden Strebe. `tools/aircraft_finish_probe.gd` trennt SSR, Reflexionen,
+SDFGI und SSIL in kontrollierten Render-Vergleichen; die Produktionsdarstellung
+behält diese Effekte bei.
 
 Forward+-Aufnahmen aus der tatsächlichen Hauptszene:
 
 ![Terminal mit Gate und Blick auf das Vorfeld](doc/airport/airport_terminal.png)
+![Texturierte glTF-Lounge mit Aussicht](doc/airport/airport_lounge.png)
 ![Begehbare Kabine mit Fensterplätzen](doc/airport/airport_cabin.png)
+![Geformte Sitzschalen und einzelne Gepäckfachklappen](doc/airport/airport_cabin_seatbacks.png)
+![Echtes Luftbild unter räumlichen Wolken durch den Glasboden](doc/airport/airport_glass_floor_clouds.png)
+![Kabine im Flug mit Passagieren, Glasdach und Glasboden](doc/airport/airport_cabin_space.png)
 ![Orbitalpanorama vom Fensterplatz](doc/airport/airport_space.png)
+![Überarbeitete Maschine mit gewölbtem Bug und profilierten Tragflächen](doc/airport/airport_dome_exterior_front3q.png)
+![Turbofan mit hohlem Einlauf und geformten Fanblättern](doc/airport/airport_dome_exterior_engine.png)
+![Kugelförmige Heckkuppel am Spezialflugzeug](doc/airport/airport_dome_exterior.png)
+![Freier Blick aus der Heckkuppel im Orbit](doc/airport/airport_dome_orbit_aft.png)
 
-Leistungsstichprobe der ersten Flughafenfassung **vor der Material- und
-Passagierüberarbeitung** vom 29.10.2026, RTX 4070, Godot 4.7.2, 1920×1080,
+Leistungsstichprobe **vor dem Anbau der Heckkuppel**, mit der überarbeiteten Architektur und Kabine, SDFGI,
+schattenwerfenden Leuchten, Passagieren, Luftbild und volumetrischen Wolken vom 29.10.2026,
+RTX 4070, Godot 4.7.2, 1920×1080,
 ohne VSync und ohne parallele Lasttests. Je Ansicht 2,5 Sekunden Aufwärmzeit
 und drei Sekunden Messung, normale Besucher-/Verkehrslogik und HUD aktiv:
 
 | Ansicht mit Flughafen-Erweiterung | Median pro Bild | 95. Perzentil | FPS aus dem Median |
 | --- | ---: | ---: | ---: |
-| Atrium | 9,10 ms | 13,53 ms | 110 |
-| Terminal mit Flugverkehr | 3,64 ms | 4,58 ms | 275 |
-| Kabine am Gate | 3,48 ms | 3,94 ms | 287 |
-| Start, Blick aus dem Fenster | 1,58 ms | 1,68 ms | 632 |
-| Wolkenreise, Blick aus dem Fenster | 1,52 ms | 1,73 ms | 657 |
-| Orbitalpanorama, Blick aus dem Fenster | 1,52 ms | 1,84 ms | 657 |
+| Atrium | 10,04 ms | 16,02 ms | 100 |
+| Terminal mit Flugverkehr | 5,70 ms | 8,78 ms | 175 |
+| Lounge mit glTF-Möbeln | 5,28 ms | 8,74 ms | 189 |
+| Kabine am Gate | 4,47 ms | 5,80 ms | 224 |
+| Start, Blick aus dem Fenster | 4,17 ms | 9,49 ms | 240 |
+| Wolkenreise, Blick aus dem Fenster | 4,40 ms | 11,89 ms | 227 |
+| Orbitalpanorama, Blick aus dem Fenster | 2,39 ms | 10,85 ms | 419 |
+| Kabineninnenraum im Orbit | 3,93 ms | 11,31 ms | 254 |
+| Glasboden mit Satellitenkarte | 3,34 ms | 6,16 ms | 299 |
+| Volle Kabine, zehn Passagiere (gezielter Lastfall) | 4,60 ms | 13,94 ms | 218 |
 
-Die Flugansicht rendert nur die Kabine und ihre eigene vereinfachte Außenwelt;
-das erklärt die deutlich geringere Last als im Museum. Die Wolken sind
-prozedurale Schichten und weich schattierte Sprites, keine volumetrische
-Wettersimulation. Diese kurzen Stichproben einzelner Ansichten sind keine
+Im Terminal waren alle 22 Flughafenpersonen aktiv, im Atrium keine; während
+der normalen Flugmessungen waren fünf Personen an Bord aktiv. Der übrige
+Terminalverkehr schlief. Für den zusätzlichen Lastfall setzt das Messtool alle
+sechs Boarder direkt in ihre reservierten Sitze: zehn aktive Kabinenpassagiere.
+Das ist eine ausdrücklich vorbereitete Leistungsprobe; der normale Einstieg
+läuft weiterhin über die Brücke und wird separat als Wegablauf geprüft.
+Rohdaten einschließlich aktiver Personen,
+Drawcalls und Flugzustand stehen in `doc/airport/airport_benchmark_1920x1080.json`.
+
+Messung vom **30.10.2026 mit überarbeiteter Außenkonstruktion und Heckkuppel**,
+RTX 4070, Godot 4.7.2, 1920×1080, ohne VSync und parallele Lasttests,
+normalem HUD und regulärer Passagierlogik. Je Blick mindestens 2,5 Sekunden und
+120 Frames Aufwärmzeit nach dem ersten Bild, anschließend drei Sekunden Messung:
+
+| Ansicht | Median pro Bild | 95. Perzentil | FPS aus dem Median |
+| --- | ---: | ---: | ---: |
+| Am Gate auf das Vorfeld | 3,04 ms | 3,66 ms | 329 |
+| Ganze Maschine und Terminal von außen | 4,67 ms | 6,01 ms | 214 |
+| Freies Wolkenpanorama | 7,21 ms | 7,72 ms | 139 |
+| Freies Orbitalpanorama | 2,23 ms | 2,58 ms | 449 |
+| Im Orbit zurück zur Kabine | 3,25 ms | 3,59 ms | 308 |
+
+Der freie Wolkenblick beansprucht nahezu die ganze Bildfläche und ist deshalb
+teurer als der Blick durch ein kleines Kabinenfenster. In den Flugmessungen
+waren fünf reguläre Passagiere an Bord aktiv; am Gate waren 20 Flughafenpersonen
+aktiv. Keine Personen wurden für diesen
+Test versetzt. Details: `doc/airport/airport_dome_benchmark_1920x1080.json`.
+Die Ansichten sind kurze Stichproben, keine zugesicherten Mindest-FPS. Der ältere
+Kuppel-Messstand und das alte Außenbild liegen in `doc/airport/before-aircraft-redesign/`.
+
+Die Flugansicht rendert nur die Kabine und ihre eigene Außenwelt. Die volumetrischen
+Wolken benötigen einen zusätzlichen Renderpass mit bis zu 64 Schritten je
+sichtbarem Außenpixel; opake Kabinenflächen und Flügel werden vorher ausgeschlossen.
+Es handelt sich um gestaltete Wolkendichte ohne Wetterphysik. Diese kurzen Stichproben sind keine
 Mindest-FPS-Zusage oder isolierte Messung des zusätzlichen Flughafenaufwands.
 Unbearbeitete Bilder und Messdaten liegen in `doc/airport/`, vom Asset-Import
 durch `.gdignore` ausgeschlossen.
 
 ## Die sechs Galerien
 
-Die Architektur und alle neuen Materialien entstehen im Code. Dafür werden
-keine externen Texturen oder Architekturmodelle geladen. Die vorhandenen
+Die Architektur und Materialien dieser sechs Galerien entstehen im Code.
+Diese Galerien benötigen keine externen Texturen oder Architekturmodelle. Die vorhandenen
 Besuchermodelle bleiben mitgelieferte GLB-Dateien.
 
 | Etage | Nordwestliche Halle | Südöstliche Halle |
@@ -309,7 +466,8 @@ feine Materialdetails. Wiederholte Wandprofile werden in räumlich begrenzten
 MultiMeshes zusammengefasst; sämtliche Richtungspfeile benötigen zusammen zwei
 MultiMeshes. Materialien teilen eine gemeinsame prozedurale Stein-Noise-Textur.
 
-Sieben ReflectionProbes erfassen die Räume einmalig. SSR ergänzt sichtbare,
+Sieben ReflectionProbes erfassen die Galerieräume einmalig; eine zusätzliche
+Probe erfasst das Flughafenterminal. SSR ergänzt sichtbare,
 bewegte Reflexionen. Die übrigen polierten Wandpaneele verwenden diese lokalen
 Reflexionsproben; sie sind keine perspektivisch exakten Planspiegel. Der einzelne
 echte Wandspiegel in Nocturne rendert dagegen aus dem gespiegelten Augenpunkt mit

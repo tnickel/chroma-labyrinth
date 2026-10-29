@@ -8,16 +8,24 @@ const ROWS := 9
 const ROW_PITCH := 1.85
 const FIRST_ROW := -6.8
 const PBR = preload("res://scripts/airport/AirportMaterials.gd")
+const Fuselage = preload("res://scripts/airport/AircraftFuselage.gd")
+const Propulsion = preload("res://scripts/airport/AircraftPropulsion.gd")
+const Wings = preload("res://scripts/airport/AircraftWings.gd")
+const Seating = preload("res://scripts/airport/CabinSeating.gd")
+const Interior = preload("res://scripts/airport/CabinInterior.gd")
+const ObservationDome = preload("res://scripts/airport/AircraftObservationDome.gd")
 const FLOOR_WINDOW_FRONT := Rect2(-1.0, -9.2, 2.0, 1.6)
 const FLOOR_WINDOW_AISLE := Rect2(-0.43, -7.6, 0.86, 16.8)
 const ROOF_WINDOW := Rect2(-0.95, -8.8, 1.90, 18.0)
 
 var seats: Array[Dictionary] = []
 var passenger_seats: Array[Dictionary] = []
+var observation_dome: Node3D
 var floor_window_regions: Array[Rect2] = [FLOOR_WINDOW_FRONT, FLOOR_WINDOW_AISLE]
 var aisle_points := PackedVector3Array([
 	Vector3(-2.05, 0.10, -10), Vector3(0, 0.10, -10),
-	Vector3(0, 0.10, -7.8), Vector3(0, 0.10, 9.7)])
+	Vector3(0, 0.10, -7.8), Vector3(0, 0.10, 9.7),
+	Vector3(0, 0.10, 15.4), Vector3(0, 0.10, 19.5)])
 var start_position := Vector3(-0.7, 0, -9.3)
 var door_open := true
 var _built := false
@@ -45,6 +53,10 @@ func build() -> void:
 	_build_seating()
 	_build_passenger_service_units()
 	_build_service_areas()
+	_build_dome_connection()
+	observation_dome = ObservationDome.new()
+	add_child(observation_dome)
+	observation_dome.build()
 	_build_door()
 	_build_lights()
 	_flush_batches()
@@ -52,7 +64,12 @@ func build() -> void:
 
 func contains(world_point: Vector3) -> bool:
 	var point := to_local(world_point)
-	return absf(point.x) < 2.15 and point.z > -12.0 and point.z < 12.0 and point.y > -0.1 and point.y < 3.4
+	var cabin_volume := absf(point.x) < 2.15 and point.z > -12.0 and point.z < 11.5 and point.y > -0.1 and point.y < 3.4
+	var neck_volume := absf(point.x) < 1.03 and point.z >= 11.2 and point.z < 15.5 and point.y > -0.1 and point.y < 2.65
+	return cabin_volume or neck_volume or (observation_dome != null and observation_dome.contains_local(point))
+
+func is_in_observation_dome(world_point: Vector3) -> bool:
+	return observation_dome != null and observation_dome.contains_local(to_local(world_point))
 
 func set_door_open(open: bool) -> void:
 	door_open = open
@@ -70,17 +87,30 @@ func set_door_open(open: bool) -> void:
 		_door.position = destination
 
 func _make_materials() -> void:
-	_materials.shell = _material(Color("e6e3d7"), 0.28, 0.30)
+	_materials.shell = _material(Color("eceeea"), 0.24, 0.035)
+	_materials.shell.clearcoat_enabled = true
+	_materials.shell.clearcoat = 0.7
+	_materials.shell.clearcoat_roughness = 0.17
+	Fuselage.configure_lacquer(_materials.shell)
 	_materials.lining = PBR.get_material("lining").duplicate()
 	_materials.ceiling = PBR.get_material("lining").duplicate()
 	_materials.ceiling.albedo_color = Color("eee8dc")
 	_materials.floor = PBR.get_material("carpet").duplicate()
 	_materials.seat = PBR.get_material("leather").duplicate()
-	_materials.seat.albedo_color = Color("486577")
+	# The photographed leather already carries a grey diffuse reflectance. A
+	# restrained light blue-grey tint keeps the moulded silhouette readable.
+	_materials.seat.albedo_color = Color("c1cdd2")
 	_materials.headrest = PBR.get_material("leather").duplicate()
-	_materials.headrest.albedo_color = Color("a7afa9")
+	_materials.headrest.albedo_color = Color("eee4d1")
 	_materials.fabric = PBR.get_material("fabric").duplicate()
 	_materials.fabric.albedo_color = Color("ced5d4")
+	_materials.seat_shell = PBR.get_material("lining").duplicate()
+	_materials.seat_shell.albedo_color = Color("c5c8c3")
+	_materials.seat_shell.roughness = 0.56
+	_materials.seat_insert = PBR.get_material("fabric").duplicate()
+	_materials.seat_insert.albedo_color = Color("d4dce0")
+	_materials.bin_door = PBR.get_material("lining").duplicate()
+	_materials.bin_door.albedo_color = Color("dfdfd4")
 	_materials.metal = PBR.get_material("aluminum").duplicate()
 	_materials.wood = PBR.get_material("wood").duplicate()
 	_materials.piping = _material(Color("b9b4a1"), 0.72, 0.0)
@@ -125,7 +155,7 @@ func _box(point: Vector3, size: Vector3, material: Material, label: String, laye
 	var key := "%s|%s|%d" % [size, material.get_instance_id(), layer]
 	if not _batches.has(key):
 		var mesh: Mesh
-		if label in ["SeatCushion", "SeatBack", "AdjustableHeadrest", "SeatArmrest", "HeadrestWing", "LumbarPad", "OverheadLocker", "ScreenFrame", "GalleyDrawer"]:
+		if label in ["SeatCushion", "SeatBack", "AdjustableHeadrest", "SeatArmrest", "HeadrestWing", "LumbarPad", "OverheadLocker", "ScreenFrame", "GalleyDrawer", "FoldedTray"]:
 			mesh = _rounded_box(size, minf(0.045, minf(size.x, minf(size.y, size.z)) * 0.28))
 		else:
 			var box := BoxMesh.new()
@@ -264,7 +294,7 @@ func _tube_path(points: PackedVector3Array, radius: float, close := true) -> Arr
 func _build_observation_floor() -> void:
 	# Opaque floor panels surround real glass openings. The belly beneath both
 	# apertures is cut away separately; no opaque cargo floor hides the view.
-	var sections := [[-12.25, -9.2, 0.0], [-9.2, -7.6, 1.0], [-7.6, 9.2, 0.43], [9.2, 12.25, 0.0]]
+	var sections := [[-12.25, -9.2, 0.0], [-9.2, -7.6, 1.0], [-7.6, 9.2, 0.43], [9.2, 11.5, 0.0]]
 	for section in sections:
 		var start: float = section[0]
 		var finish: float = section[1]
@@ -301,148 +331,44 @@ func _build_observation_floor() -> void:
 
 func _build_airframe() -> void:
 	_build_observation_floor()
-	# The lower body is below the floor. Its opaque roof only begins above
-	# window height; no full cylinder conceals the window apertures.
-	var roof := _surface()
-	var panorama := _surface()
-	var belly := _surface()
-	var roof_cut := acos(0.95 / 2.3)
-	var belly_cut := acos(1.8 / 2.3)
-	var angles: Array[float] = [roof_cut, PI - roof_cut, belly_cut, PI - belly_cut]
-	for index in 33:
-		angles.append(PI * float(index) / 32.0)
-	angles.sort()
-	var divisions := [-12.25, -9.2, -8.8, 9.2, 11.5]
-	for index in angles.size() - 1:
-		var a := angles[index]
-		var b := angles[index + 1]
-		var middle := (a + b) * 0.5
-		var roof_a := Vector2(cos(a) * 2.30, 2.16 + sin(a) * 1.05)
-		var roof_b := Vector2(cos(b) * 2.30, 2.16 + sin(b) * 1.05)
-		var lower_a := Vector2(cos(a) * 2.30, -0.10 - sin(a) * 2.05)
-		var lower_b := Vector2(cos(b) * 2.30, -0.10 - sin(b) * 2.05)
-		for segment in divisions.size() - 1:
-			var start: float = divisions[segment]
-			var finish: float = divisions[segment + 1]
-			var glass_region := middle > roof_cut and middle < PI - roof_cut and start >= -8.8 and finish <= 9.2
-			_quad(panorama if glass_region else roof, Vector3(roof_a.x, roof_a.y, start), Vector3(roof_b.x, roof_b.y, start), Vector3(roof_b.x, roof_b.y, finish), Vector3(roof_a.x, roof_a.y, finish))
-			var open_belly := middle > belly_cut and middle < PI - belly_cut and start >= -9.2 and finish <= 9.2
-			if not open_belly:
-				_quad(belly, Vector3(lower_a.x, lower_a.y, finish), Vector3(lower_b.x, lower_b.y, finish), Vector3(lower_b.x, lower_b.y, start), Vector3(lower_a.x, lower_a.y, start))
-	var roof_mat := _materials.ceiling.duplicate() as StandardMaterial3D
-	roof_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	_mesh(roof.commit(), roof_mat, "VaultedCabinRoof", ROOF_LAYER)
-	var roof_glass := _mesh(panorama.commit(), _materials.roof_glass, "PanoramicGlassRoof", ROOF_LAYER)
-	roof_glass.set_meta("observation_window", "roof")
-	roof_glass.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_mesh(belly.commit(), _materials.shell, "LowerFuselage")
+	Fuselage.build(self, _materials.shell, _materials.metal, _materials.teal, _materials.roof_glass)
+	var roof_cut := acos(0.95 / Fuselage.RADIUS)
 	var arch_points := PackedVector3Array()
 	for index in 17:
 		var angle := lerpf(roof_cut, PI - roof_cut, float(index) / 16.0)
-		arch_points.append(Vector3(cos(angle) * 2.3, 2.16 + sin(angle) * 1.05 - 0.02, 0))
+		arch_points.append(Vector3(cos(angle) * Fuselage.RADIUS, 2.16 + sin(angle) * 1.05 - 0.02, 0))
 	var arch := _tube_path(arch_points, 0.026, false)
 	for z in [-8.8, -5.2, -1.6, 2.0, 5.6, 9.2]:
 		_batch_mesh(arch, _materials.metal, "PanoramaRoofRibs", Transform3D(Basis.IDENTITY, Vector3(0, 0, z)), ROOF_LAYER)
 	for side in [-1.0, 1.0]:
 		_box(Vector3(side * 0.95, 3.105, 0.2), Vector3(0.065, 0.065, 18.05), _materials.metal, "PanoramaRoofStringer", ROOF_LAYER)
 	_collider(Vector3(0, 3.0, 0), Vector3(4.6, 0.25, 24.3), "CeilingCollision")
-	_box(Vector3(0, 1.4, -12.1), Vector3(4.4, 2.8, 0.18), _materials.lining, "FlightDeckBulkhead", BODY_LAYER, true)
-	_box(Vector3(0, 1.4, 11.3), Vector3(4.4, 2.8, 0.18), _materials.lining, "RearBulkhead", BODY_LAYER, true)
-	_end_shell(-12.25, -16.1, "SculptedNose", false)
-	_end_shell(11.5, 16.0, "TailCone", true)
+	_collider(Vector3(0, 1.4, -12.1), Vector3(4.4, 2.8, 0.18), "FlightDeckBulkhead")
+	# A rectangular visual bulkhead used to pierce both roof shoulders.
+	# Follow the pressure-shell crown instead of exposing triangular corners.
+	var flight_bulkhead := _surface()
+	for i in 48:
+		var x0 := lerpf(-2.34, 2.34, float(i) / 48.0)
+		var x1 := lerpf(-2.34, 2.34, float(i + 1) / 48.0)
+		var y0 := 2.16 + 1.05 * sqrt(1.0 - pow(x0 / Fuselage.RADIUS, 2)) - 0.025
+		var y1 := 2.16 + 1.05 * sqrt(1.0 - pow(x1 / Fuselage.RADIUS, 2)) - 0.025
+		_quad(flight_bulkhead, Vector3(x0, 0, -12.1), Vector3(x0, y0, -12.1), Vector3(x1, y1, -12.1), Vector3(x1, 0, -12.1))
+	_mesh(flight_bulkhead.commit(), _materials.lining, "CurvedFlightDeckBulkhead")
+	# Split pressure bulkhead leaves an actual two-metre rear opening.
 	for side in [-1.0, 1.0]:
-		# Wings are thick, swept and slightly dihedral, rather than flat quads.
-		var wing := _surface()
-		var top := [Vector3(side * 2.15, -0.35, -2.0), Vector3(side * 11.7, 0.28, 3.3), Vector3(side * 11.3, 0.28, 5.4), Vector3(side * 2.15, -0.35, 4.6)]
-		var lower: Array[Vector3] = []
-		for point: Vector3 in top:
-			lower.append(point - Vector3.UP * 0.18)
-		_quad(wing, top[0], top[1], top[2], top[3])
-		_quad(wing, lower[3], lower[2], lower[1], lower[0])
-		for index in 4:
-			var next := (index + 1) % 4
-			_quad(wing, top[index], lower[index], lower[next], top[next])
-		var material := _materials.shell.duplicate() as StandardMaterial3D
-		material.cull_mode = BaseMaterial3D.CULL_DISABLED
-		_mesh(wing.commit(), material, "SweptWing")
-		_box(Vector3(side * 11.5, 0.85, 4.38), Vector3(0.12, 1.25, 1.8), _materials.teal, "Winglet", BODY_LAYER, false, Vector3(0, 0, side * -0.17))
-		_box(Vector3(side * 11.58, 0.4, 4.3), Vector3(0.15, 0.08, 0.22), _materials.red_light if side < 0 else _materials.green_light, "WingNavigationLight")
-		_engine(side)
-		var stabilizer := _surface()
-		_quad(stabilizer, Vector3(side * 1.2, 1.0, 10.6), Vector3(side * 5.3, 1.25, 12.7), Vector3(side * 4.8, 1.25, 14.1), Vector3(side * 0.9, 1.0, 13.1))
-		_mesh(stabilizer.commit(), material, "Tailplane")
-		_box(Vector3(side * 2.25, 0.38, 0), Vector3(0.035, 0.18, 21.5), _materials.teal, "FuselageLivery")
-	var fin := _surface()
-	for side in [-1.0, 1.0]:
-		_quad(fin, Vector3(side * 0.12, 1.6, 9.7), Vector3(side * 0.12, 6.0, 13.8), Vector3(side * 0.12, 5.7, 15.0), Vector3(side * 0.12, 1.4, 14.7))
-	var fin_mat := _materials.teal.duplicate() as StandardMaterial3D
-	fin_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	_mesh(fin.commit(), fin_mat, "VerticalStabilizer")
-	for point in [Vector3(-1.5, -2.55, 3.4), Vector3(1.5, -2.55, 3.4), Vector3(0, -2.55, -10.5)]:
-		_box(point + Vector3.UP * 0.43, Vector3(0.13, 1.2, 0.13), _materials.metal, "GearStrut")
-		var wheel := CylinderMesh.new()
-		wheel.top_radius = 0.43
-		wheel.bottom_radius = 0.43
-		wheel.height = 0.32
-		wheel.radial_segments = 18
-		var instance := _mesh(wheel, _materials.rubber, "LandingGearTyre")
-		instance.position = point - Vector3.UP * 0.17
-		instance.rotation.z = PI * 0.5
-
-func _end_shell(start: float, finish: float, label: String, rear: bool) -> void:
-	var surface := _surface()
-	for ring in 10:
-		var u0 := float(ring) / 10.0
-		var u1 := float(ring + 1) / 10.0
-		for index in 32:
-			var a := TAU * float(index) / 32.0
-			var b := TAU * float(index + 1) / 32.0
-			var points: Array[Vector3] = []
-			var normals: Array[Vector3] = []
-			for pair in [Vector2(u0, a), Vector2(u1, a), Vector2(u1, b), Vector2(u0, b)]:
-				var size := sqrt(maxf(0.0001, 1.0 - pair.x * pair.x)) if not rear else pow(1.0 - pair.x * 0.99, 0.7)
-				points.append(Vector3(cos(pair.y) * 2.3 * size, 0.5 + sin(pair.y) * 2.68 * size, lerpf(start, finish, pair.x)))
-				var slope: float = -pair.x / size if not rear else -0.693 * pow(1.0 - pair.x * 0.99, -0.3)
-				normals.append(Vector3(cos(pair.y) / 2.3, sin(pair.y) / 2.68, -slope / (finish - start)).normalized())
-			for corner in ([0, 2, 1, 0, 3, 2] if not rear else [0, 1, 2, 0, 2, 3]):
-				surface.set_normal(normals[corner])
-				surface.add_vertex(points[corner])
-	var material := _materials.shell.duplicate() as StandardMaterial3D
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED
-	_mesh(surface.commit(), material, label)
-	if not rear:
-		for side in [-1.0, 1.0]:
-			var windscreen := _surface()
-			_quad(windscreen, Vector3(side * 0.05, 1.70, -15.28), Vector3(side * 1.25, 1.63, -14.75), Vector3(side * 1.40, 2.15, -14.05), Vector3(side * 0.07, 2.35, -14.42))
-			var dark := _materials.dark.duplicate() as StandardMaterial3D
-			dark.cull_mode = BaseMaterial3D.CULL_DISABLED
-			_mesh(windscreen.commit(), dark, "CockpitWindscreen")
-
-func _engine(side: float) -> void:
-	_box(Vector3(side * 4.4, -0.65, -0.45), Vector3(0.27, 0.95, 1.6), _materials.metal, "EnginePylon")
-	var nacelle := CylinderMesh.new()
-	nacelle.top_radius = 0.78
-	nacelle.bottom_radius = 0.68
-	nacelle.height = 3.1
-	nacelle.radial_segments = 28
-	var instance := _mesh(nacelle, _materials.shell, "EngineNacelle")
-	instance.position = Vector3(side * 4.4, -1.35, -1.15)
-	instance.rotation.x = PI * 0.5
-	var intake := CylinderMesh.new()
-	intake.top_radius = 0.66
-	intake.bottom_radius = 0.66
-	intake.height = 0.035
-	intake.radial_segments = 28
-	var fan := _mesh(intake, _materials.dark, "DarkFanIntake")
-	fan.position = Vector3(side * 4.4, -1.35, -2.72)
-	fan.rotation.x = PI * 0.5
-	for index in 12:
-		var angle := float(index) * TAU / 12.0
-		_box(Vector3(side * 4.4 + sin(angle) * 0.34, -1.35 + cos(angle) * 0.34, -2.75), Vector3(0.065, 0.50, 0.035), _materials.metal, "TurbofanBlade", BODY_LAYER, false, Vector3(0, 0, -angle + 0.25))
+		_collider(Vector3(side * 1.65, 1.15, 11.3), Vector3(1.30, 2.30, 0.18), "ObservationPortalJamb")
+	_collider(Vector3(0, 2.86, 11.3), Vector3(2.0, 0.72, 0.18), "ObservationPortalHeader")
+	_build_observation_bulkhead()
+	Wings.build(self, _materials.shell, _materials.metal, _materials.teal)
+	Wings.build_tail(self, _materials.shell, _materials.metal, _materials.teal)
+	Propulsion.build(self, _materials.shell, _materials.metal, _materials.teal)
+	Propulsion.build_gear(self, _materials.shell, _materials.metal, _materials.teal)
 
 func _build_windows() -> void:
+	var interior := Interior.meshes()
 	for side in [-1.0, 1.0]:
 		var x: float = side * 2.23
+		var mirror := Basis.IDENTITY if side > 0 else Basis(Vector3.UP,PI)
 		# Continuous collision glazing prevents falling out, while optical
 		# geometry deliberately remains open at each transparent window.
 		if side > 0:
@@ -452,29 +378,21 @@ func _build_windows() -> void:
 			_collider(Vector3(x, 1.15, -11.70), Vector3(0.20, 2.3, 1.10), "PortPressureWallForwardOfDoor")
 		# The window band runs from -7.4 to 8.6. Vestibule and rear panels fill
 		# the remainder; the port boarding aperture is intentionally omitted.
-		_box(Vector3(x, 0.52, 0.6), Vector3(0.18, 1.04, 16.0), _materials.lining, "WindowLowerWall")
-		_box(Vector3(x, 2.15, 0.6), Vector3(0.18, 0.18, 16.0), _materials.lining, "WindowHeader")
-		_box(Vector3(x, 1.12, 9.95), Vector3(0.18, 2.24, 2.7), _materials.lining, "RearPressurePanel")
+		_batch_mesh(Interior.solid_panel(2.7),_materials.lining,"CurvedRearPressurePanel",Transform3D(mirror,Vector3(0,0,9.95)))
 		if side > 0:
-			_box(Vector3(x, 1.12, -9.825), Vector3(0.18, 2.24, 4.85), _materials.lining, "VestibuleStarboardWall")
+			_batch_mesh(Interior.solid_panel(4.85),_materials.lining,"CurvedVestibuleStarboard",Transform3D(mirror,Vector3(0,0,-9.825)))
 		else:
-			_box(Vector3(x, 1.12, -8.125), Vector3(0.18, 2.24, 1.45), _materials.lining, "VestibulePortWall")
-			_box(Vector3(x, 1.12, -11.70), Vector3(0.18, 2.24, 1.10), _materials.lining, "PortNosePanel")
-		var previous_end := -7.4
+			_batch_mesh(Interior.solid_panel(1.45),_materials.lining,"CurvedVestibulePort",Transform3D(mirror,Vector3(0,0,-8.125)))
+			_batch_mesh(Interior.solid_panel(1.10),_materials.lining,"CurvedPortNosePanel",Transform3D(mirror,Vector3(0,0,-11.70)))
 		for row in ROWS:
 			var z := FIRST_ROW + row * ROW_PITCH
-			var start := z - 0.56
-			if start > previous_end:
-				_box(Vector3(x, 1.55, (start + previous_end) * 0.5), Vector3(0.18, 1.02, start - previous_end), _materials.lining, "WindowPier")
+			var placement := Transform3D(mirror,Vector3(0,0,z))
+			_batch_mesh(interior.wall,_materials.lining,"CurvedWindowSidewall",placement)
+			_batch_mesh(interior.bin,_materials.ceiling,"IndividualOverheadBin",placement,ROOF_LAYER)
+			_batch_mesh(interior.door,_materials.bin_door,"CurvedBinDoor",placement,ROOF_LAYER)
+			_box(Vector3(side*1.085,2.48,z),Vector3(0.025,0.073,0.235),_materials.dark,"BinLatchRecess",ROOF_LAYER)
+			_box(Vector3(side*1.065,2.48,z),Vector3(0.025,0.025,0.16),_materials.metal,"FlushBinHandle",ROOF_LAYER)
 			_window(side, z)
-			previous_end = z + 0.56
-		if previous_end < 8.6:
-			_box(Vector3(x, 1.55, (8.6 + previous_end) * 0.5), Vector3(0.18, 1.02, 8.6 - previous_end), _materials.lining, "WindowPier")
-		_box(Vector3(side * 1.62, 2.53, 0.4), Vector3(1.03, 0.43, 18.2), _materials.ceiling, "OverheadLocker", ROOF_LAYER)
-		_box(Vector3(side * 1.12, 2.34, 0.4), Vector3(0.06, 0.055, 18.2), _materials.gold, "LockerReveal", ROOF_LAYER)
-		for row in ROWS:
-			var z := FIRST_ROW + row * ROW_PITCH
-			_box(Vector3(side * 1.61, 2.30, z + 0.50), Vector3(1.03, 0.02, 0.035), _materials.metal, "LockerSeam", ROOF_LAYER)
 		# Light ribbons flank the glass roof instead of obscuring its centre.
 		_box(Vector3(side * 1.035, 3.04, 0.1), Vector3(0.035, 0.026, 21.3), _materials.white_light, "CeilingLightRibbon", ROOF_LAYER)
 		# The broad vestibule pane has its own illuminated outer frame. A
@@ -560,14 +478,7 @@ func _window_reveal(side: float, z: float) -> ArrayMesh:
 	return surface.commit()
 
 func _build_seating() -> void:
-	var back_path := PackedVector3Array()
-	var cushion_path := PackedVector3Array()
-	for point in _rounded_profile(0.244, 0.432, 0.065):
-		back_path.append(Vector3(point.x, point.y, -0.077))
-	for point in _rounded_profile(0.247, 0.312, 0.06):
-		cushion_path.append(Vector3(point.x, 0.072, point.y))
-	var back_piping := _tube_path(back_path, 0.0038)
-	var cushion_piping := _tube_path(cushion_path, 0.0038)
+	var upholstery := Seating.meshes()
 	var pocket := _surface()
 	for column in 8:
 		for row in 4:
@@ -586,32 +497,39 @@ func _build_seating() -> void:
 			for column in 2:
 				var x: float = side * (0.90 + float(column) * 0.65)
 				var pos := Vector3(x, 0, z)
-				_box(pos + Vector3(0, 0.30, 0.05), Vector3(0.14, 0.52, 0.18), _materials.metal, "SeatPedestal")
-				_box(pos + Vector3(0, 0.055, 0.04), Vector3(0.46, 0.11, 0.64), _materials.dark, "SeatRail")
-				_box(pos + Vector3(0, 0.46, -0.02), Vector3(0.55, 0.14, 0.70), _materials.seat, "SeatCushion")
-				_box(pos + Vector3(0, 0.98, 0.34), Vector3(0.55, 0.94, 0.14), _materials.seat, "SeatBack", BODY_LAYER, false, Vector3(-0.10, 0, 0))
-				_box(pos + Vector3(0, 1.40, 0.37), Vector3(0.40, 0.24, 0.16), _materials.headrest, "AdjustableHeadrest")
-				_box(pos + Vector3(0, 0.86, 0.245), Vector3(0.435, 0.22, 0.07), _materials.seat, "LumbarPad", BODY_LAYER, false, Vector3(-0.10, 0, 0))
-				_batch_mesh(back_piping, _materials.piping, "BackrestStitchPiping", Transform3D(Basis.from_euler(Vector3(-0.10, 0, 0)), pos + Vector3(0, 0.98, 0.34)))
-				_batch_mesh(cushion_piping, _materials.piping, "CushionStitchPiping", Transform3D(Basis.IDENTITY, pos + Vector3(0, 0.46, -0.02)))
-				_box(pos + Vector3(0, 1.05, 0.455), Vector3(0.35, 0.26, 0.045), _materials.dark, "ScreenFrame")
-				_box(pos + Vector3(0, 1.055, 0.481), Vector3(0.29, 0.193, 0.008), _materials.display, "SeatBackDisplay")
-				_box(pos + Vector3(0, 1.005, 0.487), Vector3(0.22, 0.009, 0.004), _materials.blue_light, "DisplayRouteLine")
-				_box(pos + Vector3(0, 0.79, 0.455), Vector3(0.39, 0.20, 0.035), _materials.lining, "FoldedTray")
-				_box(pos + Vector3(0, 0.88, 0.482), Vector3(0.055, 0.025, 0.015), _materials.metal, "TrayReleaseLatch")
-				_cylinder(pos + Vector3(0, 0.695, 0.458), 0.012, 0.33, _materials.metal, "TrayHinge", Vector3.RIGHT)
-				_batch_mesh(pocket_mesh, _materials.fabric, "SeatLiteraturePocket", Transform3D(Basis.IDENTITY, pos + Vector3(0, 0.57, 0.45)))
-				_box(pos + Vector3(0, 0.68, 0.51), Vector3(0.39, 0.018, 0.014), _materials.piping, "PocketHem")
-				_box(pos + Vector3(-0.05, 0.72, 0.485), Vector3(0.18, 0.12, 0.006), _materials.paper, "SafetyCard")
-				_box(pos + Vector3(-0.05, 0.756, 0.49), Vector3(0.15, 0.018, 0.004), _materials.teal, "SafetyCardHeader")
+				var placement := Transform3D(Basis.IDENTITY,pos)
+				_batch_mesh(upholstery.shell,_materials.seat_shell,"MouldedSeatShell",placement)
+				_batch_mesh(upholstery.pan,_materials.seat_shell,"MouldedSeatPan",placement)
+				_batch_mesh(upholstery.back,_materials.seat,"ContouredBackCushion",placement)
+				_batch_mesh(upholstery.insert,_materials.seat_insert,"WovenBackInsert",placement)
+				_batch_mesh(upholstery.cushion,_materials.seat,"SculptedSeatCushion",placement)
+				_batch_mesh(upholstery.headrest,_materials.headrest,"WingedHeadrest",placement)
+				for rail in [-1.0,1.0]:
+					_box(pos+Vector3(rail*0.18,0.028,0.035),Vector3(0.065,0.045,0.53),_materials.metal,"SeatFloorTrack")
+					_cylinder(pos+Vector3(rail*0.18,0.235,0.075),0.024,0.39,_materials.metal,"SlenderSeatStrut",Vector3(0,0.97,-0.24))
+				# Screens and trays follow the reclined shell rather than floating in
+				# the old rectangular backrest's plane.
+				var screen_tilt := Vector3(0.194,0,0)
+				var screen_basis := Basis.from_euler(screen_tilt)
+				var screen_point := pos+Vector3(0,1.05,0.447)
+				_box(screen_point,Vector3(0.33,0.235,0.035),_materials.dark,"ScreenFrame",BODY_LAYER,false,screen_tilt)
+				_box(screen_point+screen_basis*Vector3(0,0.005,0.0225),Vector3(0.28,0.18,0.008),_materials.display,"SeatBackDisplay",BODY_LAYER,false,screen_tilt)
+				_box(screen_point+screen_basis*Vector3(0,-0.045,0.0285),Vector3(0.21,0.007,0.004),_materials.blue_light,"DisplayRouteLine",BODY_LAYER,false,screen_tilt)
+				_box(pos+Vector3(0,0.79,0.3655),Vector3(0.39,0.20,0.018),_materials.lining,"FoldedTray",BODY_LAYER,false,Vector3(0.24,0,0))
+				_box(pos+Vector3(0,0.88,0.401),Vector3(0.055,0.025,0.015),_materials.metal,"TrayReleaseLatch",BODY_LAYER,false,Vector3(0.24,0,0))
+				_cylinder(pos+Vector3(0,0.695,0.355),0.012,0.33,_materials.metal,"TrayHinge",Vector3.RIGHT)
+				_batch_mesh(pocket_mesh,_materials.fabric,"SeatLiteraturePocket",Transform3D(Basis.IDENTITY,pos+Vector3(0,0.575,0.338)))
+				_box(pos+Vector3(0,0.68,0.378),Vector3(0.39,0.018,0.014),_materials.piping,"PocketHem")
+				_box(pos+Vector3(-0.05,0.67,0.365),Vector3(0.18,0.12,0.006),_materials.paper,"SafetyCard")
+				_box(pos+Vector3(-0.05,0.706,0.371),Vector3(0.15,0.018,0.004),_materials.teal,"SafetyCardHeader")
 				# The two loose belt halves and metal tongue lie on the cushion.
 				_box(pos + Vector3(-0.13, 0.537, -0.05), Vector3(0.23, 0.012, 0.055), _materials.belt, "LapBelt", BODY_LAYER, false, Vector3(0, -0.16, 0))
 				_box(pos + Vector3(0.13, 0.537, -0.07), Vector3(0.23, 0.012, 0.055), _materials.belt, "LapBelt", BODY_LAYER, false, Vector3(0, 0.19, 0))
 				_box(pos + Vector3(0.025, 0.55, -0.08), Vector3(0.067, 0.024, 0.055), _materials.metal, "SeatBeltBuckle")
 				for arm in [-1.0, 1.0]:
-					_box(pos + Vector3(arm * 0.29, 0.72, 0.02), Vector3(0.065, 0.075, 0.55), _materials.headrest, "SeatArmrest")
-					_box(pos + Vector3(arm * 0.19, 1.40, 0.295), Vector3(0.085, 0.23, 0.15), _materials.headrest, "HeadrestWing", BODY_LAYER, false, Vector3(0, arm * 0.28, 0))
-					_cylinder(pos + Vector3(arm * 0.19, 1.02, 0.258), 0.0018, 0.53, _materials.piping, "DoubleStitchSeam", Vector3.UP)
+					_batch_mesh(upholstery.arm,_materials.headrest,"SculptedArmrest",Transform3D(Basis.IDENTITY,pos+Vector3(arm*0.29,0.72,0.02)))
+					_cylinder(pos+Vector3(arm*0.29,0.63,0.24),0.018,0.18,_materials.metal,"ArmrestCantilever",Vector3.UP)
+					_cylinder(pos+Vector3(arm*0.29,0.72,0.235),0.035,0.062,_materials.metal,"ArmrestPivot",Vector3.RIGHT)
 				_collider(pos + Vector3(0, 0.66, 0.10), Vector3(0.58, 1.32, 0.85), "SeatCollision")
 			passenger_seats.append({"position": Vector3(side * 0.90, 0, z - 0.02),
 				"stand": Vector3(side * 0.05, 0.06, z - 0.58), "yaw": 0.0, "seat_height": 0.53,
@@ -626,7 +544,6 @@ func _build_passenger_service_units() -> void:
 		var z := FIRST_ROW + float(row) * ROW_PITCH
 		for side in [-1.0, 1.0]:
 			_box(Vector3(side * 1.55, 2.295, z - 0.10), Vector3(0.68, 0.035, 0.47), _materials.lining, "PassengerServicePanel", ROOF_LAYER)
-			_box(Vector3(side * 1.13, 2.32, z + 0.36), Vector3(0.04, 0.075, 0.20), _materials.metal, "LockerLatch", ROOF_LAYER)
 			for x_offset in [-0.19, 0.19]:
 				var x: float = side * 1.55 + x_offset
 				_cylinder(Vector3(x, 2.269, z - 0.19), 0.051, 0.025, _materials.metal, "AdjustableAirVent", Vector3.UP, ROOF_LAYER)
@@ -652,10 +569,61 @@ func _build_service_areas() -> void:
 	_label("PANORAMA FLIGHT  /  A01", Vector3(0, 1.82, -11.97), 0.0027, Color("496778"))
 	_label("R  RUNDFLUG STARTEN", Vector3(0.15, 1.45, -11.96), 0.0034, Color("335a67"))
 	_label("E  FENSTERPLATZ / AUFSTEHEN", Vector3(0, 1.15, -11.96), 0.0027, Color("496778"))
-	_box(Vector3(0, 1.12, 10.75), Vector3(2.4, 2.24, 0.35), _materials.lining, "RearServiceBulkhead", BODY_LAYER, true)
-	_label("CHROMA  /  RETURN TO GATE A01", Vector3(0, 1.85, 10.55), 0.0032, Color("496778"), Vector3(0, PI, 0))
+	for side in [-1.0, 1.0]:
+		_box(Vector3(side * 1.72, 1.02, 10.75), Vector3(0.62, 2.04, 0.35), _materials.lining, "AftServiceCabinet", BODY_LAYER, true)
+	_label("360Ã‚Â°  PANORAMAKUPPEL", Vector3(0, 2.70, 11.17), 0.0028, Color("496778"), Vector3(0, PI, 0)).double_sided = false
 	# A side-facing portal sign remains visible while approaching from bridge.
 	_label("A01  /  ORBIT LINER", Vector3(-2.34, 2.55, -10), 0.0031, Color("a9d9dc"), Vector3(0, -PI * 0.5, 0))
+
+func _build_observation_bulkhead() -> void:
+	# Match the actual curved roof instead of letting square jambs protrude
+	# through the fuselage as bright triangular corners in exterior views.
+	var wall := _surface()
+	for limits in [Vector2(-2.3, -1.0), Vector2(-1.0, 1.0), Vector2(1.0, 2.3)]:
+		for index in 20:
+			var a := lerpf(limits.x, limits.y, float(index) / 20.0)
+			var b := lerpf(limits.x, limits.y, float(index + 1) / 20.0)
+			var low := 2.5 if limits.x == -1.0 else 0.0
+			var top_a := 2.16 + 1.05 * sqrt(maxf(0.0, 1.0 - pow(a / 2.3, 2.0)))
+			var top_b := 2.16 + 1.05 * sqrt(maxf(0.0, 1.0 - pow(b / 2.3, 2.0)))
+			_quad(wall, Vector3(a, low, 11.21), Vector3(b, low, 11.21), Vector3(b, top_b, 11.21), Vector3(a, top_a, 11.21))
+	var lining := _materials.lining.duplicate() as StandardMaterial3D
+	lining.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_mesh(wall.commit(), lining, "CurvedObservationBulkhead")
+
+func _build_dome_connection() -> void:
+	# The floor meets the sphere's exact rectangular aperture at Z~15.16.
+	# All opaque connection geometry stops just inside that lip, leaving the
+	# circular observation deck and the belly below it completely transparent.
+	var start := 11.2
+	var finish := 15.4
+	var middle := (start + finish) * 0.5
+	var length := finish - start
+	_box(Vector3(0, -0.09, middle), Vector3(2.18, 0.18, length), _materials.floor, "DomeAccessFloor", BODY_LAYER, true)
+	# Collider slabs preserve the established passage clearance. Its visible
+	# surfaces are now a moulded liner inside one continuous pressure fairing.
+	for side in [-1.0, 1.0]:
+		_collider(Vector3(side * 1.09, 1.31, middle), Vector3(0.18, 2.62, length), "DomeAccessWall")
+		_box(Vector3(side * 0.94, 0.01, middle), Vector3(0.016, 0.014, length), _materials.blue_light, "DomeAccessFloorGuide")
+		_box(Vector3(side * 1.14, 2.57, middle), Vector3(0.022, 0.022, length - 0.3), _materials.white_light, "DomeAccessCove", ROOF_LAYER)
+	_collider(Vector3(0, 2.81, middle), Vector3(2.36, 0.12, length), "DomeAccessCeiling")
+	Fuselage.build_neck(self, _materials.shell, _materials.lining, _materials.metal)
+	_label("ZUR KABINE  /  GATE A01", Vector3(0, 2.55, 15.43), 0.0017, Color("496778")).double_sided = false
+	var light := OmniLight3D.new()
+	light.name = "DomeAccessLight"
+	light.position = Vector3(0, 2.25, 13.5)
+	light.light_color = Color("f5e5c9")
+	light.light_energy = 0.65
+	light.omni_range = 3.7
+	light.shadow_enabled = true
+	light.layers = BODY_LAYER | ROOF_LAYER
+	light.light_cull_mask = BODY_LAYER | ROOF_LAYER
+	light.light_indirect_energy = 0.0
+	light.light_volumetric_fog_energy = 0.0
+	light.distance_fade_enabled = true
+	light.distance_fade_begin = 30.0
+	light.distance_fade_length = 10.0
+	add_child(light)
 
 func _build_door() -> void:
 	# Static collision remains at the aperture; only its disabled state changes.
@@ -684,9 +652,11 @@ func _build_door() -> void:
 	panel.layers = BODY_LAYER
 	panel.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	_door.add_child(panel)
-	_box(Vector3(-2.27, 2.37, -10), Vector3(0.27, 0.12, 2.5), _materials.gold, "BoardingDoorLintel")
+	# The whole trim face sits in front of the curved lining. At the former
+	# depth only small triangular bits protruded through its mid-height bulge.
+	_box(Vector3(-2.19, 2.37, -10), Vector3(0.44, 0.12, 2.5), _materials.gold, "BoardingDoorLintel")
 	for z in [-11.20, -8.80]:
-		_box(Vector3(-2.27, 1.17, z), Vector3(0.27, 2.34, 0.10), _materials.gold, "BoardingDoorFrame")
+		_box(Vector3(-2.19, 1.17, z), Vector3(0.44, 2.34, 0.10), _materials.gold, "BoardingDoorFrame")
 	_box(Vector3(-2.24, 0.012, -10), Vector3(0.40, 0.024, 2.30), _materials.metal, "BoardingSill")
 
 func _build_lights() -> void:
@@ -699,6 +669,9 @@ func _build_lights() -> void:
 		lamp.omni_range = 4.1
 		lamp.omni_attenuation = 0.85
 		lamp.shadow_enabled = false
+		# Camera visibility and illuminated receiver layers are separate masks.
+		# Without these layers the isolated flight camera removes the lamp itself.
+		lamp.layers = BODY_LAYER | ROOF_LAYER
 		lamp.light_cull_mask = BODY_LAYER | ROOF_LAYER
 		lamp.light_indirect_energy = 0.0
 		lamp.light_volumetric_fog_energy = 0.0

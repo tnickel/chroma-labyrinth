@@ -1,6 +1,7 @@
 AIRPORT MATERIALS / DAYLIGHT
 
-Bundled textures and HDRI are Poly Haven assets, CC0 1.0 Universal.
+The original surface maps listed below and daylight_2k.hdr are
+Poly Haven assets, CC0 1.0 Universal.
 They may be redistributed with this project. No runtime downloads are required.
 License: https://polyhaven.com/license
 CC0 deed: https://creativecommons.org/publicdomain/zero/1.0/
@@ -11,6 +12,7 @@ https://polyhaven.com/a/wood_table_001
 https://polyhaven.com/a/leather_white
 https://polyhaven.com/a/denmin_fabric_02
 https://polyhaven.com/a/smooth_concrete_floor
+https://polyhaven.com/a/concrete_tiles_02
 https://polyhaven.com/a/clean_asphalt
 https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky
 
@@ -19,3 +21,23 @@ sources.json records the original download URLs and verified MD5 checksums.
 tools/fetch_airport_assets.ps1 reproduces the bounded asset download.
 Maps are original 1K/2K albedo, OpenGL normals, roughness; sky is 2K HDR.
 In-engine material tints and physical mapping scales are set in AirportMaterials.gd.
+
+apron_concrete/: Concrete Tiles 02 by Charlotte Baglioni, Poly Haven CC0.
+Original 2K JPEG diffuse, OpenGL normal and roughness maps, not recoloured.
+Exact download URLs and verified MD5 checksums are appended in sources.json.
+Photographic joints map to staggered 2.5 x 5 m apron panels; other concrete
+materials keep their original source and scale. Texture imports use mipmaps.
+
+Additional independently documented sources:
+- terrazzo/: ambientCG Tiles040, CC0. Source, download URLs and checksums:
+  terrazzo/source.json. https://ambientcg.com/a/Tiles040
+  License: https://docs.ambientcg.com/license/
+- ground/: USDA NAIP imagery served by USGS, public domain, Lancaster County
+  Pennsylvania 2022. This is an aerial scenery insert, not Mediterranean data.
+  ground/SOURCE.txt and ground/source.json contain rights, six source raster
+  records, exact bounds, export URLs and SHA-256 checksums.
+  https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer
+- terrain/: Poly Haven CC0 maps; see terrain/LICENSES.txt and source manifest.
+- models/: Poly Haven CC0 glTF furnishings; see models/LICENSES.txt.
+- NASA Earth maps: see EARTH-SOURCE.txt and earth-region-source.json.
+  These are documented under NASA's usage terms, not claimed as CC0.

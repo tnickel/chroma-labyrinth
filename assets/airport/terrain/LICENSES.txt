@@ -1,0 +1,14 @@
+Airport landscape textures
+
+Original 1K PBR diffuse, OpenGL normal and roughness maps from Poly Haven.
+All six files are licensed CC0 1.0 Universal and may be copied, modified and
+redistributed, including commercially. Attribution is not required.
+
+Sparse Grass by Amal Kumar: https://polyhaven.com/a/sparse_grass
+Rocky Terrain 02 by Amal Kumar: https://polyhaven.com/a/rocky_terrain_02
+Official asset license: https://polyhaven.com/license
+CC0 terms: https://creativecommons.org/publicdomain/zero/1.0/
+
+sources.json records each original URL, MD5, byte count and retrieval date.
+Downloaded source files are unchanged; the terrain shader blends them at
+different physical scales. No website preview images or logos are bundled.

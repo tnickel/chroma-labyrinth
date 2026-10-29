@@ -150,5 +150,29 @@
     "license": "CC0-1.0",
     "file": "daylight_2k.hdr",
     "asset": "kloofendal_48d_partly_cloudy_puresky"
+  },
+  {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/concrete_tiles_02/concrete_tiles_02_diff_2k.jpg",
+    "md5": "7db6f974b91e94c395ecdcdb96329e75",
+    "source": "https://polyhaven.com/a/concrete_tiles_02",
+    "license": "CC0-1.0",
+    "file": "apron_concrete/albedo.jpg",
+    "asset": "concrete_tiles_02"
+  },
+  {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/concrete_tiles_02/concrete_tiles_02_nor_gl_2k.jpg",
+    "md5": "2da0bec51e41be940d85629f8d1ff426",
+    "source": "https://polyhaven.com/a/concrete_tiles_02",
+    "license": "CC0-1.0",
+    "file": "apron_concrete/normal.jpg",
+    "asset": "concrete_tiles_02"
+  },
+  {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/concrete_tiles_02/concrete_tiles_02_rough_2k.jpg",
+    "md5": "0e54945f4f4a451687d58d3395612ce4",
+    "source": "https://polyhaven.com/a/concrete_tiles_02",
+    "license": "CC0-1.0",
+    "file": "apron_concrete/roughness.jpg",
+    "asset": "concrete_tiles_02"
   }
 ]

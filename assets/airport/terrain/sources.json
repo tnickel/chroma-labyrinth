@@ -1,0 +1,68 @@
+[
+  {
+    "file": "grass/albedo.jpg",
+    "asset": "sparse_grass",
+    "map": "Diffuse",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/sparse_grass/sparse_grass_diff_1k.jpg",
+    "md5": "5d0aba796e1b5882555161c16b10ee9d",
+    "bytes": 955945,
+    "source": "https://polyhaven.com/a/sparse_grass",
+    "license": "CC0-1.0",
+    "retrieved": "2026-10-29"
+  },
+  {
+    "file": "grass/normal.jpg",
+    "asset": "sparse_grass",
+    "map": "nor_gl",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/sparse_grass/sparse_grass_nor_gl_1k.jpg",
+    "md5": "3307e6ce47413c6b4e85885d4b8ae932",
+    "bytes": 1440314,
+    "source": "https://polyhaven.com/a/sparse_grass",
+    "license": "CC0-1.0",
+    "retrieved": "2026-10-29"
+  },
+  {
+    "file": "grass/roughness.jpg",
+    "asset": "sparse_grass",
+    "map": "Rough",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/sparse_grass/sparse_grass_rough_1k.jpg",
+    "md5": "acf2fd7e352e7635f67f24ecda01e485",
+    "bytes": 463340,
+    "source": "https://polyhaven.com/a/sparse_grass",
+    "license": "CC0-1.0",
+    "retrieved": "2026-10-29"
+  },
+  {
+    "file": "rock/albedo.jpg",
+    "asset": "rocky_terrain_02",
+    "map": "Diffuse",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rocky_terrain_02/rocky_terrain_02_diff_1k.jpg",
+    "md5": "cf604d3868398a6a996cb5ba330dd3ab",
+    "bytes": 843188,
+    "source": "https://polyhaven.com/a/rocky_terrain_02",
+    "license": "CC0-1.0",
+    "retrieved": "2026-10-29"
+  },
+  {
+    "file": "rock/normal.jpg",
+    "asset": "rocky_terrain_02",
+    "map": "nor_gl",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rocky_terrain_02/rocky_terrain_02_nor_gl_1k.jpg",
+    "md5": "c1636176f0fa8eb9b924ebdecd47ddfd",
+    "bytes": 993692,
+    "source": "https://polyhaven.com/a/rocky_terrain_02",
+    "license": "CC0-1.0",
+    "retrieved": "2026-10-29"
+  },
+  {
+    "file": "rock/roughness.jpg",
+    "asset": "rocky_terrain_02",
+    "map": "Rough",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rocky_terrain_02/rocky_terrain_02_rough_1k.jpg",
+    "md5": "f940e341352cca8bdd2dc4d0c30f3da1",
+    "bytes": 437094,
+    "source": "https://polyhaven.com/a/rocky_terrain_02",
+    "license": "CC0-1.0",
+    "retrieved": "2026-10-29"
+  }
+]

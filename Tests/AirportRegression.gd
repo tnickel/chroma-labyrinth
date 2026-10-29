@@ -71,6 +71,10 @@ func _run() -> void:
 	var start_point := player.global_position
 	airport.advance_simulation(5.0)
 	_check(camera.cull_mask == 112, "Flight camera renders the stationary museum/terminal")
+	for lamp: Light3D in airport.cabin.find_children("*", "Light3D", true, false):
+		_check((lamp.layers & camera.cull_mask) != 0, "Flight camera culls the cabin lamp itself")
+		_check((lamp.light_cull_mask & 32) != 0, "Cabin lamp does not illuminate flight cabin/passengers")
+	_check((airport.scenery.get_node("FlightSun").layers & camera.cull_mask) != 0, "Flight camera culls its own sun")
 	_check(camera.environment == airport.scenery.environment, "Flight has no dedicated sky environment")
 	_check(camera.far >= 7000.0, "Flight sky is clipped by the museum far plane")
 	_check(not player.get_node("HUD").visible and not sun.visible, "Museum HUD or sun remains active in isolated flight")

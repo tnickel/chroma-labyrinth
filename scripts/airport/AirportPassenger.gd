@@ -8,6 +8,7 @@ signal stand_finished(passenger)
 
 const Attention = preload("res://scripts/VisitorAttention.gd")
 const SeatedPose = preload("res://scripts/airport/PassengerSeatedPose.gd")
+const Appearance = preload("res://scripts/airport/PassengerAppearance.gd")
 var model_scene: PackedScene
 var serial := 0
 var role := "walker"
@@ -60,6 +61,7 @@ func _ready() -> void:
 	add_child(visual)
 	var model := model_scene.instantiate() as Node3D
 	visual.add_child(model)
+	Appearance.apply(model, serial)
 	model.rotation.y = PI
 	model.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	animation = model.find_children("*", "AnimationPlayer", true, false)[0]

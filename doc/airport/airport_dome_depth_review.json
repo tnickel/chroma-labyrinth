@@ -1,0 +1,57 @@
+{
+	"captures": [
+		{
+			"altitude": 0.0,
+			"camera_mask": 15,
+			"door_open": true,
+			"draw_calls": 136.0,
+			"error": 0,
+			"far": 4000.0,
+			"image": "user://airport_dome_corridor_gate.png",
+			"inside_cabin": true,
+			"phase": -1,
+			"player_local": "(0.0, 0.08, 9.5)",
+			"seconds": 0.0
+		},
+		{
+			"altitude": 0.0,
+			"camera_mask": 15,
+			"door_open": true,
+			"draw_calls": 95.0,
+			"error": 0,
+			"far": 4000.0,
+			"image": "user://airport_dome_gate.png",
+			"inside_cabin": true,
+			"phase": -1,
+			"player_local": "(0.0, 0.000836, 19.42503)",
+			"seconds": 0.0
+		},
+		{
+			"altitude": 0.0,
+			"camera_mask": 15,
+			"door_open": true,
+			"draw_calls": 3033.0,
+			"error": 0,
+			"far": 4000.0,
+			"image": "user://airport_dome_gate_connector.png",
+			"inside_cabin": true,
+			"phase": -1,
+			"player_local": "(0.0, 0.000836, 19.42503)",
+			"seconds": 0.0
+		},
+		{
+			"altitude": 4972.97668038409,
+			"camera_mask": 112,
+			"door_open": false,
+			"draw_calls": 889.0,
+			"error": 0,
+			"far": 8000.0,
+			"image": "user://airport_dome_clouds_forward_depth.png",
+			"inside_cabin": true,
+			"phase": 4,
+			"player_local": "(0.0, 0.000836, 23.10505)",
+			"seconds": 55.0
+		}
+	],
+	"failed": false
+}

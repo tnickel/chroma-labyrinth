@@ -18,14 +18,14 @@ static func get_material(key: String) -> StandardMaterial3D:
 	material.roughness = 0.7
 	match key:
 		"terminal_floor":
-			folder = "stone"
-			repeat = 0.3125 # Three large stone tiles in a 3.2 m texture period.
-			material.albedo_color = Color(0.87, 0.94, 1.0)
-			material.roughness = 0.52
-			material.normal_scale = 0.24
+			folder = "terrazzo"
+			repeat = 0.3125 # Eight 40 cm tiles per 3.2 m texture period.
+			material.albedo_color = Color("e9edf0")
+			material.roughness = 0.64
+			material.normal_scale = 0.12
 			material.clearcoat_enabled = true
-			material.clearcoat = 0.16
-			material.clearcoat_roughness = 0.24
+			material.clearcoat = 0.10
+			material.clearcoat_roughness = 0.28
 		"wood":
 			folder = "wood"
 			repeat = 0.8
@@ -33,9 +33,10 @@ static func get_material(key: String) -> StandardMaterial3D:
 			material.normal_scale = 0.24
 		"leather":
 			folder = "leather"
-			repeat = 3.0
+			# Keep the scanned grain readable at cabin viewing distances.
+			repeat = 1.5
 			material.roughness = 0.98
-			material.normal_scale = 0.55
+			material.normal_scale = 0.9
 		"fabric", "carpet":
 			folder = "fabric"
 			repeat = 2.5 if key == "fabric" else 1.4
@@ -47,6 +48,14 @@ static func get_material(key: String) -> StandardMaterial3D:
 			repeat = 0.25
 			material.roughness = 0.9
 			material.normal_scale = 0.3
+		"apron_concrete":
+			folder = "apron_concrete"
+			# Six photographed slab columns and three staggered rows per repeat.
+			# A 15 m period gives 2.5 x 5 m paving, without extra seam geometry.
+			repeat = 1.0 / 15.0
+			material.albedo_color = Color.WHITE
+			material.roughness = 0.95
+			material.normal_scale = 0.14
 		"asphalt":
 			folder = "asphalt"
 			repeat = 0.33
@@ -81,7 +90,7 @@ static func get_material(key: String) -> StandardMaterial3D:
 	if not folder.is_empty():
 		material.albedo_texture = load(ROOT + folder + "/albedo.jpg")
 		material.normal_enabled = true
-		material.normal_texture = load(ROOT + folder + "/normal.png")
+		material.normal_texture = load(ROOT + folder + ("/normal.jpg" if folder in ["terrazzo", "apron_concrete"] else "/normal.png"))
 		material.roughness_texture = load(ROOT + folder + "/roughness.jpg")
 		material.roughness_texture_channel = BaseMaterial3D.TEXTURE_CHANNEL_RED
 	_cache[key] = material

@@ -1,0 +1,44 @@
+Rear observation dome — validation 2026-10-29
+Godot 4.7.2 Forward+, NVIDIA GeForce RTX 4070, 1920x1080
+
+Geometry and integration
+- Sphere: radius 4.8 m, aircraft-local centre (0, 1.8, 19.5).
+- Glass deck Y=0, radius 4.449719092 m. Sphere bottom Y=-3.0;
+  the apron is Y=-3.2, so the lower glass remains above the ground.
+- Real 2.0 x 2.5 m opening, continuous access floor through the old rear
+  bulkheads; no tail cone, central fin or opaque belly behind the glass deck.
+- Six static dome meshes, transparent upper/lower shell and floor,
+  two frame meshes and one emissive perimeter mesh. No per-frame dome logic.
+- Flight can start while standing in the dome; no forced seating, teleport,
+  camera-height change or movement lock. Return remains through the cabin.
+
+Headless regressions, all exit 0:
+AircraftDomeRegression: 1527 checks, 201 actual-player capsule steps,
+  144 deck support samples, 13 real-mesh sightlines, no failures.
+AircraftPanoramaRegression: 468 checks, 31 optical rays, no failures.
+AirportRegression: 4147 checks, 1448 route samples, two flights, no failures.
+AirportPassengersRegression: 11598 checks, 2892 route samples,
+  nine boardings and three return journeys, no failures.
+Editor import completed without errors.
+
+Actual Forward+ production-scene reviews:
+- Walked with ordinary Player physics from the rear cabin into the dome.
+- Started a full 150-second itinerary while standing, inspected clouds,
+  glass floor and six orbital directions, then walked back to the jetbridge.
+- Also completed a production early-return journey (143 seconds total),
+  with door, camera masks, far clipping, HUD and unchanged dome position checked.
+- Final exterior and corridor inspection after shaping the rear bulkhead
+  and fairing to the real fuselage profile.
+- Final long-distance cloud depth check from the aft edge of the dome:
+  opaque forward cabin remains clear beyond the old 35-m exclusion distance.
+  The exclusion now covers the longer special aircraft up to 64 m.
+- Captures are unedited screenshots, not mockups.
+
+Performance: four separate dome views; normal HUD/NPC logic, VSync off,
+minimum 2.5 seconds / 120 warmup frames after first draw, then 3-second samples.
+See airport_dome_benchmark_1920x1080.json for raw data. The cloud panorama
+fills almost the whole viewport and has a higher cost than a cabin window.
+
+Known existing warnings: seven Texture RIDs on ReflectionProbe shutdown;
+MinimapCamera interpolation warning during accelerated passenger regression.
+No script or shader errors in the final production-scene reviews.

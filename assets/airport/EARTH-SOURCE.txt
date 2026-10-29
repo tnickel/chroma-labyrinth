@@ -9,5 +9,34 @@ NASA imagery used under the NASA Images and Media Usage Guidelines:
 https://www.nasa.gov/nasa-brand-center/images-and-media/
 This satellite composite is acknowledged as NASA content, separate from the
 Poly Haven CC0 materials. NASA does not endorse this project.
-The image is unchanged. Shader mapping, lighting, atmosphere and cloud overlays
-are artistic additions. This is not live satellite data or a flight navigation map.
+The global fallback image is unchanged. Shader mapping, lighting, atmosphere and
+cloud overlays are artistic additions. This is not live satellite data or a
+flight navigation map.
+
+earth_mediterranean_500m.jpg
+NASA EOSDIS Global Imagery Browse Services (GIBS), BlueMarble_NextGeneration.
+Static Blue Marble MODIS basemap at the published 500-m tile-matrix resolution.
+Georeferenced region: 4.5 degrees W to 31.5 degrees E, 18 to 54 degrees N.
+Image: 8192 x 8192, 0.00439453125 degrees/pixel (489.197 m/pixel at equator;
+longitude ground spacing contracts with latitude). This is approximately
+16 times the global fallback's linear detail, not an upscaled 5400 image.
+
+The source uses native level-7/500m GIBS grid alignment. Four adjacent 4096-square
+WMS requests assemble the region without resampling, added detail or colour edits.
+The result is encoded as JPEG quality95, 4:4:4. Source download total: 6,291,839
+bytes; shipped regional JPEG: 12,072,381 bytes. Godot imports BC7 with mipmaps.
+
+SHA256: e2d174bcb19fc52ff0c8877ca2cdf2370b6c5a068f60d16084bea03031d82a5e
+Exact source requests, geographic bounds and individual SHA256 checksums:
+earth-region-source.json
+Reproduce: python tools/fetch_airport_earth.py (Python 3 + Pillow).
+The helper refuses downloads above 30 MB and verifies previously recorded source
+hashes before replacing the asset. It never synthesizes imagery.
+
+GIBS source/capabilities:
+https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/wmts.cgi?SERVICE=WMTS&REQUEST=GetCapabilities
+https://nasa-gibs.github.io/gibs-api-docs/access-basics/
+Blue Marble background and credit (NASA images by Reto Stockli/Robert Simmon):
+https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/
+Usage is governed by the NASA media guidelines above; this is not a Poly Haven
+CC0 texture. NASA does not endorse this project.

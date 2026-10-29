@@ -1,0 +1,29 @@
+Low-altitude cinematic ground image
+==================================
+
+File: lancaster_naip_2022.jpg, 4000 x 4000 pixels, 3,846,533 bytes.
+Source: USDA National Agriculture Imagery Program, served by USGS The National Map.
+Area: Lancaster County, Pennsylvania, USA; requested bounds
+76.31 W, 39.95 N to 76.23 W, 40.01 N (server adjusts the square export extent).
+Acquisition: six USDA 2022 source rasters, originally 0.6 m ground sample distance.
+Export: natural-color JPEG at approximately 1.706 ground metres per pixel,
+covering about 6.824 km per side at the central latitude. Web Mercator export
+coordinates and individual raster acquisition metadata are in source.json.
+
+Rights: US public domain. The official USDA catalog declares this dataset public
+domain; the USGS service description explicitly describes its CONUS NAIP downloads
+as public-domain orthoimagery. No commercial Esri/Google basemap tiles are used.
+Credit: USGS, USDA, The National Map.
+
+Official source service:
+https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer
+Official license/dataset record:
+https://catalog.data.gov/dataset/national-agriculture-imagery-program-naip-imagery
+
+This image is a cinematic scenery insert for the fictional flight. It repeats
+with mirrored edges in the ground shader; it is not a navigational map and is
+not high-resolution imagery of the Mediterranean shown by the separate orbital
+Earth view. The fictional runway is drawn by the shader over the real image.
+
+The bundled JPEG runs completely offline. Reproduction and SHA256 verification:
+python tools/fetch_airport_ground.py

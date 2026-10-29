@@ -1,0 +1,118 @@
+{
+  "title": "Lancaster County, Pennsylvania — USDA NAIP 2022",
+  "file": "lancaster_naip_2022.jpg",
+  "source_service": "https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer",
+  "license": "US public domain",
+  "license_source": "https://catalog.data.gov/dataset/national-agriculture-imagery-program-naip-imagery",
+  "credit": "USGS, USDA, The National Map",
+  "acquisition_year": 2022,
+  "requested_wgs84_bbox": [
+    -76.31,
+    39.95,
+    -76.23,
+    40.01
+  ],
+  "exported_extent": {
+    "xmin": -8494790.342434704,
+    "ymin": 4858584.536592471,
+    "xmax": -8485884.783171242,
+    "ymax": 4867490.095855934,
+    "spatialReference": {
+      "wkid": 102100,
+      "latestWkid": 3857
+    }
+  },
+  "width": 4000,
+  "height": 4000,
+  "original_ground_sample_distance_m": 0.6,
+  "exported_ground_sample_distance_m_approx": 1.706,
+  "shader_period_m": 6824.0,
+  "export_parameters": {
+    "f": "json",
+    "bbox": "-8494790.342434704,4858584.536592471,-8485884.783171242,4867490.095855934",
+    "bboxSR": "3857",
+    "imageSR": "3857",
+    "size": "4000,4000",
+    "format": "jpg",
+    "interpolation": "RSP_BilinearInterpolation",
+    "compressionQuality": "86",
+    "mosaicRule": "{\"mosaicMethod\":\"esriMosaicLockRaster\",\"lockRasterIds\":[161443,161444,161448,162328,162329,162333],\"mosaicOperation\":\"MT_FIRST\"}"
+  },
+  "rasters": [
+    {
+      "OBJECTID": 161443,
+      "Name": "m_3907606_ne_18_060_20220720",
+      "State": "PA",
+      "Year": 2022,
+      "acquisition_date": 1658275200000,
+      "agency": "USDA",
+      "vendor": "USDA-FSA-APFO",
+      "resolution_value": 0.6,
+      "resolution_units": "METER",
+      "download_url": "https://earthexplorer.usgs.gov/download/options/naip/3266052"
+    },
+    {
+      "OBJECTID": 161444,
+      "Name": "m_3907606_nw_18_060_20220424",
+      "State": "PA",
+      "Year": 2022,
+      "acquisition_date": 1650758400000,
+      "agency": "USDA",
+      "vendor": "USDA-FSA-APFO",
+      "resolution_value": 0.6,
+      "resolution_units": "METER",
+      "download_url": "https://earthexplorer.usgs.gov/download/options/naip/3266053"
+    },
+    {
+      "OBJECTID": 161448,
+      "Name": "m_3907607_nw_18_060_20220517",
+      "State": "PA",
+      "Year": 2022,
+      "acquisition_date": 1652745600000,
+      "agency": "USDA",
+      "vendor": "USDA-FSA-APFO",
+      "resolution_value": 0.6,
+      "resolution_units": "METER",
+      "download_url": "https://earthexplorer.usgs.gov/download/options/naip/3266057"
+    },
+    {
+      "OBJECTID": 162328,
+      "Name": "m_4007662_se_18_060_20220720",
+      "State": "PA",
+      "Year": 2022,
+      "acquisition_date": 1658275200000,
+      "agency": "USDA",
+      "vendor": "USDA-FSA-APFO",
+      "resolution_value": 0.6,
+      "resolution_units": "METER",
+      "download_url": "https://earthexplorer.usgs.gov/download/options/naip/3266936"
+    },
+    {
+      "OBJECTID": 162329,
+      "Name": "m_4007662_sw_18_060_20220711",
+      "State": "PA",
+      "Year": 2022,
+      "acquisition_date": 1657497600000,
+      "agency": "USDA",
+      "vendor": "USDA-FSA-APFO",
+      "resolution_value": 0.6,
+      "resolution_units": "METER",
+      "download_url": "https://earthexplorer.usgs.gov/download/options/naip/3266937"
+    },
+    {
+      "OBJECTID": 162333,
+      "Name": "m_4007663_sw_18_060_20220517",
+      "State": "PA",
+      "Year": 2022,
+      "acquisition_date": 1652745600000,
+      "agency": "USDA",
+      "vendor": "USDA-FSA-APFO",
+      "resolution_value": 0.6,
+      "resolution_units": "METER",
+      "download_url": "https://earthexplorer.usgs.gov/download/options/naip/3266941"
+    }
+  ],
+  "sha256": "d16b842cebe3c3ddf2cf0732c9ce13729af263176dab34ce4c2af27677c8b714",
+  "bytes": 3846533,
+  "purpose": "Cinematic low-altitude scenery insert; mirrored repetition in metres. Not a navigational map, not imagery of the Mediterranean. The fictional runway is composited by the shader."
+}

@@ -23,7 +23,7 @@ func _run() -> void:
 	airport.get_node("AirportHUD").visible = false
 	_place(player, Vector3(62, 0.12, 5.5), Vector3(85, 2.4, -2))
 	await _capture("airport_terminal")
-	_place(player, Vector3(60, 0.12, 13.8), Vector3(66, 1.2, 16.3))
+	_place(player, Vector3(78.6, 0.12, 18.1), Vector3(72.9, 1.0, 16.2))
 	await _capture("airport_lounge")
 	_place(player, Vector3(80.8, 0.12, 2.5), Vector3(160, 2.0, -30))
 	await _capture("airport_runway")
@@ -31,6 +31,8 @@ func _run() -> void:
 	await _capture("airport_jetbridge")
 	_place(player, Vector3(106, 0.12, -8.4), Vector3(106, 1.4, 11))
 	await _capture("airport_cabin")
+	_place(player, Vector3(106, 0.12, 4.5), Vector3(106, 1.4, -10))
+	await _capture("airport_cabin_seatbacks")
 	_place(player, Vector3(106, 0.12, -4.8), Vector3(105.1, 0.95, -4.8))
 	await _capture("airport_passenger_seat")
 	# The starboard middle window looks across the wing toward the runway.
@@ -55,6 +57,10 @@ func _run() -> void:
 	await _capture("airport_clouds")
 	airport.advance_simulation(23.0)
 	await _capture("airport_cloud_cruise")
+	if "--cloud-probe" in OS.get_cmdline_user_args():
+		airport.scenery._cloud_volume.visible = false
+		await _capture("airport_cloud_cruise_without_volume")
+		airport.scenery._cloud_volume.visible = true
 	airport._update_ui()
 	airport.get_node("AirportHUD").visible = true
 	await _capture("airport_flight_hud")
@@ -102,7 +108,7 @@ func _place(player: CharacterBody3D, foot: Vector3, target: Vector3) -> void:
 	player.reset_physics_interpolation()
 
 func _capture(label: String) -> void:
-	for frame in 80:
+	for frame in 150:
 		await process_frame
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("user://" + label + ".png")

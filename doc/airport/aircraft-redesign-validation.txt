@@ -1,0 +1,183 @@
+Aircraft exterior redesign — validation record
+Test runs: 2026-10-29 to 2026-10-30 (Europe/Berlin).
+Engine: Godot 4.7.2.stable.official.ed1daf0bf
+Workspace: D:\AntiGravitySoftware\GitWorkspace\GDotLabyrith2
+
+Scope and execution
+-------------------
+All runs below were executed serially with the headless renderer. Each finished
+with process exit code 0 and failures=0. No GPU render or performance benchmark
+was performed by this validation task. The parent task reviews rendered views
+separately. Mesh/physics assertions do not prove photographic visual quality.
+
+Reproduction, from the workspace in PowerShell:
+& 'D:\DevelopmentTools\Godot\4.7.2\Godot_v4.7.2-stable_win64_console.exe' --headless --path . --fixed-fps 60 --script res://Tests/<test-name>.gd --log-file "$env:TEMP\<log-name>.log"
+
+Full integration suite before the final cockpit bulkhead / wing paint changes
+---------------------------------------------------------------------------
+This suite was run after AircraftFuselage, AircraftWings and AircraftPropulsion
+were integrated and the fan blade normal/cap corrections were applied. The final
+bulkhead visibility change and wing paint adjustment occurred afterwards; only
+the four targeted reruns in the next section apply to that final state.
+
+Test: AircraftExteriorRegression
+Log: %TEMP%\aircraft-exterior-regression-final.log
+AIRCRAFT_EXTERIOR checks=626 meshes=50 closed=37 smooth=4 radial=3 triangles=108072 failures=0
+
+Test: AircraftDomeRegression
+Log: %TEMP%\aircraft-exterior-dome-suite.log
+AIRCRAFT_DOME checks=1519 route_samples=201 deck_samples=144 optical_rays=13 failures=0
+
+Test: AircraftPanoramaRegression
+Log: %TEMP%\aircraft-exterior-panorama-suite.log
+AIRCRAFT_PANORAMA checks=460 optical_rays=31 floor_panes=3 roof_panes=1 passenger_seats=18 failures=0
+
+Test: AirportRegression
+Log: %TEMP%\aircraft-exterior-airport-suite.log
+AIRPORT_REGRESSION checks=4147 route_samples=1448 flight_phases=10 completed_flights=2 failures=0
+
+Test: AirportPassengersRegression
+Log: %TEMP%\aircraft-exterior-passengers-suite.log
+AIRPORT_PASSENGERS checks=11598 route_samples=2892 boarded=9 returned=3 people=22 failures=0
+
+Only warning in this full series:
+WARNING: [Physics interpolation] Interpolated Camera3D triggered from outside physics process: "/root/Main/Player/HUD/MinimapFrame/MinimapContainer/MinimapViewport/MinimapCamera" (possibly benign).
+The NPC assertions still passed; this warning is recorded, not suppressed.
+
+Targeted final reruns
+--------------------
+Changes under test: the visible FlightDeckBulkhead now follows the curved roof;
+its collider is unchanged. The painted wings inherit shell.metallic (0.035).
+No additional production changes were made by the validation task.
+
+Test: AircraftExteriorRegression
+Log: %TEMP%\aircraft-redesign-exterior-final.log
+AIRCRAFT_EXTERIOR checks=626 meshes=50 closed=37 smooth=4 radial=3 triangles=108072 failures=0
+
+Test: AircraftPanoramaRegression
+Log: %TEMP%\aircraft-redesign-panorama-final.log
+AIRCRAFT_PANORAMA checks=459 optical_rays=31 floor_panes=3 roof_panes=1 passenger_seats=18 failures=0
+The actual current check count is 459, not the earlier 460. All 31 optical rays
+still pass. The test performs assertions against the constructed geometry.
+
+Test: AirportLightingRegression
+Log: %TEMP%\aircraft-redesign-lighting-final.log
+AIRPORT_LIGHTING_REGRESSION checks=68 failures=0
+
+Test: AircraftSeatingRegression
+Log: %TEMP%\aircraft-redesign-seating-final.log
+AIRCRAFT_SEATING checks=72 reusable_triangles=15568 cushion_contact=0.5300 shell_thickness=0.0350 back_recline_delta=0.1517 failures=0
+
+No ERROR, SCRIPT ERROR or WARNING output occurred in these four final reruns.
+The full NPC/airport/dome simulations were not rerun after these final visual
+changes; the successful earlier results above are preserved with their scope.
+
+Targeted coverage for the observed window-corner and bulkhead defects
+--------------------------------------------------------------------
+Date: 2026-10-30. Only AircraftExteriorRegression was rerun after adding these
+assertions. No production geometry was changed by the validation task.
+
+Test: AircraftExteriorRegression
+Log: %TEMP%\aircraft-redesign-exterior-corners-bulkhead.log
+AIRCRAFT_EXTERIOR checks=1202 meshes=50 closed=37 smooth=4 radial=3 triangles=108072 window_corner_rays=216 window_aperture_rays=162 bulkhead_roof_samples=194 failures=0
+
+Exit code 0; no ERROR, SCRIPT ERROR or WARNING output in this run.
+
+Window pressure skin: all four corners of all 18 window fields receive three
+inward rays at distinct insets (216 rays). The test intersects only the actual
+ContinuousWindowPressureSkin mesh and verifies its material is opaque. Interior
+walls, seats, window reveals and other geometry cannot make a missing skin
+triangle pass. Nine additional rays through each actual window aperture (162
+rays) must remain clear against this same mesh, preventing a repair that simply
+fills the whole field.
+
+Cockpit bulkhead: all unique vertices and triangle centroids of the actual
+CurvedFlightDeckBulkhead (194 points) are compared against intersections with the
+actual VaultedCabinRoof triangles. Each sample must have roof cover and remain
+under that rendered roof envelope. The check does not reuse the producer's
+ellipse formula and also detects a displaced bulkhead or exposed shoulders.
+
+The current Exterior count is therefore 1202; the earlier 626-check results
+above are retained as historical runs, not relabelled with the new test count.
+
+Geometry cost, as measured by the final exterior test
+---------------------------------------------------
+Counts include all builder-generated parts, and MultiMesh triangle counts are
+multiplied by actual instance_count. Shared nacelles/spinners count twice in
+instantiated geometry, and the 22 fan blades per engine count 44 times overall.
+
+AIRCRAFT_EXTERIOR_COST module=wings_tail instances=12 unique_meshes=12 unique_triangles=31584 instantiated_triangles=31584
+AIRCRAFT_EXTERIOR_COST module=propulsion instances=54 unique_meshes=7 unique_triangles=21456 instantiated_triangles=60912
+AIRCRAFT_EXTERIOR_COST module=gear instances=27 unique_meshes=17 unique_triangles=6000 instantiated_triangles=18000
+
+Wings/tail + propulsion + gear: 110496 instantiated triangles.
+This excludes the fuselage, cabin, dome and surroundings, and is not a draw-call
+or frame-time measurement. The 108072 triangles in AIRCRAFT_EXTERIOR are the
+unique geometry inspected across the marked exterior meshes; that is a different
+count from the instantiated module totals above.
+
+Defects detected and resolved during this review
+-----------------------------------------------
+The first actual geometry run found inconsistent fan blade winding and negative
+enclosed volume. The producer corrected the global section-normal orientation.
+The remaining ten inconsistently oriented tip-cap edges were traced to a cap
+centre on the uncambered chord, outside the thin curved blade profile. The cap
+centre now follows the camber centreline. The final manifold/orientation checks
+pass for all 37 marked closed volumes.
+
+The initial test's rounded-cell vertex weld falsely separated nearly identical
+seam positions at cell boundaries. The test now searches adjacent spatial cells
+and checks actual distance <=0.01 mm. No production geometry was changed to hide
+those numerical false positives. Degenerate-triangle detection uses a squared
+cross-product tolerance of 1e-16, below the producer's 1e-14 skip threshold.
+
+Exterior tests check finite unit normals, clockwise front-face consistency,
+outward fuselage normals, declared smooth-seam normals, closed-volume edge
+incidence/orientation, positive signed volume, and relevant flight/gate layers.
+Panorama and dome tests separately check intended transparent apertures and
+real collision routes; open windows are not treated as closed-solid defects.
+
+Review tooling
+--------------
+tools/airport_dome_review.gd accepts --exterior-only and records eight exterior
+views: overview, side, front three-quarter, rear three-quarter, nose, windows,
+engine and cabin-to-dome connection. This validation task only parsed/extended
+the tool; GPU screenshots belong to the separately coordinated visual review.
+
+Parent renderer acceptance — 2026-10-30
+-------------------------------------
+Final production Main/Forward+ review: 24 captures, failed=false. Actual Player
+physics traversed the cabin/neck/dome, standing flight start, clouds/orbit,
+landing, return corridor, cabin and jetbridge. Includes eight exterior closeups.
+Final files: aircraft_full_review.json and airport_dome_*.png. Rendering used
+the corrected terminal rods and the new neutral apron concrete. Log:
+%TEMP%/chroma_aircraft_final_review.log and .err.
+
+A controlled nose-view A/B kept SSR, reflections, SDFGI and SSIL separately
+switchable. The former red underside band remained without SSR/reflections/SSIL
+and disappeared without SDFGI. Replacing the rust-brown apron albedo with
+photographic warm-grey concrete removed the conspicuous red cast while leaving
+SDFGI and all production reflection effects enabled. No lighting feature was
+turned off in the final production scene.
+
+Additional terminal geometry regression: 65 checks, zero failures. Before the
+rod transform correction: 30 failures/65 checks; an actual ceiling brace reached
+Y=6.080 above the roof. Correct local-axis scaling ends it at Y=4.684. Maximum
+measured endpoint error now <=0.000004m. Source: AirportTerminalGeometryRegression.
+
+New bundled CC0 concrete maps: Poly Haven concrete_tiles_02. Three 2048x2048
+textures with mipmaps, source MD5 verified, 6.29MB. Other concrete usage unchanged.
+
+Exclusive-GPU benchmark: RTX4070, 1920x1080, Forward+, VSync off. Five views,
+minimum2.5s+120frames warmup,3s samples. Normal HUD/passenger logic; no staged NPCs.
+Raw data: airport_dome_benchmark_1920x1080.json. At gate20 active airport people;
+during flight5 actual passengers on board. Results are samples, not FPS guarantees.
+Dome at gate / aft toward runway: median 3.039ms, p95 3.659ms, 329.1 median FPS.
+Complete airframe / exterior front three-quarter: median 4.671ms, p95 6.014ms, 214.1 median FPS.
+Dome cloud panorama / full aft view: median 7.205ms, p95 7.718ms, 138.8 median FPS.
+Dome orbit / full aft view: median 2.226ms, p95 2.585ms, 449.2 median FPS.
+Dome orbit / connector and cabin forward: median 3.245ms, p95 3.589ms, 308.2 median FPS.
+
+The final GPU runs reported the previously isolated seven Texture RID warnings
+on ReflectionProbe shutdown. No script errors, shader errors or failed review
+steps occurred. The warning was retained, not suppressed.
