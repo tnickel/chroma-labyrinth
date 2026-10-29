@@ -6,10 +6,11 @@ const WORLDS := [
 	{"title": "CHROMA", "tag": "00 / ATRIUM", "detail": "Zwölf Meter kinetisches Metall.\nLicht in ständiger Bewegung.", "color": Color("9be4ef"), "position": Vector3(0, 0.12, 7.2), "target": Vector3(0, 7.5, 0)},
 	{"title": "SOLAR", "tag": "01 / SONNENSEGEL", "detail": "Warmes Mineral, goldene Segel\nund geformtes Sonnenlicht.", "color": Color("f2c779"), "position": Vector3(-22.8, 0.12, -10.4), "target": Vector3(-18, 3.4, -20)},
 	{"title": "NOCTURNE", "tag": "02 / STERNENRAUM", "detail": "Obsidian, kosmische Tiefe\nund ein echter Raumspiegel.", "color": Color("9faff3"), "position": Vector3(13.2, 0.12, 23.4), "target": Vector3(18, 3.2, 14)},
-	{"title": "GLACIER", "tag": "03 / LICHT UNTER EIS", "detail": "Glas, frostiges Licht\nund bewegte Wasserstrukturen.", "color": Color("94e7ef"), "position": Vector3(-23, 6.12, -10.4), "target": Vector3(-18, 9.4, -20)},
+	{"title": "GLACIER", "tag": "03 / PRISMENRESONANZ", "detail": "Ein Kristall aus wanderndem Licht.\nSpektralfarben unter schwebendem Eis.", "color": Color("94e7ef"), "position": Vector3(-21.4, 6.12, -12.6), "target": Vector3(-18, 8.6, -18)},
 	{"title": "SPECTRUM", "tag": "04 / FARBE IN BEWEGUNG", "detail": "Prismatische Bänder\nzwischen Licht und Material.", "color": Color("e3a4e9"), "position": Vector3(13, 6.12, 25.5), "target": Vector3(18, 9.4, 16)},
 	{"title": "EMBER", "tag": "05 / MAGMATISCHE ENERGIE", "detail": "Dunkles Gestein, Kupfer\nund langsame glühende Adern.", "color": Color("f5a176"), "position": Vector3(-23, 12.12, -10.4), "target": Vector3(-18, 15.3, -20)},
-	{"title": "AFTERGLOW", "tag": "06 / AURORA", "detail": "Ein Lichtgarten unter\nfließenden Polarlichtbändern.", "color": Color("a4e7c2"), "position": Vector3(13, 12.12, 25.5), "target": Vector3(18, 15.4, 16)}
+	{"title": "AFTERGLOW", "tag": "06 / AURORA", "detail": "Ein Lichtgarten unter\nfließenden Polarlichtbändern.", "color": Color("a4e7c2"), "position": Vector3(13, 12.12, 25.5), "target": Vector3(18, 15.4, 16)},
+	{"title": "AIRPORT", "tag": "07 / CHROMA ORBIT", "detail": "Gate A01. Einsteigen und\nüber die Wolken bis ins All.", "color": Color("82e5dc"), "position": Vector3(62.0 / Layout.HORIZONTAL_SCALE, 0.12, 0), "target": Vector3(102.0 / Layout.HORIZONTAL_SCALE, 2.0, -14.0 / Layout.HORIZONTAL_SCALE)}
 ]
 
 var _player: CharacterBody3D
@@ -24,6 +25,12 @@ var _transition := false
 var _title_tween: Tween
 var _zone_elapsed := 0.0
 var _hud_hidden := false
+var _travel_locked := false
+
+func set_travel_locked(locked: bool) -> void:
+	if locked and _menu_open:
+		set_menu_open(false)
+	_travel_locked = locked
 
 func configure(player: CharacterBody3D) -> void:
 	_player = player
@@ -41,6 +48,8 @@ func configure(player: CharacterBody3D) -> void:
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo or _transition:
 		return
+	if _travel_locked and event.physical_keycode in [KEY_TAB, KEY_H, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8]:
+		return
 	match event.physical_keycode:
 		KEY_TAB:
 			set_menu_open(not _menu_open)
@@ -57,17 +66,19 @@ func _input(event: InputEvent) -> void:
 		KEY_F11:
 			var mode := DisplayServer.window_get_mode()
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if mode == DisplayServer.WINDOW_MODE_FULLSCREEN else DisplayServer.WINDOW_MODE_FULLSCREEN)
-		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7:
+		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8:
 			if _menu_open:
 				visit_world(event.physical_keycode - KEY_1)
 
 func set_menu_open(open: bool) -> void:
+	if open and _travel_locked:
+		return
 	_menu_open = open
 	_chooser.visible = open
 	_arrival.visible = not open and not _hud_hidden
 	_player.get_node("HUD").visible = not open and not _hud_hidden
-	_player.set_physics_process(not open)
-	_player.set_process_unhandled_input(not open)
+	_player.set_physics_process(not open and not _transition and not _player.movement_locked)
+	_player.set_process_unhandled_input(not open and not _transition)
 	_player.velocity = Vector3.ZERO
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if open else Input.MOUSE_MODE_CAPTURED
 	if open:
@@ -75,7 +86,7 @@ func set_menu_open(open: bool) -> void:
 		first.grab_focus()
 
 func visit_world(index: int, animate := true) -> void:
-	if _transition or index < 0 or index >= WORLDS.size():
+	if _travel_locked or _transition or index < 0 or index >= WORLDS.size():
 		return
 	_transition = true
 	set_menu_open(false)
@@ -103,7 +114,7 @@ func visit_world(index: int, animate := true) -> void:
 		var reveal := create_tween()
 		reveal.tween_property(_fade, "color:a", 0.0, 0.55)
 		await reveal.finished
-	_player.set_physics_process(true)
+	_player.set_physics_process(not _player.movement_locked)
 	_player.set_process_unhandled_input(true)
 	_transition = false
 
@@ -117,7 +128,9 @@ func _process(delta: float) -> void:
 	var p := Layout.to_design(_player.global_position)
 	var level := clampi(roundi(p.y / 6.0), 0, 2)
 	var zone := -1
-	if absf(p.x) < 8.2 and absf(p.z) < 8.2:
+	if _player.global_position.x > 40.5 and _player.global_position.y < 5.5:
+		zone = 7
+	elif absf(p.x) < 8.2 and absf(p.z) < 8.2:
 		zone = 0
 	elif p.x > -26.0 and p.x < -10.0 and p.z > -26.0 and p.z < -10.0:
 		zone = 1 + level * 2
@@ -172,7 +185,7 @@ func _build_menu() -> void:
 	column.add_theme_constant_override("separation", 14)
 	margins.add_child(column)
 	column.add_child(_label("C H R O M A   /   SPACES IN MOTION", 28, Color("e2eaf0")))
-	column.add_child(_label("Sieben Perspektiven. Drei Etagen. Ein begehbares Labyrinth.", 15, Color("9caab9")))
+	column.add_child(_label("Drei Etagen. Sechs Galerien. Ein Flughafen mit Orbitalreise.", 15, Color("9caab9")))
 	var grid := GridContainer.new()
 	grid.columns = 4
 	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -212,9 +225,7 @@ func _build_menu() -> void:
 		text.add_child(_label("%02d / %s" % [i + 1, data.tag.substr(5)], 11, data.color))
 		text.add_child(_label(data.title, 23, Color("e6edf3")))
 		text.add_child(_label(data.detail, 12, Color("a4b3bf")))
-	var note := _label("WASD / frei erkunden\n\nDie Bodenpfeile führen zu den Rampen.\nCyan: hinauf · Amber: hinunter.\n\nF / Taschenlampe\nH / Oberfläche ausblenden\nF11 / Vollbild", 13, Color("9caab9"))
-	note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_child(note)
+	column.add_child(_label("WASD gehen · F Licht · H HUD · F11 Vollbild    /    AIRPORT: E Fensterplatz · R Rundflug", 13, Color("9caab9")))
 	var close := Button.new()
 	close.text = "ZURÜCK ZUM RUNDGANG     /     TAB"
 	close.custom_minimum_size.y = 42

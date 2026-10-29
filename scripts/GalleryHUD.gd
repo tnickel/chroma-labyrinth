@@ -73,10 +73,16 @@ func update_location(position: Vector3, level: int) -> void:
 		zone = "GALERIE / " + HALLS[level][1]
 	elif position.x < -14 and absf(position.z) > 26.0:
 		zone = "RAMPE / ETAGENWECHSEL"
+	elif position.x > 33.0 and level == 0:
+		zone = "TERMINAL / GATE A01"
+		if position.x * Layout.HORIZONTAL_SCALE > 103.0:
+			zone = "AN BORD / CHROMA ORBIT"
+		elif position.x * Layout.HORIZONTAL_SCALE > 84.0:
+			zone = "FLUGGASTBRÜCKE / A01"
 	var signature := str(level) + zone
 	if signature != _last_location:
 		_last_location = signature
-		_location.text = "%02d  /  %s" % [level + 1, TITLES[level]]
+		_location.text = "A01  /  AIRPORT" if position.x > 33.0 and level == 0 else "%02d  /  %s" % [level + 1, TITLES[level]]
 		_location.add_theme_color_override("font_color", ACCENTS[level])
 		_zone.text = zone
 	if _stats.visible:

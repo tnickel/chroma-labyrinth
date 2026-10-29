@@ -206,6 +206,11 @@ func _build_floor(level: int) -> void:
             if level < 2 and x == 0 and z == ramp_row:
                 var entry := Vector2i(0, 1 if ramp_row == 0 else 9)
                 openings[_edge(a, entry)] = true
+    # A legible ground-floor spoke connects the atrium to the airport annex.
+    # Open actual geometry and the same navigation graph together.
+    if level == 0:
+        for x in range(6, 10):
+            openings[_edge(Vector2i(x, 5), Vector2i(x + 1, 5))] = true
     _ensure_navigation_connectivity(level, openings)
     _build_navigation_floor(level, openings)
     for z in range(COUNT):
@@ -228,6 +233,9 @@ func _build_floor(level: int) -> void:
                 if is_atrium:
                     _balustrade(p, d, level)
                 elif not _active(level, other.x, other.y):
+                    if level == 0 and x == 10 and z == 5 and d == Vector2i.RIGHT:
+                        _airport_doorway(p)
+                        continue
                     # Ramp cut is traversable at its high end and from the adjacent lane.
                     if not (_inside(other.x, other.y) and _ramp_cut(level, other.x, other.y)):
                         _wall(p, d, WALL_HEIGHT, surfaces.get_wall(level, room), level)
@@ -249,6 +257,13 @@ func _build_floor(level: int) -> void:
     # Art mounted on the outer perimeter, facing the interior.
     _art(Layout.to_world(Vector3(-12, base + 2.5, -32.88)), level)
     _art(Layout.to_world(Vector3(12, base + 2.5, -32.88)), (level + 1) % 3)
+
+func _airport_doorway(p: Vector3) -> void:
+    var x := p.x + CELL * 0.5
+    var side_width := (CELL - 5.0) * 0.5
+    for sign_side in [-1.0, 1.0]:
+        _box(Vector3(x, WALL_HEIGHT * 0.5, sign_side * (2.5 + side_width * 0.5)), Vector3(0.2, WALL_HEIGHT, side_width), surfaces.get_wall(0, 0), 1, true)
+    _box(Vector3(x, (WALL_HEIGHT + 3.65) * 0.5, 0), Vector3(0.2, WALL_HEIGHT - 3.65, 5.0), surfaces.get_wall(0, 0), 1, true)
 
 func _wall(p: Vector3, d: Vector2i, h: float, mat: Material, level := 0) -> void:
     var pos := p + Vector3(d.x * CELL / 2.0, h / 2.0, d.y * CELL / 2.0)

@@ -1,0 +1,154 @@
+[
+  {
+    "file": "stone/albedo.jpg",
+    "md5": "b4bfb01525c22e611d9a0651f372ae91",
+    "source": "https://polyhaven.com/a/terrazzo_tiles",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/terrazzo_tiles/terrazzo_tiles_diff_2k.jpg",
+    "asset": "terrazzo_tiles"
+  },
+  {
+    "file": "stone/normal.png",
+    "md5": "ff081b8a9ad4ea9ea1425d1f8449cb34",
+    "source": "https://polyhaven.com/a/terrazzo_tiles",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/terrazzo_tiles/terrazzo_tiles_nor_gl_2k.png",
+    "asset": "terrazzo_tiles"
+  },
+  {
+    "file": "stone/roughness.jpg",
+    "md5": "f75be6541a4fa5c8197408224946efb3",
+    "source": "https://polyhaven.com/a/terrazzo_tiles",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/terrazzo_tiles/terrazzo_tiles_rough_2k.jpg",
+    "asset": "terrazzo_tiles"
+  },
+  {
+    "file": "wood/albedo.jpg",
+    "md5": "56652a7339b16a76afad20d3585f66ea",
+    "source": "https://polyhaven.com/a/wood_table_001",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_table_001/wood_table_001_diff_1k.jpg",
+    "asset": "wood_table_001"
+  },
+  {
+    "file": "wood/normal.png",
+    "md5": "e34b6eb7939a0f99bd11740f8d85a56c",
+    "source": "https://polyhaven.com/a/wood_table_001",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/wood_table_001/wood_table_001_nor_gl_1k.png",
+    "asset": "wood_table_001"
+  },
+  {
+    "file": "wood/roughness.jpg",
+    "md5": "05b60bd20a1cc4355c5d73a99b245d44",
+    "source": "https://polyhaven.com/a/wood_table_001",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_table_001/wood_table_001_rough_1k.jpg",
+    "asset": "wood_table_001"
+  },
+  {
+    "file": "leather/albedo.jpg",
+    "md5": "a580e1c45d806a56d89331f9a549ecb2",
+    "source": "https://polyhaven.com/a/leather_white",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/leather_white/leather_white_diff_1k.jpg",
+    "asset": "leather_white"
+  },
+  {
+    "file": "leather/normal.png",
+    "md5": "2ad9cc7795a17c95bf7a82070927539f",
+    "source": "https://polyhaven.com/a/leather_white",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/leather_white/leather_white_nor_gl_1k.png",
+    "asset": "leather_white"
+  },
+  {
+    "file": "leather/roughness.jpg",
+    "md5": "db1052bac557bb6b03fdde325a853af4",
+    "source": "https://polyhaven.com/a/leather_white",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/leather_white/leather_white_rough_1k.jpg",
+    "asset": "leather_white"
+  },
+  {
+    "file": "fabric/albedo.jpg",
+    "md5": "4f2d1e96f967a32c93fe1d853c71bfa8",
+    "source": "https://polyhaven.com/a/denmin_fabric_02",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/denmin_fabric_02/denmin_fabric_02_diff_1k.jpg",
+    "asset": "denmin_fabric_02"
+  },
+  {
+    "file": "fabric/normal.png",
+    "md5": "e6e39a5149383b967f75c92f617d3bf2",
+    "source": "https://polyhaven.com/a/denmin_fabric_02",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/denmin_fabric_02/denmin_fabric_02_nor_gl_1k.png",
+    "asset": "denmin_fabric_02"
+  },
+  {
+    "file": "fabric/roughness.jpg",
+    "md5": "cdb64b61e87759a6164c2cf53e8ea1fc",
+    "source": "https://polyhaven.com/a/denmin_fabric_02",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/denmin_fabric_02/denmin_fabric_02_rough_1k.jpg",
+    "asset": "denmin_fabric_02"
+  },
+  {
+    "file": "concrete/albedo.jpg",
+    "md5": "321efe0af2d0809ab958b78a008fa116",
+    "source": "https://polyhaven.com/a/smooth_concrete_floor",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/smooth_concrete_floor/smooth_concrete_floor_diff_1k.jpg",
+    "asset": "smooth_concrete_floor"
+  },
+  {
+    "file": "concrete/normal.png",
+    "md5": "da9344e29599ceb9d992232d766e59be",
+    "source": "https://polyhaven.com/a/smooth_concrete_floor",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/smooth_concrete_floor/smooth_concrete_floor_nor_gl_1k.png",
+    "asset": "smooth_concrete_floor"
+  },
+  {
+    "file": "concrete/roughness.jpg",
+    "md5": "d69e03eafb7442684db178e26896a1ee",
+    "source": "https://polyhaven.com/a/smooth_concrete_floor",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/smooth_concrete_floor/smooth_concrete_floor_rough_1k.jpg",
+    "asset": "smooth_concrete_floor"
+  },
+  {
+    "file": "asphalt/albedo.jpg",
+    "md5": "7edccb95cbf72e63889baade8455f9e5",
+    "source": "https://polyhaven.com/a/clean_asphalt",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/clean_asphalt/clean_asphalt_diff_1k.jpg",
+    "asset": "clean_asphalt"
+  },
+  {
+    "file": "asphalt/normal.png",
+    "md5": "2609fb18d22b915d5ba6dee13fcae1c7",
+    "source": "https://polyhaven.com/a/clean_asphalt",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/1k/clean_asphalt/clean_asphalt_nor_gl_1k.png",
+    "asset": "clean_asphalt"
+  },
+  {
+    "file": "asphalt/roughness.jpg",
+    "md5": "4238f2eab76530f4b0c66ddb929b142d",
+    "source": "https://polyhaven.com/a/clean_asphalt",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/clean_asphalt/clean_asphalt_rough_1k.jpg",
+    "asset": "clean_asphalt"
+  },
+  {
+    "file": "daylight_2k.hdr",
+    "md5": "2eba3a4d7eeb23cbfbeca364c97e7980",
+    "source": "https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky",
+    "license": "CC0-1.0",
+    "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+    "asset": "kloofendal_48d_partly_cloudy_puresky"
+  }
+]

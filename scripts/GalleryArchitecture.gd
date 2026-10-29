@@ -86,13 +86,13 @@ func _build_hall(centre: Vector3, level: int, room: int) -> void:
 	var key_colors := [Color("ffe1ad"), Color("b5d7ff"), Color("c6f5ff"), Color("e1dcff"), Color("ffd293"), Color("c1e5df")]
 	var rim_colors := [Color("c3def4"), Color("e6b9ef"), Color("ffdfbd"), Color("99f0e8"), Color("9dbada"), Color("ddbbff")]
 	var fill_colors := [Color("fff0dc"), Color("c7d7eb"), Color("e0eff5"), Color("e1e2ef"), Color("ffe3c7"), Color("dce5e9")]
-	var key_energy: float = [6.2, 5.5, 5.8, 5.6, 5.8, 5.5][index]
-	var rim_energy: float = [3.5, 3.7, 2.8, 4.2, 3.4, 4.0][index]
+	var key_energy: float = [6.2, 5.5, 3.8, 5.6, 5.8, 5.5][index]
+	var rim_energy: float = [3.5, 3.7, 2.0, 4.2, 3.4, 4.0][index]
 	var density: float = [0.008, 0.013, 0.021, 0.012, 0.013, 0.014][index]
 	var beam_energy: float = [0.7, 1.4, 2.2, 1.1, 1.0, 1.5][index]
 	_spot(centre + Vector3(-5.8, 5.25, -4.4), centre + Vector3(0.6, 0.2, 1.9), key_colors[index], key_energy, 15.0, 27.0, true, beam_energy)
 	_spot(centre + Vector3(5.6, 5.25, 4.7), centre + Vector3(-1.8, 0.8, -1.5), rim_colors[index], rim_energy, 14.0, 32.0, true, beam_energy * 0.65)
-	_fill(centre + Vector3(0, 4.3, 0), fill_colors[index], 1.55, 14.0)
+	_fill(centre + Vector3(0, 4.3, 0), fill_colors[index], 0.95 if index == 2 else 1.55, 14.0)
 	_fog(centre + Vector3(0, 3.0, 0), Vector3(15, 5.2, 15), fill_colors[index], density)
 	if level == 1 and room == 1:
 		_ground_mist(centre + Vector3(0, 0.30, 0))

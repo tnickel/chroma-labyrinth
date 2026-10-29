@@ -325,7 +325,7 @@ func _world_entry_cases(scene: Node3D, player: CharacterBody3D) -> void:
 	shape_query.margin = 0.001
 	shape_query.exclude = [player.get_rid()]
 	var worlds: Array = director.WORLDS
-	_check(worlds.size() == 7, "Showcase no longer offers seven world entries")
+	_check(worlds.size() == 8, "Showcase must retain seven gallery entries and add the airport")
 	for i in worlds.size():
 		director.set_menu_open(true)
 		_check(not player.is_physics_processing() and director._menu_open, "Open world chooser leaves first-person movement active")
@@ -351,7 +351,10 @@ func _world_entry_cases(scene: Node3D, player: CharacterBody3D) -> void:
 			var expected_floor := floorf(worlds[i].position.y / 6.0) * 6.0
 			_check(absf(floor_hit.position.y - expected_floor) < 0.03 and floor_hit.normal.y > 0.99, "World entry is on the wrong storey or slope: " + str(i))
 			_check(absf(player.minimap_camera.global_position.y - expected_floor - 5.85) < 0.001, "World jump does not refresh the clipped minimap storey")
-		_check(absf(player.global_position.x) < Layout.FOOTPRINT_WIDTH * 0.5 and absf(player.global_position.z) < Layout.FOOTPRINT_WIDTH * 0.5, "World entry leaves the maze footprint")
+		if worlds[i].title == "AIRPORT":
+			_check(player.global_position.x > 54.0 and player.global_position.x < 84.0 and absf(player.global_position.z) < 16.0, "Airport entry leaves the terminal footprint")
+		else:
+			_check(absf(player.global_position.x) < Layout.FOOTPRINT_WIDTH * 0.5 and absf(player.global_position.z) < Layout.FOOTPRINT_WIDTH * 0.5, "World entry leaves the maze footprint")
 	print("SHOWCASE_ENTRIES actual_jumps=%d capsule_radius=%.2f player_height=%.2f" % [worlds.size(), shape_query.shape.radius, shape_query.shape.height])
 
 func _atrium_clearance_cases(scene: Node3D, maze: Node3D) -> void:

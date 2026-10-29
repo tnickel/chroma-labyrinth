@@ -21,6 +21,8 @@ var floor_label: Label
 var minimap_viewport: SubViewport
 var _minimap_elapsed := 0.0
 var _gallery_hud := GalleryHUD.new()
+## A seated passenger keeps mouse-look, but menu changes must not restart walking.
+var movement_locked := false
 
 
 func _ready() -> void:
@@ -72,6 +74,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if movement_locked:
+		velocity = Vector3.ZERO
+		return
 	var input := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction := (global_basis * Vector3(input.x, 0.0, input.y)).normalized()
 	var speed := sprint_speed if Input.is_action_pressed("sprint") else walk_speed

@@ -1,0 +1,62 @@
+[
+	{
+		"draw_calls": 3870.0,
+		"frames": 312,
+		"height": 1080,
+		"median_fps": 109.841827768014,
+		"median_ms": 9.104,
+		"p95_ms": 13.527,
+		"view": "Atrium with annex loaded",
+		"width": 1920
+	},
+	{
+		"draw_calls": 472.0,
+		"frames": 788,
+		"height": 1080,
+		"median_fps": 275.027502750275,
+		"median_ms": 3.636,
+		"p95_ms": 4.582,
+		"view": "Terminal / live runway traffic",
+		"width": 1920
+	},
+	{
+		"draw_calls": 378.0,
+		"frames": 836,
+		"height": 1080,
+		"median_fps": 287.438919229664,
+		"median_ms": 3.479,
+		"p95_ms": 3.942,
+		"view": "Cabin at gate",
+		"width": 1920
+	},
+	{
+		"draw_calls": 34.0,
+		"frames": 1876,
+		"height": 1080,
+		"median_fps": 632.111251580278,
+		"median_ms": 1.582,
+		"p95_ms": 1.676,
+		"view": "Takeoff / window seat",
+		"width": 1920
+	},
+	{
+		"draw_calls": 36.0,
+		"frames": 1961,
+		"height": 1080,
+		"median_fps": 656.598818122127,
+		"median_ms": 1.523,
+		"p95_ms": 1.733,
+		"view": "Cloud cruise / window seat",
+		"width": 1920
+	},
+	{
+		"draw_calls": 29.0,
+		"frames": 1953,
+		"height": 1080,
+		"median_fps": 657.462195923734,
+		"median_ms": 1.521,
+		"p95_ms": 1.84,
+		"view": "Orbital panorama / window seat",
+		"width": 1920
+	}
+]

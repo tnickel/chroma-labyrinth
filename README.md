@@ -37,9 +37,10 @@ Geschossabstand, Figurengröße und Laufgeschwindigkeit bleiben erhalten.
 - **Maus:** umsehen; **F:** Taschenlampe an/aus
 - **Esc:** Maus freigeben; **Linksklick:** Maus wieder einfangen
 - **F3:** Bildratenanzeige ein-/ausblenden
-- **Tab:** Welt-Auswahl öffnen/schließen; dort **1–7** oder eine Karte anklicken
+- **Tab:** Welt-Auswahl öffnen/schließen; dort **1–8** oder eine Karte anklicken
 - **H:** HUD und Minimap für eine freie Ansicht ein-/ausblenden
 - **F11:** Vollbild ein-/ausschalten
+- **Im Flugzeug:** **E** Fensterplatz/Aufstehen; **R** Rundflug starten; **L** vorzeitige Rückkehr ab der Wolkenreise; **M** Fluggeräusch stummschalten
 
 Die Welt-Auswahl setzt den Spieler mit einer kurzen Überblendung an einen
 geprüften Aussichtspunkt im echten Labyrinth. Von dort ist jeder Bereich frei
@@ -53,6 +54,77 @@ die Entfernung folgt dem Labyrinthweg, nicht der Luftlinie. Direkt an den Rampen
 stehen zusätzliche Etagen-Schilder. Im mittleren Stockwerk sind Auf- und Abstieg
 getrennt markiert.
 
+## Airport / Chroma Orbit
+
+Im Erdgeschoss führt die neue **Ostachse vom Atrium** zu einem ausgeschilderten
+Flughafenportal. Der Glasgang, die Wartehalle, die Fluggastbrücke und die Maschine
+sind tatsächlich begehbar. Alternativ führt **Tab → AIRPORT** direkt ins Terminal.
+Die Abflugtafel und Bodenmarkierungen weisen zu **Gate A01**; zurück geht es
+über die Schilder **CHROMA / GALERIEN**. Die ursprüngliche Labyrinthfläche bleibt
+erhalten; Terminal und Vorfeld liegen als zusätzlicher Anbau daneben.
+
+Durch die Panoramafenster sind Landebahn, Hangars und drei Flugzeuge mit
+Start-, Lande- und Rollbewegungen zu sehen. Die eigene Maschine besitzt
+36 Sitze, 18 nutzbare Fensterplätze, einen Mittelgang, Gepäckfächer, Flügel,
+Triebwerke und eine schließbare Einstiegstür. Die Fenster sind echte Öffnungen
+mit transparentem Glas, keine Bilder an einer geschlossenen Wand.
+
+1. Über Gate A01 und die Glasbrücke in die Maschine gehen.
+2. Mit **E** neben einer Sitzreihe einen Fensterplatz einnehmen.
+3. **R** drücken oder nach **Esc** den Button **RUNDFLUG STARTEN** anklicken.
+   Der Start ist nur an Bord möglich und setzt den Spieler nötigenfalls an
+   einen Fensterplatz. Der Mausblick bleibt frei.
+4. Der rund **150 Sekunden** lange Flug führt automatisch über Rollen, Start,
+   Wolken, Orbitalpanorama und Landung zurück zum Gate. **E** erlaubt auch
+   währenddessen das Aufstehen und Gehen in der geschlossenen Kabine.
+5. Nach dem Andocken öffnet die Tür. Mit **E** aufstehen und denselben Weg durch
+   Brücke und Terminal zurück ins Labyrinth gehen. Weitere Flüge sind möglich.
+
+Das ist ein inszenierter Passagier-Erlebnisflug: Ein gewöhnliches Verkehrsflugzeug
+fliegt nicht ins All. Die Kabine behält stabile Physikkoordinaten; bewegte
+Landschaft, gestaffelte Wolken, Himmel und gekrümmter Planet erzeugen das
+Panorama. Der Planet ist prozedural und keine geografisch genaue Erdkarte.
+Leises Triebwerksrauschen und ein Kabinensignal entstehen ebenfalls im Code.
+Während des Fluges bleibt die Weltenauswahl gesperrt, bis das ursprüngliche
+Gate samt Kamera, Umgebung, Licht und Steuerung wiederhergestellt ist.
+
+Das vollständige Konzept steht in [doc/Flugterminal-Konzept.txt](doc/Flugterminal-Konzept.txt).
+Module: `scripts/airport/`; Außenwelt- und Terminal-Shader: `shaders/airport_*.gdshader`.
+`Tests/AirportRegression.gd` prüft den realen Hin-/Rückweg mit der Player-Kapsel,
+E/R/L/Tab-Eingaben, alle Flugphasen, zwei Flüge und die vollständige Rückkehr.
+Der Abschlusslauf bestand 3.923 Prüfungen mit 1.344 Wegproben. Zusätzlich sind
+Flugstart während eines Weltwechsels und die Sitzsperre beim Menüschließen
+abgedeckt. Die Weltenauswahl bestand weitere 3.276 Prüfungen mit acht Zielen.
+`tools/airport_review.gd` erzeugt echte Forward+-Aufnahmen; `tools/airport_benchmark.gd`
+misst die laufende Hauptszene mit normalem HUD, Besuchern und Flugverkehr.
+
+Forward+-Aufnahmen aus der tatsächlichen Hauptszene:
+
+![Terminal mit Gate und Blick auf das Vorfeld](doc/airport/airport_terminal.png)
+![Begehbare Kabine mit Fensterplätzen](doc/airport/airport_cabin.png)
+![Orbitalpanorama vom Fensterplatz](doc/airport/airport_space.png)
+
+Leistungsstichprobe vom 29.10.2026, RTX 4070, Godot 4.7.2, 1920×1080,
+ohne VSync und ohne parallele Lasttests. Je Ansicht 2,5 Sekunden Aufwärmzeit
+und drei Sekunden Messung, normale Besucher-/Verkehrslogik und HUD aktiv:
+
+| Ansicht mit Flughafen-Erweiterung | Median pro Bild | 95. Perzentil | FPS aus dem Median |
+| --- | ---: | ---: | ---: |
+| Atrium | 9,10 ms | 13,53 ms | 110 |
+| Terminal mit Flugverkehr | 3,64 ms | 4,58 ms | 275 |
+| Kabine am Gate | 3,48 ms | 3,94 ms | 287 |
+| Start, Blick aus dem Fenster | 1,58 ms | 1,68 ms | 632 |
+| Wolkenreise, Blick aus dem Fenster | 1,52 ms | 1,73 ms | 657 |
+| Orbitalpanorama, Blick aus dem Fenster | 1,52 ms | 1,84 ms | 657 |
+
+Die Flugansicht rendert nur die Kabine und ihre eigene vereinfachte Außenwelt;
+das erklärt die deutlich geringere Last als im Museum. Die Wolken sind
+prozedurale Schichten und weich schattierte Sprites, keine volumetrische
+Wettersimulation. Diese kurzen Stichproben einzelner Ansichten sind keine
+Mindest-FPS-Zusage oder isolierte Messung des zusätzlichen Flughafenaufwands.
+Unbearbeitete Bilder und Messdaten liegen in `doc/airport/`, vom Asset-Import
+durch `.gdignore` ausgeschlossen.
+
 ## Die sechs Galerien
 
 Die Architektur und alle neuen Materialien entstehen im Code. Dafür werden
@@ -62,7 +134,7 @@ Besuchermodelle bleiben mitgelieferte GLB-Dateien.
 | Etage | Nordwestliche Halle | Südöstliche Halle |
 | --- | --- | --- |
 | 01 / OBSIDIAN | **SOLAR:** warme Sonnensegel, gerillter Kalkstein, Travertin und Messing | **NOCTURNE:** Sternenraum, Obsidian, kosmisches Wandfenster, echter Wandspiegel und 12 × 12 m perspektivischer Spiegelboden |
-| 02 / GLACIER | **GLACIER:** gläserner Wasser-Lichtboden, Eisfacetten, Kristalle und Bodennebel | **SPECTRUM:** raumspannende prismatische Bänder, Terrazzo und kinetisches Möbiusband |
+| 02 / GLACIER | **GLACIER:** spektral leuchtender Kristall, rotierende Strahlenfächer, Kaustik-Lichtkranz, Wasser-Lichtboden und schwebendes Eis | **SPECTRUM:** raumspannende prismatische Bänder, Terrazzo und kinetisches Möbiusband |
 | 03 / EMBER | **EMBER:** Basaltgewölbe, langsam glühende Magmaadern und Kupfer | **AFTERGLOW:** fließende Aurorabänder, projizierter Lichtgarten und blaugrüner Stein |
 
 Das Atrium verbindet die Etagen mit Glasbrüstungen, Stahlstützen, einem Glasdach
@@ -80,6 +152,52 @@ Nebel bleibt schwach. AgX-Tonemapping erhält helle Lichtflächen, ohne die gesa
 Szene weiß aufzuhellen. Die Materialfamilien unterscheiden sich in Maserung,
 Rauheit, Reflexion und Relief, nicht nur in ihrer Farbe.
 
+### Glacier: Prismenresonanz
+
+Über **Tab → GLACIER** lässt sich die Installation direkt besuchen. Die fünf
+Kristalle tragen polierte Facetten mit wandernden Lichtadern und gegeneinander
+versetzten Spektralfarben. Ein Farbkreis dauert rund 18 Sekunden; die Farben
+gehen kontinuierlich ineinander über. Langsam rotierende Strahlenfächer,
+ein mehrfarbiger Bodenlichtkranz und 96 schwebende Lichtpartikel ergänzen den Kern.
+Drei synchronisierte Echtzeitlichter beleuchten den Sockel, Boden und Besucher.
+Die Bodenmuster und Strahlen sind künstlerische Shader-Effekte, keine physikalisch
+berechneten Lichtbrechungs-Kaustiken.
+
+Die 60 ursprünglichen Kanten-Meshes wurden zu fünf zusammengefasst. Kristalle,
+Sockel und Effekt benötigen zusammen 14 Mesh-Surfaces; die Partikel bewegen sich
+gebündelt auf der GPU. Zusätzliche Lichter und Atmosphäre blenden zwischen 18 und
+24 Metern aus und schalten auf anderen Etagen ab. Im inaktiven Zustand prüft das
+Modul nur zehnmal pro Sekunde die Kamera und überträgt keine Animationsparameter.
+Die echten Kristall-Meshes bleiben für Sichtbarkeit und Reflexionen bestehen.
+Die vorhandenen statischen Cubemaps werden weiterhin einmal aufgenommen;
+laufende Farbänderungen erscheinen dort nicht zeitlich korrekt. SSR und direkte
+Beleuchtung bleiben dynamisch.
+
+`Tests/GlacierRadianceRegression.gd` prüft Integration, Farbphase, Etagen,
+Distanzblende und Geometrie-/Lichtgrenzen. Für reproduzierbare Bilder bzw. eine
+Messung des zusätzlichen lokalen Licht-/Atmosphäreaufwands bei aktivem HUD,
+Minimap und Besuchern:
+
+```text
+godot --path . --resolution 1920x1080 --script res://tools/glacier_review.gd
+godot --path . --resolution 1920x1080 --script res://tools/glacier_review.gd -- --benchmark
+```
+
+Die Bilder und Messdaten werden im Godot-`user://`-Verzeichnis gespeichert.
+Der Bildvergleich benötigt einen echten Forward+-Viewport, keinen Headless-Lauf.
+
+Die Erweiterung wurde auf der RTX 4070 bei 1920×1080 mit normalen Besuchern,
+HUD und Minimap geprüft: zwei aktive Stichproben ergaben **6,49 und 6,79 ms
+Median pro Bild** (rund 154 bzw. 147 FPS). Die Vergleichsläufe ohne zusätzliche
+Lichter/Atmosphäre lagen bei 6,62 und 6,84 ms; die Unterschiede liegen innerhalb
+der Streuung dieses kurzen Tests und belegen keinen belastbaren Zeitgewinn.
+Rohdaten: `doc/showcase/glacier-radiance-benchmark-1920x1080.json`.
+Alle vier relevanten Regressionstests bestanden, darunter 140 gezielte
+Glacier-Prüfungen. Zwei tatsächlich gerenderte Farbphasen:
+
+![Glacier mit warmen Spektralfarben](doc/showcase/glacier.png)
+![Glacier mit blauvioletten Spektralfarben](doc/showcase/glacier-spectral-blue.png)
+
 ## Aufbau
 
 - `Main.tscn`, `Main.gd`: Zusammensetzen der Komponenten und Forward+-Umgebung.
@@ -90,6 +208,7 @@ Rauheit, Reflexion und Relief, nicht nur in ihrer Farbe.
 - `scripts/SurfaceLibrary.gd`, `shaders/architectural_surface.gdshader`, `shaders/gallery_glass.gdshader`: gemeinsam genutzte Stein-, Metall-, Keramik- und Glasmaterialien.
 - `scripts/GalleryArchitecture.gd`: Glasdach, Wandpaneele, gerichtete Haupt-/Gegenlichter, Wandbeleuchtung und Reflexionsproben.
 - `scripts/ChromaAtrium.gd`, `shaders/chroma_*.gdshader`: kinetisches Atrium mit konservativen Culling-Grenzen für die Shader-Animation.
+- `scripts/GlacierRadiance.gd`, `shaders/glacier_*.gdshader`: lokale spektrale Kristallinstallation mit GPU-Partikeln und abgestimmten Echtzeitlichtern.
 - `scripts/ExperienceWorlds.gd`, `shaders/experience_*.gdshader`: sechs eigenständige Rauminstallationen und animierte Oberflächen, ohne neue Physikhindernisse.
 - `scripts/ExperienceResponse.gd`: dezente lokale Lichtreaktion der Wasser-/Auroraböden auf die Spielerposition, höchstens zehn Parameteraktualisierungen je Sekunde und Material.
 - `scripts/GalleryThresholds.gd`: zwölf Portale aus den tatsächlichen Hallen-/Gangverbindungen.
@@ -229,12 +348,13 @@ der zusätzlichen Berechnungen in mittlerer und großer Entfernung.
 - `Tests/PlanarMirrorRegression.gd`: Off-Axis-Projektion, reflektierte Sichtstrahlen, Clipping und begrenzte Aktualisierung.
 - `Tests/VisitorRampLandingRegression.gd`: vier gezielt erzwungene Konflikte zwischen Warteschlange und Rampenausfahrt, einschließlich Verbot von Seitenschritten auf der Steigung.
 - `tools/gallery_review_probe.gd`: echte Forward+-Bilder vom Startpunkt, Atrium und allen sechs Hallen unter `user://gallery_*.png`.
-- `tools/showcase_review.gd`: aktuelle Welt-Auswahl, sieben Forward+-Raumansichten und Menü; mit `-- 0 3` lassen sich einzelne Bereiche prüfen.
-- `tools/showcase_benchmark.gd`: alle sieben Welten mit normalem HUD, Minimap und Besucher-LOD; je 2,5 Sekunden Aufwärmphase und drei Sekunden Messung. JSON-Ergebnisse unter `user://showcase_benchmark_<Breite>x<Höhe>.json`.
+- `tools/showcase_review.gd`: aktuelle Welt-Auswahl, acht Forward+-Raumansichten und Menü; mit `-- 0 3` lassen sich einzelne Bereiche prüfen.
+- `tools/showcase_benchmark.gd`: alle acht Welten mit normalem HUD, Minimap und Besucher-LOD; je 2,5 Sekunden Aufwärmphase und drei Sekunden Messung. JSON-Ergebnisse unter `user://showcase_benchmark_<Breite>x<Höhe>.json`.
 - `tools/planar_mirror_probe.gd`: seitliche Spiegelansichten mit einem unabhängigen Farb-/Projektionsvergleich.
 - `tools/gallery_benchmark.gd`: vier Ansichten bei Projektauflösung, ohne VSync, mit Aufwärmphase, Median und 95. Perzentil der tatsächlich gerenderten Bildintervalle. Währenddessen keine anderen Lasttests starten.
 
-Messung der vollständigen Erlebniswelten vom 29.10.2026 auf der vorhandenen
+Messung der vollständigen Erlebniswelten vom 29.10.2026 **vor der Glacier-
+Prismenresonanz-Erweiterung**, auf der vorhandenen
 RTX 4070, Godot 4.7.2, **1920×1080**, ohne VSync und ohne parallele Testprozesse.
 Die normale Besucher-LOD, HUD und Minimap blieben aktiv. Pro Ansicht wurden
 nach 2,5 Sekunden Aufwärmen drei Sekunden gemessen. Ergebnisse sind Stichproben

@@ -1,7 +1,8 @@
 extends RefCounted
 ## Seven individually modelled, asset-free exhibits. All vertices stay inside
 ## the existing 2.8 m pedestal footprint; navigation/collision remain unchanged.
-## Meshes are built once. Only the small Spectrum exhibit rotates at runtime.
+## Meshes are built once. Spectrum rotates; Glacier has a local spectral effect.
+const GlacierLight = preload("res://scripts/GlacierRadiance.gd")
 
 class KineticExhibit extends Node3D:
 	func _process(delta: float) -> void:
@@ -215,9 +216,12 @@ static func _glacier(root: Node3D, materials: Dictionary) -> void:
 	var centres := [Vector3(0, 1.15, 0), Vector3(-0.61, 1.15, 0.23), Vector3(0.58, 1.15, 0.25), Vector3(-0.31, 1.15, -0.59), Vector3(0.43, 1.15, -0.48)]
 	var heights := [2.62, 1.82, 1.45, 1.20, 2.12]
 	for i in 5:
-		_crystal(root, centres[i], heights[i], 0.32 if i == 0 else 0.25,
+		_crystal(root, centres[i], heights[i], 0.43 if i == 0 else 0.29,
 			Vector3(0.025 * float(i - 2), float(i) * 0.31, 0.035 * sin(float(i))),
 			frosted if i % 2 == 0 else clear, materials.metal, i)
+	var radiance := GlacierLight.new()
+	root.get_parent().add_child(radiance)
+	radiance.configure(root)
 
 static func _mobius_point(u: float, v: float) -> Vector3:
 	# The strip closes with an actual half twist: p(2π,v) == p(0,-v).

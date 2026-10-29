@@ -12,6 +12,7 @@ const Thresholds = preload("res://scripts/GalleryThresholds.gd")
 const Worlds = preload("res://scripts/ExperienceWorlds.gd")
 const Response = preload("res://scripts/ExperienceResponse.gd")
 const ReflectingFloor = preload("res://scripts/NocturneReflectingFloor.gd")
+const Airport = preload("res://scripts/airport/AirportSystem.gd")
 
 func _ready() -> void:
 	_create_environment()
@@ -46,6 +47,9 @@ func _ready() -> void:
 	var showcase := Showcase.new()
 	add_child(showcase)
 	showcase.configure(player)
+	var airport := Airport.new()
+	add_child(airport)
+	airport.build(player, showcase)
 
 func _create_environment() -> void:
 	GalleryEnvironment.build(self)

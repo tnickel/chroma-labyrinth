@@ -97,6 +97,10 @@ func _check_geometry(scene: Node3D, maze: Node3D, crowd: Node3D, map_camera: Cam
 	var static_samples := 0
 	var npc_gi_modes: Dictionary = {}
 	for instance: MeshInstance3D in scene.find_children("*", "MeshInstance3D", true, false):
+		# The annex has its own runway/orbital-scale bounds and route checks in
+		# AirportRegression. Preserve the original gallery-scale contract here.
+		if scene.has_node("AirportSystem") and scene.get_node("AirportSystem").is_ancestor_of(instance):
+			continue
 		checked_meshes += 1
 		_check(instance.mesh != null, "Missing mesh on " + str(instance.get_path()))
 		if not instance.mesh:
@@ -128,6 +132,8 @@ func _check_geometry(scene: Node3D, maze: Node3D, crowd: Node3D, map_camera: Cam
 			mesh_cache[instance.mesh.get_instance_id()] = true
 			_check_mesh_vertices(instance.mesh, str(instance.get_path()))
 	for batch: MultiMeshInstance3D in scene.find_children("*", "MultiMeshInstance3D", true, false):
+		if scene.has_node("AirportSystem") and scene.get_node("AirportSystem").is_ancestor_of(batch):
+			continue
 		_check(batch.multimesh != null and batch.multimesh.mesh != null, "Empty MultiMesh batch on " + str(batch.get_path()))
 		if not batch.multimesh or not batch.multimesh.mesh:
 			continue

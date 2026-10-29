@@ -1,0 +1,21 @@
+AIRPORT MATERIALS / DAYLIGHT
+
+Bundled textures and HDRI are Poly Haven assets, CC0 1.0 Universal.
+They may be redistributed with this project. No runtime downloads are required.
+License: https://polyhaven.com/license
+CC0 deed: https://creativecommons.org/publicdomain/zero/1.0/
+
+Original asset pages:
+https://polyhaven.com/a/terrazzo_tiles
+https://polyhaven.com/a/wood_table_001
+https://polyhaven.com/a/leather_white
+https://polyhaven.com/a/denmin_fabric_02
+https://polyhaven.com/a/smooth_concrete_floor
+https://polyhaven.com/a/clean_asphalt
+https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky
+
+The pure-sky HDRI is by Greg Zaal and Jarod Guest.
+sources.json records the original download URLs and verified MD5 checksums.
+tools/fetch_airport_assets.ps1 reproduces the bounded asset download.
+Maps are original 1K/2K albedo, OpenGL normals, roughness; sky is 2K HDR.
+In-engine material tints and physical mapping scales are set in AirportMaterials.gd.

@@ -1,0 +1,74 @@
+CHROMA ORBIT — FLUGTERMINAL-ANBAU
+
+Erlebnis und Rundweg
+Vom Atrium führt im Erdgeschoss eine ausgeschilderte Ostachse durch das
+bestehende Labyrinth. Ein realer Durchbruch in der Außenwand verbindet sie mit
+einem verglasten Gang und der Wartehalle. Vom Terminal blickt man durch die
+Panoramafenster auf Vorfeld und Landebahn mit startenden, landenden und
+rollenden Flugzeugen. Gate A01 führt über eine begehbare Fluggastbrücke zu
+einer Kabine mit Sitzreihen, Mittelgang und echten seitlichen Fensteröffnungen.
+Nach dem Erlebnisflug öffnet die Tür wieder; derselbe Weg führt zurück.
+
+Architektur und Maßstab
+Alle Anbauten sind in realen Metern gebaut, ohne erneuten Flächenskalierungsfaktor.
+Labyrinth-Außenkante Ost: X=40,4166 m. Gang bis X=54 m, 5 m breit.
+Wartehalle: X=54..84 m, Z=-16..20 m, Boden Y=0, Decke etwa Y=5,2 m.
+Fluggastbrücke: X=84..103,8 m, Mitte Z=-8 m, Boden Y=0.
+Flugzeug: Ursprung X=106/Y=0/Z=2, Nase nach -Z, Einstieg links vorne.
+Vorfeld liegt tiefer; Kabinen- und Terminalboden sind stufenlos verbunden.
+
+Gestaltung
+Petrolfarbene Konstruktion, helle Sitze, Messingakzente, gerahmte große
+Glasflächen, klare Gate- und Rückwegschilder. Das Licht im Terminal ist ruhig
+und lesbar. Die Kabine bekommt separate Sitznummern, Handauflagen, Gepäckfächer,
+Innenbeleuchtung und Fensterrahmen. Modelle, Oberflächen und Szenerien werden
+prozedural erzeugt; zusätzliche externe Asset-Downloads sind nicht notwendig.
+
+Interaktion und Ablauf
+E: Fensterplatz einnehmen / wieder im Mittelgang aufstehen.
+R oder der Bildschirmbutton: Rundflug starten, nur innerhalb der Kabine.
+Der Start setzt den Spieler an einen Fensterplatz und schließt die Einstiegstür.
+Mausblick bleibt frei. Während des Fluges kann man aufstehen und in der Kabine
+gehen; die geschlossene Tür verhindert das Verlassen.
+
+Automatischer Ablauf, insgesamt etwa 150 Sekunden:
+Tür schließen 4 s; Rollen 8 s; Start 12 s; Steigflug 24 s;
+Wolkenreise 18 s; Orbitalpanorama 28 s; Sinkflug 24 s;
+Landeanflug 16 s; Landung 10 s; Andocken 6 s.
+Ab der Wolkenreise kann die Rückkehr mit L zusätzlich vorgezogen werden.
+H blendet die Fluginstrumente aus; M schaltet das prozedurale Triebwerksrauschen
+stumm. Esc gibt die Maus für die Bildschirmbuttons frei.
+Ankunft stellt Terminalansicht, Bedienung und offene Tür wieder her.
+Der Flug ist wiederholbar, ohne Szenenneustart oder Verlust des Labyrinths.
+
+Bewusste technische Grenzen
+Ein Verkehrsflugzeug erreicht physikalisch keinen Weltraum. CHROMA ORBIT ist
+ein inszenierter Passagier-Erlebnisflug mit Panorama bis zur Erdkrümmung, keine
+Aerodynamik- oder Raumflugsimulation. Die Kabinenkollision bleibt ortsfest;
+bewegte Außenszenerie, Höhe, Licht und Himmel erzeugen den Flug. Damit bleiben
+Mausblick, Sitzen und Gehen bei jeder Flugphase stabil, ohne Floating-Origin-
+Präzisionsfehler oder aufwändige mitbewegte CharacterBody-Physik.
+
+Module und Darstellung
+AirportConnection: realer Anschluss, Bodenpfeile und Rückweg.
+AirportTerminal: Wartehalle, Jetbridge, Vorfeld und analytischer Flugverkehr.
+AircraftCabin: Flugzeug, Sitzplätze, Fensteröffnungen und schließbare Tür.
+FlightScenery: eigene Außenwelt mit Rollbahn, Landschaft, Wolken, Erde und Sternen.
+AirportSystem: Zustandsautomat, Sitzinteraktion, Fluginstrumente und Rückkehr.
+AirportAudio: einmalig erzeugtes Motorrauschen und Kabinensignal ohne Audiodateien.
+Die Galerie-Layer 1/2 bleiben erhalten. Die Kabine trägt zusätzlich eigene
+Masken; im Flug sieht die Kamera ausschließlich Kabine und Flugwelt. Globale
+Umgebung und Kameraeinstellungen werden bei Rückkehr wiederhergestellt.
+Kein dauerndes Cubemap-Capturing, keine zusätzlichen CPU-Passagiersimulationen.
+Die Wolken bestehen aus fünf gestaffelten Schichten und 112 weich schattierten
+Sprites in einem gemeinsamen GPU-Batch; es gibt keine volumetrische Wetterphysik.
+Der Planet zeigt eine prozedurale Landschaft, keine geografisch genaue Erdkarte.
+
+Abnahmekriterien
+Durchgehender kapselbreiter Weg Atrium–Terminal–Kabine–zurück.
+Fensterplätze haben freie Sicht nach außen statt opaker Rumpfwand.
+Start außerhalb der Kabine wird abgewiesen; die Tür ist im Flug physisch zu.
+Alle Phasen einschließlich Rückkehr funktionieren in zwei aufeinanderfolgenden
+Flügen. Sitzen/Aufstehen und Menüschutz dürfen keine Bewegungssperre hinterlassen.
+Kamera, Umgebung, Licht und HUD sind nach Landung wieder im ursprünglichen Zustand.
+Echte Forward+-Renderkontrolle: Terminal, Kabine am Gate, Wolkenflug, Weltraum.

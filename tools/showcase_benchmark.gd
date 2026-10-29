@@ -17,7 +17,7 @@ func _run() -> void:
 		if node.has_method("update_projection"):
 			mirrors.append(node)
 	var results: Array[Dictionary] = []
-	for index in 7:
+	for index in director.WORLDS.size():
 		await director.visit_world(index, false)
 		player.set_physics_process(false)
 		player.set_process_unhandled_input(false)

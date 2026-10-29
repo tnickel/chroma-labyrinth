@@ -12,9 +12,10 @@ func _run() -> void:
 	var selection: Array[int] = []
 	for argument in OS.get_cmdline_user_args():
 		if argument.is_valid_int():
-			selection.append(clampi(int(argument), 0, 6))
+			selection.append(clampi(int(argument), 0, director.WORLDS.size() - 1))
 	if selection.is_empty():
-		selection = [0, 1, 2, 3, 4, 5, 6]
+		for index in director.WORLDS.size():
+			selection.append(index)
 	for index in selection:
 		await director.visit_world(index, false)
 		player.set_physics_process(false)
