@@ -69,6 +69,14 @@ Dateiprüfsummen. Tests, Werkzeuge, Screenshots und lokale Konfigurationen werde
 nicht in die Spieldaten exportiert. Asset- und Engine-Lizenznachweise werden
 separat beigelegt. Das Skript veröffentlicht selbst nichts.
 
+Zur Abnahme das ZIP in einen eigenen Ordner entpacken und die native EXE dort
+mit `--quit-after 240` starten. Die zusätzliche Ressourcenprüfung verwendet
+den Godot-Editor derselben Version mit `--headless --main-pack <exportiertes-PCK>
+--script <absoluter-Pfad-zu-Tests/PackagedDemoSmoke.gd>`. Sie prüft die tatsächlich
+gepackten Assets und die vollständige Szeneninitialisierung. Die offizielle
+Release-EXE unterstützt diese externen Skriptüberschreibungen nicht; ihr Start
+wird deshalb separat geprüft.
+
 Der Grundriss hat **50 % mehr Fläche** als die ursprüngliche Demo: rund
 **80,83 × 80,83 m** statt 66 × 66 m, entsprechend **6.534 m²** statt 4.356 m²
 Grundfläche. Länge und Breite wachsen dafür jeweils um den Faktor √1,5.

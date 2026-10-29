@@ -1,8 +1,10 @@
 extends SceneTree
-## Run with the exported EXE from the extracted release, outside the source
-## project: Chroma-Labyrinth.exe --headless --script <absolute-test-path>
+## Resource smoke test of the exported PCK, using the SAME VERSION editor binary:
+## godot --headless --main-pack <absolute-exported-PCK> --script <absolute-test>
+## Run outside the source project. The native release template disables path
+## overrides and ignores --script; test that EXE separately without overrides.
 ## This external test is excluded from the PCK. Every application resource below
-## is resolved through res:// in that PCK, never relative to this script or cwd.
+## resolves through res:// in the PCK, never relative to this script or cwd.
 var checks := 0
 var failures: Array[String] = []
 var _scene: Node
@@ -30,8 +32,12 @@ func _resource(path: String, expected_class: String) -> Resource:
 	return result
 
 func _run() -> void:
-	_check(not OS.has_feature("editor") and not Engine.is_editor_hint(), "Run the native export template, not the editor executable")
-	_check(OS.has_feature("release"), "The executable is not a release export")
+	# Godot consumes --main-pack before exposing application arguments. Prove
+	# the mounted package through its actual files instead of re-parsing flags.
+	_check(FileAccess.file_exists("res://project.binary"), "Exported project.binary is missing from the mounted PCK")
+	_check(not FileAccess.file_exists("res://project.godot"), "Source project.godot is visible; this must run against the exported PCK")
+	_check(not FileAccess.file_exists("res://Tests/PackagedDemoSmoke.gd") and not ResourceLoader.exists("res://Tests/PackagedDemoSmoke.gd"),
+		"The external smoke test must be excluded from the release PCK")
 	_check(str(ProjectSettings.get_setting("rendering/renderer/rendering_method", "")) == "forward_plus", "Packaged rendering configuration must remain forward_plus")
 	_check(str(ProjectSettings.get_setting("application/run/main_scene", "")) == "res://Main.tscn", "Unexpected packaged main scene")
 	for model in ["maya", "harper", "sam", "jordan"]:
@@ -102,5 +108,5 @@ func _finish() -> void:
 		for frame in 4:
 			await process_frame
 	var status := "PASS" if failures.is_empty() else "FAIL"
-	print("PACKAGED_DEMO_SMOKE %s checks=%d failures=%d source=PCK renderer_config=forward_plus" % [status, checks, failures.size()])
+	print("PACKAGED_DEMO_SMOKE %s checks=%d failures=%d source=exported_PCK renderer_config=forward_plus" % [status, checks, failures.size()])
 	quit(0 if failures.is_empty() else 1)
