@@ -1,0 +1,303 @@
+{
+  "title": "Observed Moon and catalog-derived star sky for Chroma-Labyrinth",
+  "retrieved_utc_date": "2026-10-29",
+  "offline_runtime": true,
+  "reference_moon_radius_metres": 1737400.0,
+  "height_decode": "metres = (normalized_R *65280 + normalized_G *255) *0.5 -10000; import PNG lossless as linear data (NO source_color)",
+  "global_uv": "u=(longitude_degrees+180)/360; v=(90-latitude_degrees)/180",
+  "regional_uv": "u=(longitude-west)/(east-west); v=(north-latitude)/(north-south)",
+  "sources": [
+    {
+      "name": "lroc_color_poles_16k.tif",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_poles_16k.tif",
+      "bytes": 187004094,
+      "sha256": "dbff4356479764d89f9fd7722140043eddbc2cafbad4dec5950858e2df77ac54"
+    },
+    {
+      "name": "starmap_2020_8k.exr",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004800/a004851/starmap_2020_8k.exr",
+      "bytes": 130530278,
+      "sha256": "dc6c4f413e85707a29a25a9451148154554ecca2c996f84fa8f47b65ef9ff7c4"
+    },
+    {
+      "name": "NAC_ROI_COPERNICLOF_E102N3413_5M.TIF",
+      "url": "https://pds.lroc.im-ldi.com/data/LRO-L-LROC-5-RDR-V1.0/LROLRC_2001/EXTRAS/BROWSE/NAC_ROI/COPERNICLOF/NAC_ROI_COPERNICLOF_E102N3413_5M.TIF",
+      "bytes": 76099625,
+      "sha256": "ec1efbe96bc37ef08b7ed9afe97e1ad91128d3a4d937b9c2076d7566a85ae8dc"
+    },
+    {
+      "name": "NAC_DTM_COPRNICUS01.TIF",
+      "url": "https://pds.lroc.im-ldi.com/data/LRO-L-LROC-5-RDR-V1.0/LROLRC_2001/DATA/SDP/NAC_DTM/COPRNICUS01/NAC_DTM_COPRNICUS01.TIF",
+      "bytes": 98914991,
+      "sha256": "89b6c4051ce6a9e359ddd79c5feb9f1d90be62ac85525de81c2c7f33ce79b130"
+    },
+    {
+      "name": "NAC_DTM_COPRNICUS01_README.TXT",
+      "url": "https://pds.lroc.im-ldi.com/data/LRO-L-LROC-5-RDR-V1.0/LROLRC_2001/DATA/SDP/NAC_DTM/COPRNICUS01/NAC_DTM_COPRNICUS01_README.TXT",
+      "bytes": 8816,
+      "sha256": "c0ed06cefce8a29fdae4efbeaba595336d280b64918e3c16709f3f301266c863"
+    },
+    {
+      "name": "copernicus_wac_4096.png",
+      "url": "https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/earth/moon_simp_cyl.map&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=LROC_WAC&STYLES=&FORMAT=image/png&SRS=EPSG:4326&BBOX=334,2,350,18&WIDTH=4096&HEIGHT=4096",
+      "bytes": 14528060,
+      "sha256": "ce99fb96c58b064973fabead41c2fdc1d07057f1b81939ac41018bd69b0bda68"
+    },
+    {
+      "name": "ldem_64_uint.tif",
+      "url": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/ldem_64_uint.tif",
+      "bytes": 530934146,
+      "sha256": "0f40bce8b42864deddb6943a38474879e691d5b20647aa5e54c2612b23106499"
+    },
+    {
+      "name": "cloud_combined_2048.jpg",
+      "url": "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg",
+      "bytes": 829367,
+      "sha256": "daddaad84d7a33bbbc86cdda3f591099f57cee8607b7bcf3b67eb7e4f7a1c793",
+      "verified_utc_date": "2026-10-30"
+    }
+  ],
+  "outputs": [
+    {
+      "file": "moon_albedo_16k.jpg",
+      "bytes": 43689874,
+      "sha256": "1f9b0ee0ce7b1e97c1ea150c328d138ec367e2a2c4255e5ac120671e53b138fd",
+      "dimensions": [
+        16384,
+        8192
+      ],
+      "bounds_degrees": {
+        "west": -180.0,
+        "east": 180.0,
+        "north": 90.0,
+        "south": -90.0
+      },
+      "color_space": "sRGB",
+      "source": "lroc_color_poles_16k.tif",
+      "transformation": "Original 16384x8192 pixels, JPEG quality95 4:4:4; no resize or sharpening"
+    },
+    {
+      "file": "moon_height_8k.png",
+      "bytes": 49497282,
+      "sha256": "490ed0bf149de664a871e6784c4125b19007c7d1e41976b1eeab3ac8ead06f7a",
+      "dimensions": [
+        8192,
+        4096
+      ],
+      "bounds_degrees": {
+        "west": -180.0,
+        "east": 180.0,
+        "north": 90.0,
+        "south": -90.0
+      },
+      "color_space": "linear data",
+      "source": "ldem_64_uint.tif",
+      "transformation": "Area reduction 23040x11520 to8192x4096; RG half-metre packing",
+      "height_range_metres": [
+        -9098.939453125,
+        10746.6279296875
+      ]
+    },
+    {
+      "file": "moon_region_albedo.jpg",
+      "bytes": 16893229,
+      "sha256": "5220aff341c963d6edb48226e6fbf3c3c42671d843cd0edc1f1ec4a9a2b6c201",
+      "bounds_degrees": {
+        "west": -19.305144567048444,
+        "east": -18.169577048927067,
+        "north": 11.09458537048965,
+        "south": 9.245515290313223
+      },
+      "dimensions": [
+        4951,
+        8192
+      ],
+      "source_metres_per_pixel": 5.0,
+      "projection": "spherical equirectangular",
+      "standard_parallel_degrees": 10.2,
+      "sphere_radius_metres": 1737400.0,
+      "output_dimensions": [
+        4951,
+        8192
+      ],
+      "source": "NAC_ROI_COPERNICLOF_E102N3413_5M.TIF",
+      "color_space": "sRGB",
+      "transformation": "Area downsample, JPEG quality96. Actual monochrome low-Sun orthophoto with baked shadows, NOT unlit albedo.",
+      "output_metres_per_pixel": 6.844482421875,
+      "source_dimensions": [
+        6778,
+        11214
+      ]
+    },
+    {
+      "file": "moon_region_mask.png",
+      "bytes": 88097,
+      "sha256": "0ee8407bc8b4ac6310aeeb28c853064b43ccbd06a9602f49fc6b20410d6aa462",
+      "dimensions": [
+        4951,
+        8192
+      ],
+      "bounds_degrees": {
+        "west": -19.305144567048444,
+        "east": -18.169577048927067,
+        "north": 11.09458537048965,
+        "south": 9.245515290313223
+      },
+      "transformation": "Zero/nodata validity, 12pixel feather; no invented photo content"
+    },
+    {
+      "file": "moon_region_height.png",
+      "bytes": 10597281,
+      "sha256": "9a844000b9baf27fead38609ec2a0bf84e1035cd95169978eeeded3232e391f3",
+      "dimensions": [
+        4951,
+        8192
+      ],
+      "bounds_degrees": {
+        "west": -19.305144567048444,
+        "east": -18.169577048927067,
+        "north": 11.09458537048965,
+        "south": 9.245515290313223
+      },
+      "source": [
+        "ldem_64_uint.tif",
+        "NAC_DTM_COPRNICUS01.TIF"
+      ],
+      "color_space": "linear data",
+      "fine_dtm": {
+        "bounds_degrees": {
+          "west": -18.76745213644199,
+          "east": -18.39641045449872,
+          "north": 10.629432285401244,
+          "south": 8.792728912556155
+        },
+        "dimensions": [
+          2218,
+          11139
+        ],
+        "source_metres_per_pixel": 4.9999999999999,
+        "projection": "spherical equirectangular",
+        "standard_parallel_degrees": 9.71128,
+        "sphere_radius_metres": 1737400.0
+      },
+      "output_metres_per_pixel": 6.844482421875,
+      "height_range_metres": [
+        -3451.470703125,
+        859.1399536132812
+      ],
+      "transformation": "LOLA global measured heights, replaced by measured 5m NAC stereo elevations inside valid footprint; 250m boundary feather. Linear resampling and RG half-metre packing.",
+      "limitation": "Fine stereo relief only within NAC_DTM_COPRNICUS01 valid footprint; elsewhere source LOLA has64pixels/degree (~474m equatorial spacing)."
+    },
+    {
+      "file": "stars_8k.png",
+      "bytes": 46318350,
+      "sha256": "1f804b6c7c3c04cddb2d9983db9667cd65f83b2665045ee037b2023f61c94c51",
+      "dimensions": [
+        8192,
+        4096
+      ],
+      "color_space": "sRGB",
+      "source": "starmap_2020_8k.exr",
+      "transformation": "Normalized linear EXR RGB[0,1] transferred to sRGB8 losslessPNG, same8192x4096 pixels; no clipping, exposure adjustment, tonemapping or resizing. Quantization is documented by measured conversion error.",
+      "projection": "Celestial ICRF/J2000 plate carree, RA0hours at horizontal center, RA increases left, north at top",
+      "luminance_sample_percentiles": {
+        "min": 0.0,
+        "p50": 0.0015176349552348256,
+        "p90": 0.009721217676997185,
+        "p99": 0.03560131415724754,
+        "p99.9": 0.19806930422782898,
+        "max": 1.0
+      },
+      "maximum_linear_rgb_quantization_error": 0.00439453125,
+      "credit": "NASA/Goddard Space Flight Center Scientific Visualization Studio; Gaia DR2: ESA/Gaia/DPAC; Ernie Wright (USRA)"
+    },
+    {
+      "file": "moon_wac_copernicus_4k.jpg",
+      "bytes": 4634014,
+      "sha256": "00f606d247f8b8c5669d62e9a7ff76842305e67664ab90491727dd77b158dc5a",
+      "dimensions": [
+        4096,
+        4096
+      ],
+      "bounds_degrees": {
+        "west": -26.0,
+        "east": -10.0,
+        "south": 2.0,
+        "north": 18.0
+      },
+      "color_space": "sRGB",
+      "source": "copernicus_wac_4096.png",
+      "source_layer": "USGS planetary WMS LROC_WAC, LROC global morphology100m June2013, edge updateFeb2016",
+      "source_metres_per_pixel": 100.0000418,
+      "output_equatorial_metres_per_pixel": 118.45058759433391,
+      "transformation": "4096-square WMS reprojection from native100m observed LROC morphology, JPEG96; no enlargement or generated details. Monochrome photograph includes sunlight/shadows."
+    },
+    {
+      "file": "moon_wac_height.png",
+      "bytes": 1259274,
+      "sha256": "b846a122e97f045635ba2e8372f7f9765e4679f80df5791bf0004357710d34e6",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bounds_degrees": {
+        "west": -26.0,
+        "east": -10.0,
+        "south": 2.0,
+        "north": 18.0
+      },
+      "color_space": "linear data",
+      "source": "ldem_64_uint.tif",
+      "output_equatorial_metres_per_pixel": 473.80235037733564,
+      "height_range_metres": [
+        -3595.5,
+        1075.0
+      ],
+      "transformation": "Exact pixel crop of native64pixels/degree LOLA, original half-metre values packedRG; no resampling."
+    },
+    {
+      "file": "earth_clouds_2k.jpg",
+      "bytes": 829367,
+      "sha256": "daddaad84d7a33bbbc86cdda3f591099f57cee8607b7bcf3b67eb7e4f7a1c793",
+      "dimensions": [
+        2048,
+        1024
+      ],
+      "bounds_degrees": {
+        "west": -180.0,
+        "east": 180.0,
+        "south": -90.0,
+        "north": 90.0
+      },
+      "color_space": "grayscale cloud brightness used as coverage, not a calibrated optical-depth measurement",
+      "source": "cloud_combined_2048.jpg",
+      "original_nasa_url": "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg",
+      "retrieved_from": "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg",
+      "credit": "NASA Goddard Space Flight Center; Reto Stoeckli; Robert Simmon",
+      "transformation": "Exact NASA download bytes, no resizing or image manipulation",
+      "limitation": "Historical Blue Marble composite cloud pattern; not current or simulated live weather.",
+      "verified_utc_date": "2026-10-30"
+    }
+  ],
+  "documentation": [
+    "https://svs.gsfc.nasa.gov/4720/",
+    "https://svs.gsfc.nasa.gov/4851/",
+    "https://data.lroc.im-ldi.com/lroc/view_rdr/NAC_ROI_COPERNICLOF",
+    "https://data.lroc.im-ldi.com/lroc/view_rdr/NAC_DTM_COPRNICUS01",
+    "https://astrogeology.usgs.gov/search/map/moon_lro_lroc_wac_global_morphology_mosaic_100m",
+    "https://svs.gsfc.nasa.gov/30614/",
+    "https://science.nasa.gov/earth/earth-observatory/the-blue-marble-true-color-global-imagery-at-1km-resolution/"
+  ],
+  "license_evidence": [
+    "https://svs.gsfc.nasa.gov/help/",
+    "https://lroc.im-ldi.com/about/terms",
+    "https://www.usgs.gov/media/images/moon-lro-lroc-wac-global-morphology-mosaic-100-m",
+    "https://www.nasa.gov/nasa-brand-center/images-and-media/"
+  ],
+  "limitations": [
+    "Visualization assets, not a scientific reconstruction or navigation product.",
+    "The 16k global map has finite resolution; it does not resolve metre-scale rocks.",
+    "The regional photograph includes original sunlight/shadows. It is not a measured reflectance map.",
+    "No generated detail, AI enlargement, invented stars or synthetic craters are included in these assets."
+  ]
+}

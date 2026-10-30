@@ -1,0 +1,189 @@
+{
+	"benchmarks": [
+		{
+			"draw_calls": 89.0,
+			"flight_clock_end": 333.530751,
+			"flight_clock_start": 330.528981,
+			"frames": 880,
+			"gpu": "NVIDIA GeForce RTX 4070",
+			"median_fps": 294.031167303734,
+			"median_ms": 3.401,
+			"p95_ms": 3.461,
+			"resolution": "(1920, 1080)",
+			"video_memory_bytes": 3625961856.0,
+			"view": "Copernicus through actual glass floor"
+		},
+		{
+			"draw_calls": 80.0,
+			"flight_clock_end": 337.181611333332,
+			"flight_clock_start": 334.179232333333,
+			"frames": 684,
+			"gpu": "NVIDIA GeForce RTX 4070",
+			"median_fps": 228.102189781022,
+			"median_ms": 4.384,
+			"p95_ms": 4.466,
+			"resolution": "(1920, 1080)",
+			"video_memory_bytes": 3625954496.0,
+			"view": "Copernicus panorama with live passengers and HUD"
+		},
+		{
+			"draw_calls": 43.0,
+			"flight_clock_end": 455.232423,
+			"flight_clock_start": 452.232175,
+			"frames": 1265,
+			"gpu": "NVIDIA GeForce RTX 4070",
+			"median_fps": 422.654268808115,
+			"median_ms": 2.366,
+			"p95_ms": 2.425,
+			"resolution": "(1920, 1080)",
+			"video_memory_bytes": 3631484560.0,
+			"view": "Earthrise panorama"
+		}
+	],
+	"captures": [
+		{
+			"altitude": 116979.5521875,
+			"camera_mask": 112,
+			"camera_rotation": "(-0.621081, -2.677945, 0.0)",
+			"error": 0,
+			"flight_seconds": 103.4,
+			"image": "user://lunar_earth_orbit.png",
+			"phase": 5,
+			"player_local": "(0.0, 0.04, 19.5)",
+			"resolution": "(1920, 1080)"
+		},
+		{
+			"altitude": 313941231.472,
+			"camera_mask": 112,
+			"camera_rotation": "(-0.14889, 3.141593, 0.0)",
+			"error": 0,
+			"flight_seconds": 180.0,
+			"image": "user://lunar_translunar.png",
+			"phase": 6,
+			"player_local": "(0.0, 0.04, 19.5)",
+			"resolution": "(1920, 1080)"
+		},
+		{
+			"altitude": 376207964.8,
+			"camera_mask": 112,
+			"camera_rotation": "(-0.380506, 3.141593, 0.0)",
+			"error": 0,
+			"flight_seconds": 246.0,
+			"image": "user://lunar_moon_approach.png",
+			"phase": 7,
+			"player_local": "(0.0, 0.04, 19.5)",
+			"resolution": "(1920, 1080)"
+		},
+		{
+			"altitude": 376285560.0,
+			"camera_mask": 112,
+			"camera_rotation": "(-0.576375, 3.141593, 0.0)",
+			"error": 0,
+			"flight_seconds": 285.0,
+			"image": "user://lunar_lunar_horizon.png",
+			"phase": 8,
+			"player_local": "(0.0, 0.04, 19.5)",
+			"resolution": "(1920, 1080)"
+		},
+		{
+			"altitude": 376286600.0,
+			"camera_mask": 112,
+			"camera_rotation": "(-0.54042, 3.141593, 0.0)",
+			"error": 0,
+			"flight_seconds": 330.0,
+			"image": "user://lunar_copernicus_panorama.png",
+			"phase": 8,
+			"player_local": "(0.0, 0.04, 19.5)",
+			"resolution": "(1920, 1080)"
+		},
+		{
+			"altitude": 376286600.0,
+			"camera_mask": 112,
+			"camera_rotation": "(-0.54042, 3.141593, 0.0)",
+			"error": 0,
+			"flight_seconds": 330.0,
+			"image": "user://lunar_copernicus_hud.png",
+			"phase": 8,
+			"player_local": "(0.0, 0.04, 19.5)",
+			"resolution": "(1920, 1080)"
+		},
+		{
+			"altitude": 376286600.0,
+			"camera_mask": 112,
+			"camera_rotation": "(-1.275547, -2.976444, 0.0)",
+			"error": 0,
+			"flight_seconds": 330.0,
+			"image": "user://lunar_copernicus_glass_floor.png",
+			"phase": 8,
+			"player_local": "(1.599998, 0.04, 20.0)",
+			"resolution": "(1920, 1080)"
+		},
+		{
+			"altitude": 376286600.0,
+			"camera_mask": 112,
+			"camera_rotation": "(1.325818, -2.498091, 0.0)",
+			"error": 0,
+			"flight_seconds": 333.530751,
+			"image": "user://lunar_stars_roof.png",
+			"phase": 8,
+			"player_local": "(0.0, 0.04, 19.5)",
+			"resolution": "(1920, 1080)"
+		},
+		{
+			"altitude": 376286600.0,
+			"camera_mask": 112,
+			"camera_rotation": "(-0.395769, -1.951303, 0.0)",
+			"error": 0,
+			"flight_seconds": 337.181611333332,
+			"image": "user://lunar_lunar_window_seat.png",
+			"phase": 8,
+			"player_local": "(1.550003, 0.0, -6.86)",
+			"resolution": "(1920, 1080)"
+		},
+		{
+			"altitude": 376186053.021184,
+			"camera_mask": 112,
+			"camera_rotation": "(0.07983, 3.141593, 0.0)",
+			"error": 0,
+			"flight_seconds": 451.8,
+			"image": "user://lunar_earthrise.png",
+			"phase": 9,
+			"player_local": "(0.0, 0.04, 19.5)",
+			"resolution": "(1920, 1080)"
+		},
+		{
+			"altitude": 376186053.021184,
+			"camera_mask": 112,
+			"camera_rotation": "(0.203248, 2.961201, 0.0)",
+			"error": 0,
+			"flight_seconds": 451.8,
+			"image": "user://lunar_earth_optical_10deg.png",
+			"phase": 9,
+			"player_local": "(0.0, 0.04, 19.5)",
+			"resolution": "(1920, 1080)"
+		},
+		{
+			"altitude": 51882683.2483532,
+			"camera_mask": 112,
+			"camera_rotation": "(-0.099669, 3.141593, 0.0)",
+			"error": 0,
+			"flight_seconds": 541.999999999999,
+			"image": "user://lunar_earth_return.png",
+			"phase": 10,
+			"player_local": "(0.0, 0.04, 19.5)",
+			"resolution": "(1920, 1080)"
+		},
+		{
+			"altitude": 0.0,
+			"camera_mask": 15,
+			"camera_rotation": "(0.0, -2.677945, 0.0)",
+			"error": 0,
+			"flight_seconds": 673.999999999999,
+			"image": "user://lunar_returned_gate.png",
+			"phase": -1,
+			"player_local": "(0.0, 0.04, 19.5)",
+			"resolution": "(1920, 1080)"
+		}
+	],
+	"failed": false
+}

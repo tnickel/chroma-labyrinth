@@ -125,17 +125,15 @@ func _make_materials() -> void:
 	_materials.blue_light = _emissive(Color("bbc9c4"), 0.18)
 	_materials.red_light = _emissive(Color("ff4735"), 2.0)
 	_materials.green_light = _emissive(Color("58dd91"), 2.0)
-	var glass := _material(Color(0.74, 0.87, 0.91, 0.045), 0.035, 0.0)
+	var glass := _material(Color(0.025, 0.035, 0.04, 0.035), 0.035, 0.0)
 	glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	glass.disable_receive_shadows = true
 	glass.cull_mode = BaseMaterial3D.CULL_DISABLED
-	glass.clearcoat_enabled = true
-	glass.clearcoat = 0.8
-	glass.clearcoat_roughness = 0.06
 	_materials.glass = glass
 	_materials.floor_glass = glass.duplicate()
-	_materials.floor_glass.albedo_color = Color(0.66, 0.84, 0.89, 0.055)
+	_materials.floor_glass.albedo_color = Color(0.025, 0.035, 0.04, 0.035)
 	_materials.roof_glass = glass.duplicate()
-	_materials.roof_glass.albedo_color = Color(0.79, 0.89, 0.94, 0.035)
+	_materials.roof_glass.albedo_color = Color(0.025, 0.035, 0.04, 0.035)
 
 func _material(color: Color, roughness: float, metal: float) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
@@ -567,11 +565,11 @@ func _build_service_areas() -> void:
 	_box(Vector3(1.63, 1.71, -10.5), Vector3(0.018, 0.37, 0.36), _materials.blue_light, "FlightControlDisplay")
 	_label("CHROMA ORBIT", Vector3(0, 2.16, -11.98), 0.006, Color("d2b782"))
 	_label("PANORAMA FLIGHT  /  A01", Vector3(0, 1.82, -11.97), 0.0027, Color("496778"))
-	_label("R  RUNDFLUG STARTEN", Vector3(0.15, 1.45, -11.96), 0.0034, Color("335a67"))
+	_label("R  MONDREISE STARTEN", Vector3(0.15, 1.45, -11.96), 0.0034, Color("335a67"))
 	_label("E  FENSTERPLATZ / AUFSTEHEN", Vector3(0, 1.15, -11.96), 0.0027, Color("496778"))
 	for side in [-1.0, 1.0]:
 		_box(Vector3(side * 1.72, 1.02, 10.75), Vector3(0.62, 2.04, 0.35), _materials.lining, "AftServiceCabinet", BODY_LAYER, true)
-	_label("360Ã‚Â°  PANORAMAKUPPEL", Vector3(0, 2.70, 11.17), 0.0028, Color("496778"), Vector3(0, PI, 0)).double_sided = false
+	_label("360°  PANORAMAKUPPEL", Vector3(0, 2.70, 11.17), 0.0028, Color("496778"), Vector3(0, PI, 0)).double_sided = false
 	# A side-facing portal sign remains visible while approaching from bridge.
 	_label("A01  /  ORBIT LINER", Vector3(-2.34, 2.55, -10), 0.0031, Color("a9d9dc"), Vector3(0, -PI * 0.5, 0))
 

@@ -11,7 +11,7 @@ Prozedurales 3D-Labyrinth für Godot 4.7.2 mit Forward+. Vier animierte Menschen
 * **Teil 2: Flugterminal-Anbau & Rundflug in den Orbit:** [https://youtu.be/k2gzdX22JTw](https://youtu.be/k2gzdX22JTw)  
   *Der neue Flughafen, Einstieg in den Orbit Liner, Echtzeit-Raumflug und Einblicke in den iterativen KI-Workflow.*
 
-> **Showcase-Hintergrund:** Entwickelt in nur **3–4 Stunden** mit der **Astra-KI** (GPT-4 Astra / Codex) und Godot 4 – ohne Vorkenntnisse in 3D-Grafikprogrammierung. Ausführliche Doku: [doc/PROJEKT_DOKUMENTATION.md](doc/PROJEKT_DOKUMENTATION.md) & [doc/HOMEPAGE_SHOWCASE_BLOG.md](doc/HOMEPAGE_SHOWCASE_BLOG.md).
+> **Showcase-Hintergrund:** Entwickelt in nur **3–4 Stunden** mit der **Astra-KI** (GPT-4 Astra / Codex) und Godot 4.7.2 – ohne Vorkenntnisse in 3D-Grafikprogrammierung. Ausführliche Doku: [doc/PROJEKT_DOKUMENTATION.md](doc/PROJEKT_DOKUMENTATION.md) & [doc/HOMEPAGE_SHOWCASE_BLOG.md](doc/HOMEPAGE_SHOWCASE_BLOG.md).
 
 
 ## Windows-Download
@@ -28,7 +28,7 @@ erlaubt den Vergleich mit dem heruntergeladenen Archiv.
 ## Aus dem Quellcode starten
 
 1. Repository klonen oder als ZIP herunterladen und entpacken. Die Modelle sind enthalten; Git LFS ist nicht nötig.
-2. [Godot 4.7.2](https://godotengine.org/download/archive/4.7.2-stable/) installieren. Die Demo wurde mit dieser Version und dem Vulkan-Renderer Forward+ geprüft.
+2. [Godot 4.7.2](https://godotengine.org/download/archive/4.7.2-stable/) installieren. Die Demo wurde mit dem Build `4.7.2.stable.official.ed1daf0bf` und dem Vulkan-Renderer Forward+ geprüft.
 3. `project.godot` im Editor öffnen und F5 drücken. Der erste Import erzeugt den lokalen `.godot`-Cache.
 
 Unter Windows übernimmt `start.bat` Import und Start. Der Starter sucht der Reihe
@@ -189,15 +189,58 @@ flugmechanisch oder strukturell validierte Flugzeugentwicklung.
 
 1. Über Gate A01 und die Glasbrücke in die Maschine gehen.
 2. Mit **E** neben einer Sitzreihe einen Fensterplatz einnehmen.
-3. **R** drücken oder nach **Esc** den Button **RUNDFLUG STARTEN** anklicken.
+3. **R** drücken oder nach **Esc** den Button **MONDREISE STARTEN** anklicken.
    Der Start ist nur an Bord möglich und setzt den Spieler nötigenfalls an
    einen Fensterplatz. **In der Heckkuppel startet R den Flug direkt im Stehen**;
    Position und freie Bewegung bleiben erhalten. Der Mausblick bleibt frei.
-4. Der rund **150 Sekunden** lange Flug führt automatisch über Rollen, Start,
-   Wolken, Orbitalpanorama und Landung zurück zum Gate. **E** erlaubt auch
+4. Die **11:14 Minuten** lange Reise führt über Start, Wolken und Erdorbit zum
+   Mond, über die Copernicus-Region, zum Erdaufgang und zurück zum Gate. **E** erlaubt auch
    währenddessen das Aufstehen und Gehen in der geschlossenen Kabine.
 5. Nach dem Andocken öffnet die Tür. Mit **E** aufstehen und denselben Weg durch
    Brücke und Terminal zurück ins Labyrinth gehen. Weitere Flüge sind möglich.
+
+**L** leitet ab der Wolkenreise eine vorzeitige Rückkehr ein. Auch am Mond beginnt
+sie an der aktuellen Position der Außenwelt und führt über Rückflug, Wiedereintritt
+und Landung zurück. Der Fortschritt richtet sich nach der verbleibenden Reisezeit.
+Das Flugdisplay nennt die aktuelle Phase und empfiehlt passende Blickrichtungen.
+Für die Mondoberfläche besonders geeignet: in der Heckkuppel durch den Glasboden
+schauen, für Erdaufgang und Anflug zum Heck sehen, für Sterne nach oben schauen.
+
+### Mondreise und echte Bilddaten
+
+Die Mondansicht verwendet Bild- und Höhendaten der Lunar Reconnaissance Orbiter
+Mission, einschließlich einer regionalen Detailkarte für den nahen Überflug.
+Die globale Farbkarte hat 16.384 × 8.192 Pixel. Eine WAC-Aufnahme deckt rund
+485 × 485 km um Copernicus mit etwa 118 m pro Pixel ab; der nahe NAC-Ausschnitt
+hat 4.951 × 8.192 Pixel und rund 6,84 m pro Pixel aus 5-m-Quelldaten.
+Die feinen Stereo-Höhen gelten im tatsächlich gemessenen Streifen; außerhalb
+liefern die gröberen LOLA-Messungen das Gelände. Die Karten werden räumlich
+ineinander überblendet und behalten ihre dokumentierten geografischen Grenzen.
+Der lange Kraterüberflug senkt sich von 15 auf fünf Kilometer Höhe und steigt
+anschließend für den Erdaufgang wieder an (Höhen relativ zur Mond-Referenzkugel).
+Relief, wechselnde Perspektive und
+gerichtetes Sonnenlicht ergänzen die fotografische Oberfläche. Beim Anflug
+wächst der Mond kontinuierlich, während die Erde auf der Rückreise größer wird.
+Der Sternhimmel stammt aus der NASA-Karte **Deep Star Maps 2020**, die auf
+astronomischen Sternkatalogen beruht; die frühere zufällige Sternverteilung entfällt.
+
+Die Quelldaten, Bildverarbeitung, Auflösungen und Nutzungsbedingungen sind in
+[assets/space/SOURCE.json](assets/space/SOURCE.json) und
+[assets/space/LICENSES.txt](assets/space/LICENSES.txt) dokumentiert.
+Alle fertigen Ressourcen werden mitgeliefert; während des Flugs erfolgt kein
+Download. Flugzeiten, Route, Beleuchtung und Belichtung sind für die Erlebnisreise
+gestaltet. Die Demo bildet keine aktuelle astronomische Konstellation oder
+physikalisch mögliche Reisegeschwindigkeit eines Verkehrsflugzeugs nach.
+
+`scripts/airport/LunarFlightPlan.gd` enthält den von der Grafik getrennten
+Reiseverlauf. `Tests/LunarFlightRegression.gd` prüft Übergänge und Rückreisen.
+`tools/lunar_review.gd` erstellt Forward+-Aufnahmen aus der echten Kabine und
+Kuppel sowie Messungen mit laufenden Passagieren und normalem Flugdisplay.
+Der geprüfte Stand und seine Grenzen stehen in
+[doc/lunar/validation.txt](doc/lunar/validation.txt).
+
+![Copernicus-Überflug aus der echten Heckkuppel](doc/lunar/lunar_copernicus_panorama.png)
+![NASA-Sternkarte durch das Dach der Panoramakuppel](doc/lunar/lunar_stars_roof.png)
 
 Das ist ein inszenierter Passagier-Erlebnisflug: Ein gewöhnliches Verkehrsflugzeug
 fliegt nicht ins All. Die Kabine behält stabile Physikkoordinaten; bewegte

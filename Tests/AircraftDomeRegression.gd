@@ -230,7 +230,7 @@ func _standing_journey() -> void:
 	_check(_player.global_position.is_equal_approx(point), "Orbital transition teleports the dome visitor")
 	_check(_cabin.contains(_player.global_position), "In-flight dome visitor is considered outside the cabin")
 	_check(_airport.request_return(), "Dome visitor cannot request a return from orbital flight")
-	_airport.advance_simulation(80.0)
+	_airport.advance_simulation(_airport._remaining_time() + 1.0)
 	_player.set_physics_process(false)
 	_check(not _airport.flight_active and _airport.completed_flights == completed + 1, "Dome journey does not dock exactly once")
 	_check(_airport.seated_index == -1 and not _player.movement_locked, "Returning from dome journey creates an unrequested seat lock")

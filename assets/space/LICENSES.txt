@@ -1,0 +1,90 @@
+CHROMA LUNAR FLIGHT - IMAGE AND ELEVATION CREDITS
+
+Textures in this directory derive from the NASA SVS, NASA Earth Observatory,
+LROC Planetary Data System and USGS products listed below. They are shipped locally; the
+game never downloads data. SHA256, exact source URLs, coordinates, dimensions
+and processing are recorded in SOURCE.json. Conversion is reproducible with
+tools/fetch_space_assets.py. Conversion dependencies are build tools only.
+
+1. Global lunar color and LOLA elevations
+   Credit: NASA's Scientific Visualization Studio / Ernie Wright.
+   Lunar Reconnaissance Orbiter / LROC camera team and LOLA instrument team.
+   CGI Moon Kit, https://svs.gsfc.nasa.gov/4720/
+   Color source: 2019 LROC 16384x8192 RGB map (Hapke normalized WAC mosaic).
+   Elevation source: LOLA 64 pixels/degree unsigned half-metre global map.
+   Public domain under the NASA SVS usage statement:
+   https://svs.gsfc.nasa.gov/help/ (Can I use your visualizations?)
+
+2. Copernicus NE Wall orthophoto and NE Melt Pond stereo terrain
+   Credit: NASA/GSFC/Arizona State University.
+   NAC_ROI_COPERNICLOF_E102N3413_5M (5 m/pixel orthophoto)
+   NAC_DTM_COPRNICUS01 (5 m/pixel stereo digital terrain model)
+   Source data downloaded through the LROC PDS archive, not decorative or
+   curated website images. PDS-delivered data is public domain, per:
+   https://lroc.im-ldi.com/about/terms
+   Product pages:
+   https://data.lroc.im-ldi.com/lroc/view_rdr/NAC_ROI_COPERNICLOF
+   https://data.lroc.im-ldi.com/lroc/view_rdr/NAC_DTM_COPRNICUS01
+   Instrument: Robinson et al. (2010), Lunar Reconnaissance Orbiter Camera
+   (LROC) Instrument Overview, Space Science Reviews 150, 81-124.
+   Stereo topography: Henriksen et al. (2017), Extracting accurate and precise
+   topography from LROC narrow angle camera stereo observations,
+   Icarus 283, 122-137, doi:10.1016/j.icarus.2016.05.012.
+
+3. Star sky
+   Credit: NASA/Goddard Space Flight Center Scientific Visualization Studio.
+   Gaia DR2: ESA/Gaia/DPAC. Visualization: Ernie Wright (USRA).
+   Deep Star Maps 2020, https://svs.gsfc.nasa.gov/4851/
+   Credits checked against the official source page on 2026-10-30.
+   Only the star map is used; constellation figure/grid overlays are not bundled.
+   Catalog-derived sky using Hipparcos-2, Tycho-2 and Gaia DR2 with supporting
+   catalogs described on the source page. The Milky Way is formed from those
+   measured star distributions; this is not a randomly generated star texture.
+   Public domain under https://svs.gsfc.nasa.gov/help/.
+   Original 8192x4096 linear OpenEXR (all values within [0,1]) converted to
+   sRGB8 lossless PNG without resizing, clipping or tonemapping. This conversion
+   introduces finite 8-bit quantization, documented in SOURCE.json.
+   No NASA logo or endorsement is implied.
+
+GENERAL NASA MEDIA GUIDANCE
+https://www.nasa.gov/nasa-brand-center/images-and-media/
+
+4. Broad Copernicus surroundings (WAC morphology)
+   Credit: NASA/GSFC/Arizona State University / USGS Astrogeology Science Center.
+   Actual LROC Wide Angle Camera global morphology100m mosaic, June2013;
+   USGS WMS metadata reports a February2016 edge fix. A4096-square request
+   covers longitude26W..10W, latitude2N..18N (~485km); output spacing118.45m
+   at the equator is coarser than native100m, never an enlargement.
+   Documentation:
+   https://astrogeology.usgs.gov/search/map/moon_lro_lroc_wac_global_morphology_mosaic_100m
+   Explicit public-domain declaration:
+   https://www.usgs.gov/media/images/moon-lro-lroc-wac-global-morphology-mosaic-100-m
+   Photographic layer LROC_WAC from the official planetarymaps.usgs.gov WMS;
+   exact bounded request and checksum in SOURCE.json. The image contains
+   original sunlight/shadows. A matching native1024-square LOLA height crop
+   uses the existing NASA source from item1, without resampling.
+
+5. Earth cloud cover: Blue Marble2002
+   Credit: NASA Goddard Space Flight Center; Reto Stoeckli (cloud composite),
+   Robert Simmon (enhancements). A historical MODIS image composite, not live
+   weather or procedural noise. NASA background and credits:
+   https://svs.gsfc.nasa.gov/30614/
+   https://science.nasa.gov/resource/blue-marble/
+   Original NASA file:
+   https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg
+   Retrieved directly from NASA on 2026-10-30 and shipped unchanged as
+   earth_clouds_2k.jpg (2048x1024, 829367 bytes).
+   SHA256: daddaad84d7a33bbbc86cdda3f591099f57cee8607b7bcf3b67eb7e4f7a1c793
+   This replaces the previously used university-mirror file; no mirror image
+   is shipped or used by the download helper anymore.
+   NASA's original collection explicitly lists the Clouds dataset:
+   https://science.nasa.gov/earth/earth-observatory/the-blue-marble-true-color-global-imagery-at-1km-resolution/
+   NASA media-use guidance applies as linked above; no endorsement is implied.
+
+SCIENTIFIC LIMITS
+The global color map was prepared by NASA for visualization. The regional
+photograph contains baked sunlight and shadows. The 5 m stereo DEM covers a
+narrower strip than the orthophoto; surrounding heights use the coarser LOLA
+measurements. Resampling/feathering makes their join usable for graphics,
+but does not create additional measured detail. These graphics are not
+scientific navigation data or a precise reconstruction of current illumination.

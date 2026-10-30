@@ -26,6 +26,11 @@ ins Flugzeug. Der Mittelgang fuehrt bis in die grosse Heck-Glaskuppel.
 E: Fensterplatz / aufstehen. R: Rundflug starten, in der Kuppel auch im Stehen.
 L: vorzeitige Rueckkehr ab der Wolkenreise. M: Fluggeraeusch stummschalten.
 Nach der Landung oeffnet die Tuer wieder. Freies Gehen bleibt im Flug moeglich.
+Die Mondreise dauert 11:14 Minuten: Erdorbit, Mondanflug, Copernicus-Ueberflug,
+Erdaufgang und Rueckkehr. In der Heckkuppel durch den Glasboden nach unten
+schauen, um die Mondoberflaeche zu sehen; zum Heck fuer Anflug und Erdaufgang.
+Nach oben sind Sterne und Milchstrasse zu sehen. NASA/LRO-Bild- und Hoehendaten
+sowie die Sternkarte sind enthalten. Zeiten und Route sind fuer die Demo gestaltet.
 
 FEHLERSUCHE
 Bei einem fehlgeschlagenen Start pruefen, ob das ZIP vollstaendig entpackt ist.

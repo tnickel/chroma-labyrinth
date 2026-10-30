@@ -82,7 +82,7 @@ func _run() -> void:
 	_check(player.global_position.is_equal_approx(start_point), "Takeoff teleports the seated passenger")
 	var phases := {0: true, 1: true}
 	var highest_altitude := 0.0
-	for step in 600:
+	for step in ceili(airport.FlightPlan.total_duration() * 4.0) + 4:
 		if not airport.flight_active:
 			break
 		phases[airport.phase_index] = true
@@ -90,7 +90,7 @@ func _run() -> void:
 		_check(is_finite(airport.current_altitude) and is_finite(airport.current_speed), "Flight produces a non-finite instrument value")
 		_check(airport.current_altitude >= 0.0 and airport.current_speed >= 0.0, "Flight produces negative altitude/speed")
 		highest_altitude = maxf(highest_altitude, airport.current_altitude)
-	_check(phases.size() == 10, "Full round trip skips one of the ten flight phases")
+	_check(phases.size() == airport.DURATIONS.size(), "Full round trip skips a planned flight phase")
 	_check(highest_altitude >= 100000.0, "Round trip never reaches the orbital panorama")
 	_check(airport.completed_flights == 1, "First flight does not complete exactly once")
 	await physics_frame
@@ -111,7 +111,7 @@ func _run() -> void:
 	airport.advance_simulation(55.0)
 	_check(airport.phase_index == 4, "Repeat flight did not reach cloud cruise")
 	await _key(KEY_L)
-	_check(airport.phase_index == 6, "Real L input does not request an early descent")
+	_check(airport.phase_index == airport.FlightPlan.Phase.DESCENT, "Real L input does not request an early descent")
 	var return_height: float = airport.current_altitude
 	airport.advance_simulation(5.0)
 	_check(airport.current_altitude < return_height, "An early return climbs to a fixed approach altitude instead of descending")

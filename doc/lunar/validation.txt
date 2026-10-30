@@ -1,0 +1,94 @@
+CHROMA LUNAR - VALIDATION, 2026-10-30
+
+Environment: Godot 4.7.2.stable.official.ed1daf0bf, Windows x64,
+Vulkan 1.4.341, Forward+, NVIDIA GeForce RTX 4070, 1920x1080.
+
+Production journey
+- 16 phases, 674 seconds / 11:14. Moon approach, 150-second Copernicus
+  survey, Earthrise, return to Earth and boarding at the original gate.
+- Closest altitude is 5 km above the lunar reference sphere (1737.4 km
+  radius), not a terrain-following clearance of exactly 5 km.
+- Scenic time compression and staged viewing attitude; no orbital mechanics
+  or current astronomical constellation is claimed.
+
+Actual images and heights
+- 16k global lunar color; 8k global LOLA height encoding.
+- 4096-square WAC image covers roughly 485 km with ~118 m samples.
+- Native 1024-square LOLA height crop supplies the surrounding terrain.
+- NAC photo and regional terrain: 4951x8192, ~6.84 m samples from 5 m source
+  products; fine stereo data only inside its documented narrow footprint.
+- Real 8k catalog-derived star map and historical NASA Earth cloud map.
+- All nine asset SHA256 checks passed. Sources, transformations and licenses:
+  assets/space/SOURCE.json and LICENSES.txt. No runtime network requests.
+
+Automated checks
+- LunarFlightRegression: 13,327 checks, 0 failures. Endpoint continuity,
+  full journey, interruptions during lunar phases, repeated departures,
+  original player position and camera/boarding restoration.
+- AirportRegression: 8,339 checks, 1,448 route samples, 16 phases,
+  2 completed journeys, 0 failures.
+- AircraftDomeRegression: 1,518 checks, 201 route samples,
+  144 deck samples, 13 optical rays, 0 failures.
+- AirportLightingRegression: 68 checks, 0 failures.
+- AirportPassengersRegression (--fixed-fps 60): 11,598 checks,
+  2,892 route samples, 9 boardings, 3 returners, 22 people, 0 failures.
+  One minimap camera interpolation warning remains in this accelerated test;
+  there were no missing resources or script errors in its final run.
+- Windows PCK export succeeded. PackagedDemoSmoke run from the package folder
+  against that exported PCK: 245 checks, 0 failures. Checks include all nine
+  space textures at their full intended dimensions and the shader include.
+  This is an export/resource test, not a newly published GitHub Release.
+
+GPU review
+tools/lunar_review.gd used the actual Main scene, player camera, cabin, glass
+and scenery. The production controller advanced through the whole journey;
+the journey clock paused only between screenshot samples. Benchmark windows
+ran the normal flight clock, passengers and flight HUD. No concurrent GPU
+test ran. Vsync was disabled. Thirteen captures and gate restoration passed.
+All final GPU/export logs were free of script/shader error and warning lines.
+
+View                                      Median FPS   Median ms   P95 ms
+Copernicus through glass floor                294.03        3.40      3.46
+Copernicus panorama / passengers + HUD         228.10        4.38      4.47
+Earthrise panorama                            422.65        2.37      2.42
+
+These are 3-second measurements after warmup at these viewpoints on this GPU,
+not minimum FPS promises for the entire demo or other machines. Reported
+renderer video memory was about 3.63 GB, including the rest of the Main scene.
+The machine-readable measurements and camera states are in lunar_review.json.
+
+Visual fixes verified on the GPU
+- Grazing lunar rays converge to a solid horizon instead of missing terrain.
+- Wide photographic coverage replaces the white coarse ring beyond the NAC
+  strip. Exposure matching and geographic feathering blend image products.
+- Transparent glass no longer paints diffuse structural shadows across sky
+  or lunar terrain. Dielectric reflections and actual window frames remain.
+- Distant Earth uses real cloud coverage instead of striped procedural noise;
+  optical 10-degree diagnostic confirms readable continents and cloud systems.
+- The Earth remains its physical angular size of approximately two degrees
+  when viewed near the Moon; the 10-degree capture is explicitly a QA zoom.
+
+Screenshots are unretouched Godot viewport captures. The photo's deep crater
+shadows are present in the original low-Sun source. Stars are exposed for
+visibility alongside the lunar terrain; display exposure is a scenic choice.
+Fine rocks everywhere on the Moon, live weather and scientific navigation
+accuracy are outside the source-data resolution and the demo's scope.
+
+Local logs (ignored build outputs):
+build/lunar-complete-gpu-review.log
+build/lunar-flight-regression.log
+build/lunar-airport-regression.log
+build/lunar-passengers-regression-final.log
+build/lunar-export-check.log
+build/lunar-packaged-smoke.log
+
+Source/credit follow-up, 2026-10-30
+- Added the source-page Gaia DR2: ESA/Gaia/DPAC credit to the star notices and
+  reproducible manifest generation.
+- Replaced the university-mirror cloud image with the directly downloaded NASA
+  Blue Marble cloud file (2048x1024, 829367 bytes). SHA256 and exact NASA URL
+  recorded in assets/space/SOURCE.json. No resizing or image editing applied.
+- All nine output hashes verified; Python helper compiles; Godot reimport exits
+  successfully without errors (build/rights-source-import.log).
+- The GPU screenshots and exported-pack smoke above predate this source-file
+  replacement. This follow-up has not been committed or publicly released.

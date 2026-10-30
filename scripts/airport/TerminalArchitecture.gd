@@ -123,7 +123,7 @@ static func _signage(host) -> void:
 	_text(host, "ABFLUG", position + basis * Vector3(1.97, 0.56, 0.13), yaw, 0.13, Color("8da5aa"))
 	_text(host, "A01", position + basis * Vector3(-3.08, -0.04, 0.13), yaw, 0.46, Color("eef3e7"))
 	_text(host, "CHROMA ORBIT", position + basis * Vector3(-1.60, 0.05, 0.13), yaw, 0.25, Color("e9eeea"))
-	_text(host, "Panorama flight / 150 sec", position + basis * Vector3(-1.58, -0.31, 0.13), yaw, 0.105, Color("a4b8bd"))
+	_text(host, "Moon voyage / 11 min", position + basis * Vector3(-1.58, -0.31, 0.13), yaw, 0.105, Color("a4b8bd"))
 	_text(host, "BOARDING", position + basis * Vector3(1.67, 0.03, 0.13), yaw, 0.17, Color("b9d9bb"))
 	host._status_label = _text(host, "RUNWAY 18 / 36", position + basis * Vector3(-3.08, -0.59, 0.13), yaw, 0.105, Color("8da5aa"))
 	_text(host, "GATE TO YOUR LEFT", position + basis * Vector3(1.67, -0.59, 0.13), yaw, 0.09, Color("c0cbc8"))

@@ -1,6 +1,6 @@
-# Chroma — Spaces in Motion: 3D-GameDev mit Godot 4 & Astra-KI in Rekordzeit
+# Chroma — Spaces in Motion: 3D-GameDev mit Godot 4.7.2 & Astra-KI in Rekordzeit
 
-> **Vom Prompt zum begehbaren 3D-Museum mit Raumflug:** Wie mit der Godot Engine 4 (Forward+) und KI-gestützter Entwicklung (GPT-4 Astra / Codex) innerhalb von nur **3 bis 4 Stunden** ein vollständiges, mehrstöckiges 3D-Showcase mit High-End-Grafik, dynamischen Shadern und prozeduraler Architektur entstand – ohne Vorkenntnisse in 3D-Grafikprogrammierung.
+> **Vom Prompt zum begehbaren 3D-Museum mit Raumflug:** Wie mit der Godot Engine 4.7.2 (Forward+) und KI-gestützter Entwicklung (GPT-4 Astra / Codex) innerhalb von nur **3 bis 4 Stunden** ein vollständiges, mehrstöckiges 3D-Showcase mit High-End-Grafik, dynamischen Shadern und prozeduraler Architektur entstand – ohne Vorkenntnisse in 3D-Grafikprogrammierung.
 
 ---
 
@@ -12,7 +12,7 @@
 * **Embed-Code für Homepage:**
 ```html
 <div class="video-container">
-  <iframe width="560" height="315" src="https://www.youtube.com/embed/B02GJjcgpKk" title="Chroma Godot 4 Showcase Teil 1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/B02GJjcgpKk" title="Chroma Godot 4.7.2 Showcase Teil 1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 ```
 
@@ -24,7 +24,7 @@
 * **Embed-Code für Homepage:**
 ```html
 <div class="video-container">
-  <iframe width="560" height="315" src="https://www.youtube.com/embed/k2gzdX22JTw" title="Chroma Godot 4 Showcase Teil 2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/k2gzdX22JTw" title="Chroma Godot 4.7.2 Showcase Teil 2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 ```
 
@@ -81,8 +81,8 @@ Ein zentraler Punkt im Video ist das Mindset beim Entwickeln mit KI:
 
 ## Teaser-Text für Social Media & Startseite (Short Pitch)
 
-> **🚀 In 3 Stunden zum eigenen 3D-Museum mit Raumflug in Godot 4!**  
+> **🚀 In 3 Stunden zum eigenen 3D-Museum mit Raumflug in Godot 4.7.2!**
 > Wie viel GameDev-Erfahrung braucht man heute noch, um beeindruckende 3D-Welten mit Reflexionen, Shadern und eigener Flugmechanik zu bauen? Fast keine – wenn man die richtige KI an seiner Seite hat.  
-> In diesem Showcase-Projekt zeigen wir, wie mit der Godot Engine 4 und Astra-KI in nur einem Nachmittag ein vollständiges Labyrinth mit 8 Themenwelten und echtem Orbit-Flug entstanden ist.  
+> In diesem Showcase-Projekt zeigen wir, wie mit der Godot Engine 4.7.2 und Astra-KI in nur einem Nachmittag ein vollständiges Labyrinth mit 8 Themenwelten und echtem Orbit-Flug entstanden ist.
 > 📺 Jetzt beide Videos ansehen und den Code auf GitHub ausprobieren!
 

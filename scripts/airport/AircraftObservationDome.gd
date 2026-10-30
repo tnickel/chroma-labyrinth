@@ -22,18 +22,18 @@ func build() -> void:
 	var glass := StandardMaterial3D.new()
 	# Native dielectric Fresnel and the reflected sky provide angular glints;
 	# no screen refraction, extra viewport or animated opacity is required.
-	glass.albedo_color = Color(0.78, 0.89, 0.92, 0.075)
+	# Glass transmits the exterior; a pale diffuse lobe otherwise paints a
+	# grey veil and the frame's shadow across the black lunar sky.
+	glass.albedo_color = Color(0.025, 0.035, 0.04, 0.035)
 	glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	glass.disable_receive_shadows = true
 	glass.cull_mode = BaseMaterial3D.CULL_DISABLED
 	glass.roughness = 0.045
 	glass.metallic = 0.0
 	glass.metallic_specular = 0.58
-	glass.clearcoat_enabled = true
-	glass.clearcoat = 1.0
-	glass.clearcoat_roughness = 0.045
 	glass.render_priority = 1 # After cloud volume(-100) and aerial ground(-110).
 	var deck_material := glass.duplicate() as StandardMaterial3D
-	deck_material.albedo_color = Color(0.73, 0.86, 0.88, 0.045)
+	deck_material.albedo_color = Color(0.025, 0.035, 0.04, 0.035)
 	deck_material.roughness = 0.055
 	deck_material.render_priority = 2
 	var metal := PBR.get_material("aluminum").duplicate() as StandardMaterial3D

@@ -46,6 +46,21 @@ func _run() -> void:
 		_resource("res://assets/airport/models/%s/%s_1k.gltf" % [entry, entry], "PackedScene")
 	for filename in ["daylight_2k.hdr", "earth_july_5400.jpg", "earth_mediterranean_500m.jpg", "ground/lancaster_naip_2022.jpg"]:
 		_resource("res://assets/airport/" + filename, "Texture2D")
+	for filename: String in ["moon_albedo_16k.jpg", "moon_height_8k.png", "moon_region_albedo.jpg", "moon_region_height.png", "moon_region_mask.png", "stars_8k.png", "moon_wac_copernicus_4k.jpg", "moon_wac_height.png", "earth_clouds_2k.jpg"]:
+		var texture := _resource("res://assets/space/" + filename, "Texture2D") as Texture2D
+		if texture != null:
+			var expected := Vector2i(8192, 4096)
+			if filename == "moon_albedo_16k.jpg":
+				expected = Vector2i(16384, 8192)
+			elif filename.begins_with("moon_region_"):
+				expected = Vector2i(4951, 8192)
+			elif filename == "moon_wac_copernicus_4k.jpg":
+				expected = Vector2i(4096, 4096)
+			elif filename == "moon_wac_height.png":
+				expected = Vector2i(1024, 1024)
+			elif filename == "earth_clouds_2k.jpg":
+				expected = Vector2i(2048, 1024)
+			_check(Vector2i(texture.get_width(), texture.get_height()) == expected, "Lunar texture was reduced or lost its source dimensions: " + filename)
 	for folder in ["terrazzo", "wood", "leather", "fabric", "concrete", "apron_concrete", "asphalt", "terrain/grass", "terrain/rock"]:
 		for map in ["albedo", "normal", "roughness"]:
 			var extension := ".jpg"
@@ -54,6 +69,7 @@ func _run() -> void:
 			_resource("res://assets/airport/%s/%s%s" % [folder, map, extension], "Texture2D")
 	for shader in ["airport_flight_sky", "airport_flight_ground", "airport_cloud_volume", "airport_people_cloth", "airport_terrain", "architectural_surface", "glacier_prism"]:
 		_resource("res://shaders/%s.gdshader" % shader, "Shader")
+	_resource("res://shaders/lunar_surface.gdshaderinc", "ShaderInclude")
 	var main := _resource("res://Main.tscn", "PackedScene") as PackedScene
 	if main == null or not failures.is_empty():
 		await _finish()

@@ -110,17 +110,17 @@ func _run() -> void:
 		_look(targets[direction])
 		await _capture("orbit_" + direction)
 	# Exercise an early return when requested, otherwise retain the complete
-	# 150-second production itinerary. Neither path writes phase internals.
+	# production itinerary. Neither path writes phase internals.
 	if "--early-return" in OS.get_cmdline_user_args():
 		if not _airport.request_return():
 			_failure("Production request_return() rejected the orbital phase.")
-		_airport.advance_simulation(41.0)
+		_airport.advance_simulation(maxf(0.0, _airport._remaining_time() - 17.0))
 	else:
-		_airport.advance_simulation(48.0)
+		_airport.advance_simulation(maxf(0.0, _airport._remaining_time() - 17.0))
 	_look(Vector3(4.8, -0.8, 24.0))
 	await _capture("landing")
 	var return_position := _player.global_position
-	_airport.advance_simulation(16.0)
+	_airport.advance_simulation(_airport._remaining_time() + 1.0)
 	# Advance the production reveal timer, not the flight phase.
 	_airport._process(0.8)
 	_airport.lighting.update_view()

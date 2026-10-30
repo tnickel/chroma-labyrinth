@@ -8,9 +8,10 @@ const Scenery = preload("res://scripts/airport/FlightScenery.gd")
 const CabinAudio = preload("res://scripts/airport/AirportAudio.gd")
 const Lighting = preload("res://scripts/airport/AirportLighting.gd")
 const Passengers = preload("res://scripts/airport/AirportPassengers.gd")
+const FlightPlan = preload("res://scripts/airport/LunarFlightPlan.gd")
 const PLANE_ORIGIN := Vector3(106, 0, 2)
-const DURATIONS := [4.0, 8.0, 12.0, 24.0, 18.0, 28.0, 24.0, 16.0, 10.0, 6.0]
-const PHASES := ["TÜREN SCHLIESSEN", "ROLLEN", "START", "STEIGFLUG", "ÜBER DEN WOLKEN", "ORBITALPANORAMA", "SINKFLUG", "LANDEANFLUG", "LANDUNG", "ANDOCKEN"]
+const DURATIONS = FlightPlan.DURATIONS
+const PHASES = FlightPlan.PHASES
 
 var terminal: Node3D
 var cabin: Node3D
@@ -21,6 +22,7 @@ var phase_elapsed := 0.0
 var flight_elapsed := 0.0
 var current_altitude := 0.0
 var current_speed := 0.0
+var current_sample: Dictionary = FlightPlan.sample(0, 0.0)
 var travel := 0.0
 var completed_flights := 0
 var seated_index := -1
@@ -37,6 +39,8 @@ var _in_flight_view := false
 var _descent_altitude := 120000.0
 var _descent_speed := 850.0
 var _approach_altitude := 7000.0
+var _return_origin: Dictionary = {}
+var _early_descent := false
 var _head_height := 1.62
 var _reveal_remaining := 0.0
 var _cinematic_hidden := false
@@ -45,6 +49,7 @@ var _panel: PanelContainer
 var _status: Label
 var _description: Label
 var _instruments: Label
+var _viewing_hint: Label
 var _progress: ProgressBar
 var _start_button: Button
 var _seat_button: Button
@@ -162,6 +167,9 @@ func start_flight() -> bool:
 	_descent_altitude = 120000.0
 	_descent_speed = 850.0
 	_approach_altitude = 7000.0
+	_return_origin.clear()
+	_early_descent = false
+	current_sample = FlightPlan.sample(0, 0.0)
 	_cinematic_hidden = false
 	_reveal_remaining = 0.0
 	_audio.chime()
@@ -203,7 +211,7 @@ func advance_simulation(delta: float) -> void:
 			phase_elapsed = 0.0
 			if phase_index == 1:
 				_enter_flight_view()
-			elif phase_index == 6:
+			elif phase_index == FlightPlan.Phase.DESCENT:
 				_descent_altitude = current_altitude
 				_descent_speed = current_speed
 				_approach_altitude = minf(7000.0, _descent_altitude * 0.65)
@@ -213,50 +221,45 @@ func advance_simulation(delta: float) -> void:
 		var orbit := smoothstep(18000.0, 70000.0, current_altitude)
 		var bank := sin(flight_elapsed * 0.09) * 0.035 * smoothstep(500.0, 6000.0, current_altitude)
 		scenery.set_flight_sample(current_altitude, current_speed, travel, bank, orbit)
+		scenery.set_lunar_sample(current_sample)
 
 func _sample_flight() -> void:
 	var t := clampf(phase_elapsed / DURATIONS[phase_index], 0.0, 1.0)
 	var smooth := t * t * (3.0 - 2.0 * t)
-	match phase_index:
-		0:
-			current_altitude = 0.0
-			current_speed = 0.0
-		1:
-			current_altitude = 0.0
-			current_speed = lerpf(0, 18, smooth)
-		2:
-			current_altitude = lerpf(0, 900, smooth)
-			current_speed = lerpf(18, 150, smooth)
-		3:
-			current_altitude = lerpf(900, 4200, smooth)
-			current_speed = lerpf(150, 320, smooth)
-		4:
-			current_altitude = lerpf(4200, 6500, smooth)
-			current_speed = lerpf(320, 850, smooth)
-		5:
-			current_altitude = lerpf(6500, 120000, smoothstep(0.0, 0.65, t))
-			current_speed = 850.0
-		6:
-			current_altitude = lerpf(_descent_altitude, _approach_altitude, smooth)
-			current_speed = lerpf(_descent_speed, 220, smooth)
-		7:
-			current_altitude = lerpf(_approach_altitude, 180, smooth)
-			current_speed = lerpf(220, 90, smooth)
-		8:
-			current_altitude = lerpf(180, 0, smooth)
-			current_speed = lerpf(90, 0, smooth)
-		9:
-			current_altitude = 0.0
-			current_speed = 0.0
+	current_sample = FlightPlan.sample(phase_index, t)
+	if phase_index == FlightPlan.Phase.HOMEBOUND and not _return_origin.is_empty():
+		current_sample = FlightPlan.return_sample(_return_origin, t)
+	elif phase_index > FlightPlan.Phase.HOMEBOUND and not _return_origin.is_empty():
+		current_sample.orbit_angle = float(_return_origin.orbit_angle) + 0.04
+	if _early_descent:
+		current_sample.orbit_angle = _return_origin.orbit_angle
+		current_sample.lunar_altitude = _return_origin.lunar_altitude
+		# Cloud/low-orbit returns never climb to an unrelated default altitude.
+		if phase_index == FlightPlan.Phase.DESCENT:
+			current_sample.earth_altitude = lerpf(_descent_altitude, _approach_altitude, smooth)
+			current_sample.speed = lerpf(_descent_speed, 220.0, smooth)
+		elif phase_index == FlightPlan.Phase.APPROACH:
+			current_sample.earth_altitude = lerpf(_approach_altitude, 180.0, smooth)
+	current_altitude = current_sample.earth_altitude
+	current_speed = current_sample.speed
+
+func get_flight_sample() -> Dictionary:
+	return current_sample.duplicate()
 
 func request_return() -> bool:
-	if phase_index < 4 or phase_index >= 6:
+	if phase_index < FlightPlan.Phase.CLOUDS or phase_index >= FlightPlan.Phase.HOMEBOUND:
 		return false
-	_descent_altitude = current_altitude
-	_descent_speed = current_speed
-	_approach_altitude = minf(7000.0, _descent_altitude * 0.65)
-	phase_index = 6
+	_return_origin = current_sample.duplicate()
+	if float(current_sample.transfer) > 0.000001:
+		phase_index = FlightPlan.Phase.HOMEBOUND
+	else:
+		_descent_altitude = current_altitude
+		_descent_speed = current_speed
+		_approach_altitude = minf(7000.0, _descent_altitude * 0.65)
+		_early_descent = true
+		phase_index = FlightPlan.Phase.DESCENT
 	phase_elapsed = 0.0
+	_sample_flight()
 	return true
 
 func _finish_flight() -> void:
@@ -264,6 +267,9 @@ func _finish_flight() -> void:
 	phase_elapsed = 0.0
 	current_altitude = 0.0
 	current_speed = 0.0
+	current_sample = FlightPlan.sample(0, 0.0)
+	_return_origin.clear()
+	_early_descent = false
 	_in_flight_view = false
 	scenery.set_active(false)
 	terminal.set_active(true)
@@ -342,28 +348,29 @@ func _update_ui() -> void:
 	var airport_zone := _player.global_position.x > 40.0 and _player.global_position.y < 5.5
 	_panel.visible = (airport_zone or flight_active) and not _showcase._menu_open and not _showcase._transition and not _cinematic_hidden
 	_status.text = PHASES[phase_index] if flight_active else ("WILLKOMMEN ZURÜCK / A01" if completed_flights > 0 else "BOARDING / GATE A01")
-	_description.text = "E: Aufstehen / Fensterplatz  ·  H: HUD  ·  M: Ton" if flight_active else ("E: Fensterplatz / Aufstehen   ·   R: Rundflug starten" if on_board else "Zur Maschine: Gate A01 → Fluggastbrücke\nRückweg: CHROMA / GALERIEN ←")
+	_description.text = "E: Aufstehen / Fensterplatz  ·  H: HUD  ·  M: Ton" if flight_active else ("E: Fensterplatz / Aufstehen   ·   R: Mondreise starten" if on_board else "Zur Maschine: Gate A01 → Fluggastbrücke\nRückweg: CHROMA / GALERIEN ←")
 	if in_observatory:
-		_description.text = "360° PANORAMAKUPPEL  ·  Frei umsehen und gehen\nH: HUD  ·  M: Ton" if flight_active else "360° PANORAMAKUPPEL  ·  Glasboden\nR: Rundflug hier starten  ·  Rückweg durch die Kabine"
+		_description.text = "360° PANORAMAKUPPEL  ·  Frei umsehen und gehen\nH: HUD  ·  M: Ton" if flight_active else "360° PANORAMAKUPPEL  ·  Glasboden\nR: Mondreise hier starten  ·  Rückweg durch die Kabine"
 	if _boarding_notice_remaining > 0.0 and not flight_active:
 		_description.text = "Ein Passagier steigt gerade ein.\nSobald die Tür frei ist, R erneut drücken."
-	_instruments.text = "%s m   /   %d km/h   /   %d s bis Gate" % [_format_height(current_altitude), roundi(current_speed * 3.6), ceili(_remaining_time())] if flight_active else "Rundflug ca. 2:30 min  ·  Esc: Maus für Buttons freigeben"
+	_instruments.text = _flight_instruments() if flight_active else "Mondreise %s min  ·  Szenischer Zeitraffer\nEsc: Maus für Buttons freigeben" % _format_time(FlightPlan.total_duration())
+	_viewing_hint.text = FlightPlan.viewing_hint(phase_index) if flight_active else "Erde → Copernicus → Erdaufgang → Gate A01"
 	_progress.visible = flight_active
-	_progress.value = float(phase_index) * 10.0 + phase_elapsed / DURATIONS[phase_index] * 10.0 if flight_active else 0.0
+	_progress.value = 100.0 * flight_elapsed / maxf(0.001, flight_elapsed + _remaining_time()) if flight_active else 0.0
 	_start_button.visible = not flight_active
 	_start_button.disabled = not on_board
-	_start_button.text = "RUNDFLUG STARTEN  [R]" if on_board else "ZUERST ÜBER GATE A01 EINSTEIGEN"
+	_start_button.text = "MONDREISE STARTEN  [R]" if on_board else "ZUERST ÜBER GATE A01 EINSTEIGEN"
 	_seat_button.visible = on_board and not in_observatory
 	_seat_button.text = "AUFSTEHEN  [E]" if seated_index >= 0 else "AM FENSTER PLATZ NEHMEN  [E]"
 	_seat_button.disabled = seated_index < 0 and _nearest_seat(true) < 0
 	_return_button.visible = flight_active
-	_return_button.disabled = phase_index < 4 or phase_index >= 6
+	_return_button.disabled = phase_index < FlightPlan.Phase.CLOUDS or phase_index >= FlightPlan.Phase.HOMEBOUND
 	var alpha := 0.0
 	if phase_index == 0:
 		alpha = smoothstep(3.3, 4.0, phase_elapsed)
 	elif phase_index == 1:
 		alpha = 1.0 - smoothstep(0.0, 0.7, phase_elapsed)
-	elif phase_index == 9:
+	elif phase_index == FlightPlan.Phase.DOCK:
 		alpha = smoothstep(5.3, 6.0, phase_elapsed)
 	elif not flight_active:
 		alpha = _reveal_remaining / 0.7
@@ -380,6 +387,20 @@ func _remaining_time() -> float:
 func _format_height(height: float) -> String:
 	return str(roundi(height))
 
+func _format_time(seconds: float) -> String:
+	var rounded := ceili(maxf(seconds, 0.0))
+	return "%d:%02d" % [rounded / 60, rounded % 60]
+
+func _flight_instruments() -> String:
+	var position_text: String
+	if float(current_sample.lunar_mix) > 0.45:
+		position_text = "Mondhöhe %.1f km  ·  Copernicus-Region" % (float(current_sample.lunar_altitude) / 1000.0)
+	elif float(current_sample.transfer) > 0.001:
+		position_text = "Entfernung Erde %s km" % str(roundi(current_altitude / 1000.0))
+	else:
+		position_text = "%s m über Erde  ·  %d km/h" % [_format_height(current_altitude), roundi(current_speed * 3.6)]
+	return "%s\n%s bis Gate  ·  Szenischer Zeitraffer" % [position_text, _format_time(_remaining_time())]
+
 func _build_ui() -> void:
 	_ui = CanvasLayer.new()
 	_ui.name = "AirportHUD"
@@ -388,9 +409,9 @@ func _build_ui() -> void:
 	_panel = PanelContainer.new()
 	_panel.name = "FlightPanel"
 	_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	_panel.offset_left = -470
+	_panel.offset_left = -500
 	_panel.offset_right = -24
-	_panel.offset_top = -294
+	_panel.offset_top = -330
 	_panel.offset_bottom = -64
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.014, 0.035, 0.055, 0.94)
@@ -405,23 +426,25 @@ func _build_ui() -> void:
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 7)
 	_panel.add_child(column)
-	column.add_child(_label("C H R O M A   O R B I T", 18, Color("8be9e1")))
+	column.add_child(_label("C H R O M A   L U N A R", 18, Color("8be9e1")))
 	_status = _label("", 15, Color("f2d399"))
 	column.add_child(_status)
 	_description = _label("", 12, Color("d5dfe3"))
 	column.add_child(_description)
 	_instruments = _label("", 12, Color("a7bdc7"))
 	column.add_child(_instruments)
+	_viewing_hint = _label("", 12, Color("e3d5b4"))
+	column.add_child(_viewing_hint)
 	_progress = ProgressBar.new()
 	_progress.custom_minimum_size.y = 6
 	_progress.show_percentage = false
 	column.add_child(_progress)
-	_start_button = _button("RUNDFLUG STARTEN  [R]", column)
+	_start_button = _button("MONDREISE STARTEN  [R]", column)
 	_start_button.name = "StartFlightButton"
 	_start_button.pressed.connect(start_flight)
 	_seat_button = _button("AM FENSTER PLATZ NEHMEN  [E]", column)
 	_seat_button.pressed.connect(toggle_seat)
-	_return_button = _button("LANDUNG VORZIEHEN  [L]", column)
+	_return_button = _button("FRÜHER ZUR ERDE ZURÜCK  [L]", column)
 	_return_button.pressed.connect(request_return)
 	_fade = ColorRect.new()
 	_fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

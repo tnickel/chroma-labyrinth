@@ -4,6 +4,7 @@ extends Node3D
 const SKY_SHADER = preload("res://shaders/airport_flight_sky.gdshader")
 const GROUND_SHADER = preload("res://shaders/airport_flight_ground.gdshader")
 const CloudVolume = preload("res://scripts/airport/FlightCloudVolume.gd")
+const LunarWorld = preload("res://scripts/airport/LunarScenery.gd")
 const LAYER := 16
 const CABIN_LIGHT_MASK := 112 # scenery16 + cabin32 + cabin roof64
 const DOME_RADIUS := 6000.0
@@ -33,6 +34,8 @@ var _noise_texture: NoiseTexture2D
 var _daylight_sky: Sky
 var _orbital_sky: Sky
 var _orbital_reflections := false
+var lunar_state: Dictionary = {}
+var _roll := 0.0
 
 func build() -> void:
 	if _built:
@@ -84,13 +87,9 @@ func _build_environment() -> void:
 	sky.radiance_size = Sky.RADIANCE_SIZE_256
 	environment.sky = sky
 	_daylight_sky = sky
-	var orbital_atmosphere := ProceduralSkyMaterial.new()
-	orbital_atmosphere.sky_top_color = Color(0.001, 0.002, 0.008)
-	orbital_atmosphere.sky_horizon_color = Color("071b36")
-	orbital_atmosphere.ground_horizon_color = Color("175b8a")
-	orbital_atmosphere.ground_bottom_color = Color("12324e")
-	orbital_atmosphere.sky_energy_multiplier = 0.35
-	orbital_atmosphere.ground_energy_multiplier = 0.7
+	var orbital_atmosphere := PanoramaSkyMaterial.new()
+	orbital_atmosphere.panorama = load(LunarWorld.STARS_PATH)
+	orbital_atmosphere.energy_multiplier = 0.65
 	_orbital_sky = Sky.new()
 	_orbital_sky.sky_material = orbital_atmosphere
 	_orbital_sky.radiance_size = Sky.RADIANCE_SIZE_128
@@ -132,7 +131,9 @@ func _build_sky() -> void:
 	_sky_material.set_shader_parameter("daylight_panorama", load("res://assets/airport/daylight_2k.hdr"))
 	_sky_material.set_shader_parameter("earth_albedo", load("res://assets/airport/earth_july_5400.jpg"))
 	_sky_material.set_shader_parameter("earth_region", load("res://assets/airport/earth_mediterranean_500m.jpg"))
+	_sky_material.set_shader_parameter("earth_clouds", load("res://assets/space/earth_clouds_2k.jpg"))
 	_sky_material.set_shader_parameter("stage_origin", _world_origin)
+	LunarWorld.bind_textures(_sky_material)
 	var sky := _mesh(self, dome, _sky_material, "AtmosphereAndOrbitalEarth")
 	sky.extra_cull_margin = 10.0
 
@@ -225,6 +226,7 @@ func set_active(value: bool) -> void:
 		_sun.visible = value
 
 func reset_to_airport() -> void:
+	set_lunar_sample({})
 	set_flight_sample(0.0, 0.0, 0.0, 0.0, 0.0)
 
 func set_flight_sample(height: float, airspeed: float, distance: float, bank: float, orbital_mix: float) -> void:
@@ -235,6 +237,7 @@ func set_flight_sample(height: float, airspeed: float, distance: float, bank: fl
 	travel = distance
 	space_mix = clampf(orbital_mix, 0.0, 1.0)
 	var roll := clampf(bank, -0.20, 0.20)
+	_roll = roll
 	# The bank rotates the exterior panorama, direct sunlight and its reflection
 	# together. The shader receives the actual direction toward this light.
 	_sun.basis = Basis(Vector3.BACK, -roll) * Basis.looking_at(-DAYLIGHT_SUN_DIRECTION.normalized())
@@ -264,3 +267,25 @@ func set_flight_sample(height: float, airspeed: float, distance: float, bank: fl
 	environment.ambient_light_energy = lerpf(0.28, 0.12, darkening)
 	environment.background_energy_multiplier = lerpf(0.7, 0.15, darkening)
 	_sun.light_energy = lerpf(1.25, 1.5, darkening)
+
+func set_lunar_sample(parameters: Dictionary) -> void:
+	if not _built or _sky_material == null:
+		return
+	lunar_state = LunarWorld.apply(_sky_material, parameters)
+	if not is_instance_valid(_sun):
+		return
+	var transfer: float = lunar_state.transfer
+	var sunlight_mix := smoothstep(0.0, 0.72, transfer)
+	var sunlight := DAYLIGHT_SUN_DIRECTION.normalized().slerp(LunarWorld.LUNAR_SUN.normalized(), sunlight_mix)
+	_sun.basis = Basis(Vector3.BACK, -_roll) * Basis.looking_at(-sunlight)
+	_sky_material.set_shader_parameter("sun_direction_world", _sun.global_basis.z.normalized())
+	_sun.light_color = Color("fff0d6").lerp(Color("fffaf0"), sunlight_mix)
+	if transfer > 0.001:
+		# No blue atmospheric fill over the Moon. Modest neutral cabin exposure
+		# keeps faces readable without washing out the black sky and crater shade.
+		environment.ambient_light_color = Color("6d87b7").lerp(Color("a5a4a1"), sunlight_mix)
+		environment.ambient_light_energy = lerpf(0.12, 0.095, sunlight_mix)
+		_ground.visible = false
+		_cloud_volume.visible = false
+		_markers.visible = false
+		_trees.visible = false

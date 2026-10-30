@@ -86,6 +86,9 @@ try {
     $logRoot = Join-Path $runRoot 'logs'
     [void][IO.Directory]::CreateDirectory($packageRoot)
     [void][IO.Directory]::CreateDirectory($logRoot)
+    # Git ignore rules do not prevent Godot from importing cached source images.
+    # Keep raw astronomy downloads and previous exports outside its asset scan.
+    Write-Utf8 (Join-Path $buildRoot '.gdignore') ''
     $engineVersion = (Invoke-GodotStep 'version' @('--version')).Trim()
     [void](Invoke-GodotStep 'import' @('--headless', '--path', $projectRoot, '--log-file', (Join-Path $logRoot 'import-engine.log'), '--import'))
 

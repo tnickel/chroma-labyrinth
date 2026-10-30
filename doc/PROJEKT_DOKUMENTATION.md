@@ -2,13 +2,13 @@
 
 ## 1. Projektübersicht & Entstehungsgeschichte
 
-**Chroma — Spaces in Motion** (Projektordner `GDotLabyrith2`) ist ein 3D-Showcase-Projekt für die **Godot Engine 4** (Forward+ Renderer / Vulkan), das die Leistungsfähigkeit moderner KI-gestützter Spieleentwicklung demonstriert.
+**Chroma — Spaces in Motion** (Projektordner `GDotLabyrith2`) ist ein 3D-Showcase-Projekt für die **Godot Engine 4.7.2** (Forward+ Renderer / Vulkan), das die Leistungsfähigkeit moderner KI-gestützter Spieleentwicklung demonstriert.
 
 ### Kern-Fakten:
 * **Entwicklungszeit:** Innerhalb von nur **3 bis 4 Stunden** von Grund auf entwickelt.
 * **Entwickler-Hintergrund:** Erstellt von Thomas Nickel ohne tiefere Vorkenntnisse in 3D-Grafikprogrammierung, Shadern oder Vektormathematik.
 * **Entwicklungsmethode:** Vollständig dialogbasiert mit der **Astra-KI** (GPT-4 Astra / Codex). Die KI erzeugte den GDScript-Code, Shader-Dateien, Szenenstrukturen und automatische Regressionstests.
-* **Showcase-Zweck:** Das Projekt beweist, wie schnell und zugänglich High-End-3D-Entwicklung in Godot 4 durch iterative KI-Führung wird.
+* **Showcase-Zweck:** Das Projekt beweist, wie schnell und zugänglich High-End-3D-Entwicklung in Godot 4.7.2 durch iterative KI-Führung wird.
 
 ---
 
@@ -101,7 +101,7 @@ Im Erdgeschoss führt eine beschilderte Ostachse vom Atrium durch einen realen D
 
 ## 6. Technische Highlights & Render-Pipeline
 
-- **Engine-Version:** Godot 4.3+ / 4.7.2 Forward+ (Vulkan Rendering Backend).
+- **Engine-Version:** Godot 4.7.2 Stable Forward+ (Vulkan Rendering Backend).
 - **Echtzeitbeleuchtung:**
   - SDFGI (Signed Distance Field Global Illumination) für realistische indirekte Lichtausbreitung.
   - Screen-Space Reflections (SSR) & Planare Reflexions-Sonden für spiegelnde Böden und Fenster.

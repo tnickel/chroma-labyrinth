@@ -36,7 +36,7 @@ func _run() -> void:
 	for light: Light3D in airport.cabin.find_children("CabinCeilingLight*", "Light3D", true, false):
 		_check((light.layers & player.view_camera.cull_mask) != 0, "Actual flight camera sees each cabin fixture")
 		_check((light.light_cull_mask & 32) != 0, "Cabin fixtures still illuminate cabin geometry/passengers")
-	airport.advance_simulation(155.0)
+	airport.advance_simulation(airport._remaining_time() + 1.0)
 	lighting.update_view()
 	_check(not airport.flight_active, "Journey lands")
 	_check(_all_mode(lighting, GeometryInstance3D.GI_MODE_STATIC), "Landing restores airport indirect geometry")

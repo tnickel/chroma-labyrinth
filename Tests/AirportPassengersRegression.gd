@@ -90,7 +90,7 @@ func _run() -> void:
 	for actor in crowd.actors:
 		if terminal_positions.has(actor.serial):
 			_check(actor.global_position.is_equal_approx(terminal_positions[actor.serial]), "Terminal traffic continues to move during the isolated flight")
-	airport.advance_simulation(151.0)
+	airport.advance_simulation(airport._remaining_time() + 1.0)
 	airport.stand_up()
 	player.set_physics_process(false)
 	player.global_position = Vector3(72, 0.04, 4)

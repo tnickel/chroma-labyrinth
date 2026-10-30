@@ -1,6 +1,8 @@
 shader_type spatial;
 render_mode unshaded, cull_front, depth_draw_opaque, fog_disabled;
 
+#include "res://shaders/lunar_surface.gdshaderinc"
+
 uniform float altitude = 0.0;
 uniform float space_mix = 0.0;
 uniform float bank = 0.0;
@@ -11,6 +13,7 @@ uniform sampler2D noise_texture : repeat_enable, filter_linear_mipmap;
 uniform sampler2D daylight_panorama : repeat_enable, filter_linear_mipmap;
 uniform sampler2D earth_albedo : source_color, repeat_enable, filter_linear_mipmap;
 uniform sampler2D earth_region : source_color, repeat_disable, filter_linear_mipmap_anisotropic;
+uniform sampler2D earth_clouds : repeat_enable, filter_linear_mipmap;
 // GIBS native 500-m region: west -4.5, east31.5, north54, south18 degrees.
 uniform vec4 earth_region_uv_rect = vec4(0.4875, 0.2, 0.1, 0.2);
 varying vec3 world_point;
@@ -53,34 +56,32 @@ void fragment() {
     daylight = mix(photographed_sky, daylight, procedural_sky_mix);
     vec3 color = mix(daylight, vec3(0.0008, 0.0013, 0.004), orbital);
 
-    // Spherical sky cells generate fixed stars; they do not flicker or move
-    // with frame time. Broad Gaussian points avoid hard pixel-sized diamonds.
+    // NASA's catalogue-derived 8k star panorama preserves actual stellar
+    // positions, colours and the Milky Way. There are no randomized dots.
     vec2 angular = vec2(atan(d.x, d.z), asin(clamp(d.y, -1.0, 1.0)));
-    vec2 star_grid = angular * 450.0;
-    vec2 cell = floor(star_grid);
-    float seed = hash21(cell + 73.17);
-    vec2 offset = vec2(hash21(cell + 7.0), hash21(cell + 31.0));
-    vec2 delta = fract(star_grid) - mix(vec2(0.18), vec2(0.82), offset);
-    float star = exp(-dot(delta, delta) * 140.0) * step(0.985, seed);
-    color += mix(vec3(0.56, 0.72, 1.0), vec3(1.0, 0.85, 0.66), offset.x) * star * orbital * 3.0;
-    float galaxy = exp(-pow(dot(d, normalize(vec3(0.35, 0.62, 0.7))) * 5.0, 2.0));
-    color += vec3(0.018, 0.022, 0.04) * galaxy * fbm(angular * 18.0) * orbital;
+    // Rotate the celestial sphere as a whole to place the Milky Way above
+    // the observation dome; its equirectangular orientation is not mirrored.
+    vec3 celestial = mat3(vec3(1.0, 0.0, 0.0), vec3(0.0, 0.62, 0.7846), vec3(0.0, -0.7846, 0.62)) * d;
+    vec2 stellar_uv = vec2(fract(atan(celestial.x, -celestial.z) / 6.2831853 + 0.18), acos(clamp(celestial.y, -1.0, 1.0)) / 3.14159265);
+    vec3 stars = texture(stellar_panorama, stellar_uv).rgb;
+    color += stars * orbital * 2.8;
 
     // Normalized planet radius avoids million-metre vertex coordinates.
     // A ray/sphere intersection gives the correct lowering curved horizon.
     float h = max(altitude, 2.0) / 6371000.0;
     float radius_from_center = 1.0 + h;
-    float b = radius_from_center * d.y;
+    vec3 earth_center = earth_direction * radius_from_center;
+    float b = dot(-earth_center, d);
     float c = h * (2.0 + h);
     float discriminant = b * b - c;
     float horizon_y = -sqrt(max(0.0, 1.0 - 1.0 / (radius_from_center * radius_from_center)));
     if (b < 0.0 && discriminant > 0.0) {
         float t = -b - sqrt(discriminant);
-        vec3 surface = normalize(vec3(0.0, radius_from_center, 0.0) + d * t);
+        vec3 surface = normalize(-earth_center + d * t);
         vec2 continent_uv = surface.xz * 26.0 + vec2(5.2, 3.7 + travel * 0.000002);
         // Blue Marble satellite composite, geographically mapped on the same
         // sphere used for the horizon. Local up starts above the Mediterranean.
-        float latitude = 0.646 + travel / 6371000.0;
+        float latitude = 0.646 + min(travel, 350000.0) / 6371000.0;
         float longitude = 0.244;
         vec3 geo_up = vec3(cos(latitude) * cos(longitude), sin(latitude), cos(latitude) * sin(longitude));
         vec3 geo_east = vec3(-sin(longitude), 0.0, cos(longitude));
@@ -88,7 +89,15 @@ void fragment() {
         // The aircraft flies toward local -Z: +Z is geographic south. This
         // right-handed frame keeps satellite ground moving toward +Z as
         // latitude advances north, matching the runway and cloud parallax.
-        vec3 geographic = geo_east * surface.x + geo_up * surface.y - geo_north * surface.z;
+        // Reorient the geographic frame with the excursion's viewing attitude.
+        // Moving Earth from beneath us into the aft sky must not accidentally
+        // change the sub-observer location from Europe to the North Pacific.
+        vec3 earth_up = -earth_direction;
+        vec3 earth_east = normalize(vec3(1.0, 0.0, 0.0) - earth_up * earth_up.x);
+        vec3 earth_south = cross(earth_east, earth_up);
+        vec3 local_surface = vec3(dot(surface, earth_east), dot(surface, earth_up), dot(surface, earth_south));
+        vec3 geographic = geo_east * local_surface.x + geo_up * local_surface.y - geo_north * local_surface.z;
+        continent_uv = local_surface.xz * 26.0 + vec2(5.2, 3.7 + travel * 0.000002);
         vec2 earth_uv = vec2(atan(geographic.z, geographic.x) / 6.2831853 + 0.5, acos(clamp(geographic.y, -1.0, 1.0)) / 3.14159265);
         vec2 regional_uv = (earth_uv - earth_region_uv_rect.xy) / earth_region_uv_rect.zw;
         vec2 edge_distance = min(regional_uv, vec2(1.0) - regional_uv);
@@ -101,18 +110,39 @@ void fragment() {
         float cloud_density = fbm(cloud_uv) * 0.75 + fbm(cloud_uv * 5.3 + 17.0) * 0.25;
         float cloud = smoothstep(0.51, 0.69, cloud_density);
         float shadow_cloud = smoothstep(0.51, 0.69, fbm(cloud_uv + vec2(0.08, 0.04)) * 0.75 + fbm((cloud_uv + vec2(0.08, 0.04)) * 5.3 + 17.0) * 0.25);
+        float distant_earth = smoothstep(0.0, 0.08, transfer);
+        // NASA Blue Marble's observed global cloud composite supplies weather
+        // systems on the small distant Earth; keep close volumetric flight
+        // clouds and their existing local coverage in the atmospheric stages.
+        float observed_cloud = texture(earth_clouds, earth_uv).r;
+        float observed_shadow = texture(earth_clouds, earth_uv + vec2(0.0007, 0.0003)).r;
+        cloud = mix(cloud, observed_cloud, distant_earth);
+        shadow_cloud = mix(shadow_cloud, observed_shadow, distant_earth);
         planet *= 1.0 - shadow_cloud * 0.22;
         planet = mix(planet, vec3(0.86, 0.91, 0.96), cloud * 0.92);
-        float angle = clamp(-d.y + horizon_y, 0.0, 1.0);
+        float earth_alignment = dot(d, earth_direction);
+        float angle = clamp(earth_alignment + horizon_y, 0.0, 1.0);
         float haze = exp(-angle * 18.0) * 0.65;
+        // Angular dot differences vanish across the entire small distant
+        // Earth. Use the surface/view angle there so haze is confined to its
+        // atmospheric limb, instead of painting over every photographed pixel.
+        float distant_limb = pow(1.0 - clamp(dot(surface, -d), 0.0, 1.0), 4.0) * 0.50;
+        haze = mix(haze, distant_limb, smoothstep(0.0, 0.08, transfer));
         planet = mix(planet, vec3(0.14, 0.38, 0.68), haze);
-        planet *= 0.72 + 0.28 * max(dot(surface, sun_direction), 0.0);
+        float terrestrial_light = max(dot(surface, sun_direction), 0.0);
+        planet *= mix(0.72 + 0.28 * terrestrial_light, 0.055 + 1.1 * terrestrial_light, smoothstep(0.03, 0.3, transfer));
+        // Exposure for the sunlit blue-white Earth, retaining its terminator.
+        // This changes radiance, never the physical angular size of the disc.
+        planet *= mix(1.0, 1.6, distant_earth);
         vec3 ground_haze = vec3(0.43, 0.57, 0.61);
         color = mix(ground_haze, planet, smoothstep(1800.0, 19000.0, altitude));
     }
     float rim_width = mix(0.055, 0.008, orbital);
-    float atmosphere_rim = exp(-abs(d.y - horizon_y) / rim_width);
-    color += vec3(0.055, 0.24, 0.63) * atmosphere_rim * (0.25 + orbital * 1.25);
+    float angular_radius = asin(1.0 / radius_from_center);
+    float planet_angle = acos(clamp(dot(d, earth_direction), -1.0, 1.0));
+    float atmosphere_width = mix(rim_width, max(angular_radius * 0.018, 0.0001), smoothstep(0.0, 0.20, transfer));
+    float atmosphere_rim = exp(-abs(planet_angle - angular_radius) / atmosphere_width);
+    color += vec3(0.055, 0.24, 0.63) * atmosphere_rim * (0.25 + orbital * 1.25) * mix(1.0, 0.27, transfer);
     // Far cumuliform banks keep a natural layered horizon behind the close
     // volumetric clouds. Their fade ends before the orbital part of the flight.
     vec2 bank_uv = angular * vec2(9.0, 29.0) + vec2(travel * 0.000035, altitude * 0.00007);
@@ -127,5 +157,15 @@ void fragment() {
     // The photograph already contains the real solar disc. Introduce its
     // aligned analytic replacement only as that photograph fades into space.
     color += vec3(1.0, 0.87, 0.67) * (solar_disc * 7.0 + corona) * procedural_sky_mix;
+    // Moon depth is analytic in normalized units. The near pass intersects
+    // NASA stereo/laser-altimetry relief instead of enlarging a flat picture.
+    if (orbital > 0.1) {
+        vec3 lunar_observer = CAMERA_POSITION_WORLD - stage_origin;
+        lunar_observer.xy = mat2(vec2(cos(bank), sin(bank)), vec2(-sin(bank), cos(bank))) * lunar_observer.xy;
+        vec4 moon = lunar_trace(d, lunar_observer);
+        if (moon.w > 0.5) {
+            color = mix(color, lunar_radiance(moon.xyz, d, sun_direction), orbital);
+        }
+    }
     ALBEDO = color;
 }
