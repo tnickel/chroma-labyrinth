@@ -93,7 +93,7 @@ Geschossabstand, Figurengröße und Laufgeschwindigkeit bleiben erhalten.
 - **H:** HUD und Minimap für eine freie Ansicht ein-/ausblenden
 - **F11:** Vollbild ein-/ausschalten
 - **Im Flugzeug:** **V** Ziel Mond/Mars wählen, **R** Flug starten oder **T** Marsflug direkt starten; **Tab + ←/→** Flugphase wechseln; **B** nach der Landung Basis betreten/verlassen; **E** Fensterplatz/Aufstehen oder an der Basisschleuse Oberfläche betreten; **L** vorzeitige Rückkehr; **M** Fluggeräusch stummschalten
-- **Während des Marsflugs:** **+ / −** schalten das Reisetempo zwischen **1×, 2×, 4× und 8×** um, auch am Ziffernblock. Das Flugdisplay zeigt Faktor und verbleibende Echtzeit. Ein neuer Flug beginnt mit 1×; beim Basisbesuch bleibt die Flugzeit pausiert.
+- **Während des Mond- und Marsflugs:** **+ / −** schalten das Reisetempo zwischen **1×, 2×, 4× und 8×** um, auch am Ziffernblock. Das Flugdisplay zeigt Faktor und verbleibende Echtzeit. Ein neuer Flug beginnt mit 1×; beim Basisbesuch bleibt die Flugzeit pausiert.
 
 Die Welt-Auswahl setzt den Spieler mit einer kurzen Überblendung an einen
 geprüften Aussichtspunkt im echten Labyrinth. Von dort ist jeder Bereich frei

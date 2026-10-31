@@ -1,6 +1,8 @@
 extends SceneTree
-## Real input dispatch and production clock, including 8x phase/finish crossings.
+## Real input dispatch and production clock for both Mars and Moon flights,
+## including 8x phase/finish crossings, HUD, base visits and restart defaults.
 const Plan = preload("res://scripts/airport/MarsFlightPlan.gd")
+const MoonPlan = preload("res://scripts/airport/LunarFlightPlan.gd")
 var scene: Node3D
 var airport: Node3D
 var player: CharacterBody3D
@@ -14,7 +16,7 @@ func _check(value: bool, message: String) -> void:
 	checks += 1
 	if not value:
 		failures.append(message)
-		push_error("MARS_FLIGHT_SPEED: " + message)
+		push_error("FLIGHT_SPEED: " + message)
 
 func _key(code: Key, character := 0, modifiers := "", physical: Key = KEY_NONE, echo := false, pressed := true) -> void:
 	var event := InputEventKey.new()
@@ -133,17 +135,56 @@ func _run() -> void:
 	airport._finish_flight()
 	airport.set_destination_mode("moon")
 	_check(airport.start_flight(), "Cannot start Moon flight")
+	_clock(1)
+	_key(KEY_PLUS, 43, "", KEY_BRACKETRIGHT)
+	_clock(2)
+	_key(KEY_EQUAL, 43, "shift")
+	_clock(4)
+	_key(KEY_KP_ADD)
+	_clock(8)
 	_key(KEY_PLUS, 43)
+	_check(airport.flight_time_scale == 8, "Moon rate wraps above 8x")
+	airport.advance_simulation(float(MoonPlan.DURATIONS[airport.phase_index]) - airport.phase_elapsed - 0.05)
+	previous_phase = airport.phase_index
+	airport._process(0.02)
+	_check(airport.phase_index == previous_phase + 1 and absf(airport.phase_elapsed - 0.11) < 0.00001,
+		"8x Moon frame does not cross phase boundary continuously")
+	_key(KEY_KP_SUBTRACT)
+	_clock(4)
+	_key(KEY_MINUS, 45)
+	_clock(2)
+	_key(KEY_MINUS, 45, "", KEY_SLASH)
+	_clock(1)
+	_key(KEY_MINUS, 45)
+	_check(airport.flight_time_scale == 1, "Moon rate goes below 1x")
+	_key(KEY_PLUS, 43)
+	_key(KEY_PLUS, 43)
+	_check(airport.jump_directly_to_lunar_base(), "Cannot enter Moon base for pause check")
 	before = airport.flight_elapsed
-	airport._process(0.125)
-	_check(airport.flight_time_scale == 1 and absf(airport.flight_elapsed - before - 0.125) < 0.00001,
-		"Mars speed shortcut accelerates Moon flight")
-	_check(not airport._instruments.text.contains("[+/-]"), "Moon HUD shows inactive Mars controls")
+	airport._process(0.5)
+	_key(KEY_MINUS, 45)
+	_check(airport.flight_elapsed == before and airport.flight_time_scale == 4,
+		"Moon base visit is not paused or accepts speed changes")
+	_check(airport.leave_base() and airport.flight_time_scale == 4, "Leaving Moon base loses selected rate")
+	_check(airport.request_return() and airport.flight_time_scale == 4, "Moon return loses selected rate")
+	_clock(4)
+	_key(KEY_PLUS, 43)
+	airport.advance_simulation(airport._remaining_time() - 0.05)
+	completed = airport.completed_flights
+	airport._process(0.02)
+	_check(not airport.flight_active and airport.completed_flights == completed + 1,
+		"8x Moon finish failed or completed more than once")
+	_check(airport.flight_time_scale == 1, "Moon finish does not reset rate")
+	_check(airport.start_flight(), "Moon restart failed")
+	_clock(1)
+	_check(Engine.time_scale == engine_rate, "Moon acceleration changed global time")
+	_check(movement == Vector4(player.walk_speed, player.sprint_speed, player.acceleration, player.mouse_sensitivity),
+		"Moon acceleration changed player movement or mouse sensitivity")
 	await _finish()
 
 func _finish() -> void:
 	scene.queue_free()
 	for frame in 4:
 		await process_frame
-	print("MARS_FLIGHT_SPEED_REGRESSION checks=%d failures=%d" % [checks, failures.size()])
+	print("FLIGHT_SPEED_REGRESSION destinations=Mars,Moon checks=%d failures=%d" % [checks, failures.size()])
 	quit(0 if failures.is_empty() else 1)

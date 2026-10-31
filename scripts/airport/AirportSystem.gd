@@ -188,7 +188,7 @@ func _input(event: InputEvent) -> void:
 		return
 	if not event.pressed:
 		return
-	if flight_active and destination_mode == "mars" and not base_visit \
+	if flight_active and not base_visit \
 			and not event.ctrl_pressed and not event.alt_pressed and not event.meta_pressed:
 		# Logical characters support both German + and US Shift+= layouts.
 		# Physical punctuation positions must not become unrelated shortcuts.
@@ -267,7 +267,7 @@ func _process(delta: float) -> void:
 	# the windows keep showing the phase's own lunar panorama.
 	if flight_active and not base_visit:
 		# Accelerate only itinerary/scenery time, never player physics or audio.
-		advance_simulation(delta * flight_time_scale if destination_mode == "mars" else delta)
+		advance_simulation(delta * flight_time_scale)
 	else:
 		_reveal_remaining = maxf(0.0, _reveal_remaining - delta)
 	if _in_flight_view:
@@ -1032,9 +1032,7 @@ func _flight_instruments() -> String:
 			position_text = "Entfernung Erde %s km" % str(roundi(current_altitude / 1000.0))
 	else:
 		position_text = "%s m über Erde  ·  %d km/h" % [_format_height(current_altitude), roundi(current_speed * 3.6)]
-	if is_mars:
-		return "%s\n%s Echtzeit bis Gate  ·  Zeitraffer %dx [+/-]" % [position_text, _format_time(_remaining_time() / flight_time_scale), flight_time_scale]
-	return "%s\n%s bis Gate  ·  Szenischer Zeitraffer" % [position_text, _format_time(_remaining_time())]
+	return "%s\n%s Echtzeit bis Gate  ·  Zeitraffer %dx [+/-]" % [position_text, _format_time(_remaining_time() / flight_time_scale), flight_time_scale]
 
 func _build_ui() -> void:
 	_ui = CanvasLayer.new()
