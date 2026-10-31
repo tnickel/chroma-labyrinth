@@ -21,6 +21,7 @@ const MARS_SURFACE_JUMP_VELOCITY := 2.5
 const AIRLOCK_REACH := 2.2
 const DURATIONS = FlightPlan.DURATIONS
 const PHASES = FlightPlan.PHASES
+const FLIGHT_TIME_SCALES: Array[int] = [1, 2, 4, 8]
 
 var terminal: Node3D
 var cabin: Node3D
@@ -29,6 +30,10 @@ var connection: Node3D
 var phase_index := -1
 var phase_elapsed := 0.0
 var flight_elapsed := 0.0
+var _flight_time_scale_index := 0
+var flight_time_scale: int:
+	get:
+		return FLIGHT_TIME_SCALES[_flight_time_scale_index]
 var current_altitude := 0.0
 var current_speed := 0.0
 var current_sample: Dictionary = FlightPlan.sample(0, 0.0)
@@ -183,6 +188,20 @@ func _input(event: InputEvent) -> void:
 		return
 	if not event.pressed:
 		return
+	if flight_active and destination_mode == "mars" and not base_visit \
+			and not event.ctrl_pressed and not event.alt_pressed and not event.meta_pressed:
+		# Logical characters support both German + and US Shift+= layouts.
+		# Physical punctuation positions must not become unrelated shortcuts.
+		var rate_step := 0
+		if event.keycode == KEY_PLUS or event.keycode == KEY_KP_ADD or event.unicode == 43:
+			rate_step = 1
+		elif event.keycode == KEY_MINUS or event.keycode == KEY_KP_SUBTRACT or event.unicode == 45:
+			rate_step = -1
+		if rate_step != 0:
+			_flight_time_scale_index = clampi(_flight_time_scale_index + rate_step, 0, FLIGHT_TIME_SCALES.size() - 1)
+			_update_ui()
+			get_viewport().set_input_as_handled()
+			return
 	if _tab_chord and flight_active and event.physical_keycode == KEY_LEFT:
 		jump_phase(1)
 		get_viewport().set_input_as_handled()
@@ -247,7 +266,8 @@ func _process(delta: float) -> void:
 	# The flight clock holds still while the visitor walks the settlement;
 	# the windows keep showing the phase's own lunar panorama.
 	if flight_active and not base_visit:
-		advance_simulation(delta)
+		# Accelerate only itinerary/scenery time, never player physics or audio.
+		advance_simulation(delta * flight_time_scale if destination_mode == "mars" else delta)
 	else:
 		_reveal_remaining = maxf(0.0, _reveal_remaining - delta)
 	if _in_flight_view:
@@ -277,6 +297,7 @@ func start_flight() -> bool:
 	passengers.set_flight_active(true)
 	cabin.set_door_open(false)
 	flight_elapsed = 0.0
+	_flight_time_scale_index = 0
 	phase_elapsed = 0.0
 	travel = 0.0
 	phase_index = 0
@@ -315,6 +336,7 @@ func _enter_flight_view() -> void:
 		_sun.visible = false
 
 func advance_simulation(delta: float) -> void:
+	# This API takes simulation seconds, including direct phase seeks/tests.
 	if not flight_active or base_visit or not is_finite(delta) or delta <= 0.0:
 		return
 	var durations := _active_durations()
@@ -810,6 +832,7 @@ func _finish_flight() -> void:
 	if base_visit:
 		leave_base()
 	phase_index = -1
+	_flight_time_scale_index = 0
 	phase_elapsed = 0.0
 	current_altitude = 0.0
 	current_speed = 0.0
@@ -1009,6 +1032,8 @@ func _flight_instruments() -> String:
 			position_text = "Entfernung Erde %s km" % str(roundi(current_altitude / 1000.0))
 	else:
 		position_text = "%s m über Erde  ·  %d km/h" % [_format_height(current_altitude), roundi(current_speed * 3.6)]
+	if is_mars:
+		return "%s\n%s Echtzeit bis Gate  ·  Zeitraffer %dx [+/-]" % [position_text, _format_time(_remaining_time() / flight_time_scale), flight_time_scale]
 	return "%s\n%s bis Gate  ·  Szenischer Zeitraffer" % [position_text, _format_time(_remaining_time())]
 
 func _build_ui() -> void:
