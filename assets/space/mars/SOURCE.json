@@ -1,0 +1,120 @@
+{
+  "mars_maps": [
+    {
+      "file": "mars_viking_global_4k.jpg",
+      "bytes": 1489056
+    },
+    {
+      "file": "mars_region_valles_4k.jpg",
+      "bytes": 2673645
+    },
+    {
+      "file": "mars_height_4k.png",
+      "bytes": 3269015
+    },
+    {
+      "file": "mars_region_height.png",
+      "bytes": 1693105
+    }
+  ],
+  "mars_art": [
+    {
+      "id": "perseverance_jezero",
+      "file": "perseverance_jezero.jpg",
+      "bytes": 529835,
+      "credit": "NASA/JPL-Caltech/ASU/MSSS \u00b7 Perseverance Rover at Jezero Crater"
+    },
+    {
+      "id": "curiosity_mount_sharp",
+      "file": "curiosity_mount_sharp.jpg",
+      "bytes": 283055,
+      "credit": "NASA/JPL-Caltech/MSSS \u00b7 Curiosity Rover at Mount Sharp (Aeolis Mons)"
+    },
+    {
+      "id": "ingenuity_mars_flight",
+      "file": "ingenuity_mars_flight.jpg",
+      "bytes": 73179,
+      "credit": "NASA/JPL-Caltech \u00b7 Ingenuity Mars Helicopter in Flight over Jezero"
+    },
+    {
+      "id": "valles_marineris_orbital",
+      "file": "valles_marineris_orbital.jpg",
+      "bytes": 3637536,
+      "credit": "NASA/JPL/USGS \u00b7 Viking Orbiter Mosaic of Valles Marineris Grand Canyon"
+    },
+    {
+      "id": "mars_sunset_curiosity",
+      "file": "mars_sunset_curiosity.jpg",
+      "bytes": 52852,
+      "credit": "NASA/JPL-Caltech/MSSS/Texas A&M \u00b7 Blue Sunset on Mars (Curiosity Mastcam)"
+    }
+  ],
+  "planets": [
+    {
+      "id": "venus_magellan_2k",
+      "file": "venus_magellan_2k.jpg",
+      "bytes": 1686119,
+      "credit": "NASA/JPL \u00b7 Magellan Global Radar Mosaic of Venus"
+    },
+    {
+      "id": "jupiter_cassini_2k",
+      "file": "jupiter_cassini_2k.jpg",
+      "bytes": 446531,
+      "credit": "NASA/JPL/Space Science Institute \u00b7 Cassini Cylindrical Map of Jupiter"
+    },
+    {
+      "id": "saturn_cassini_2k",
+      "file": "saturn_cassini_2k.jpg",
+      "bytes": 58704,
+      "credit": "NASA/JPL/Space Science Institute \u00b7 Cassini Natural Color View of Saturn"
+    },
+    {
+      "id": "phobos_viking_2k",
+      "file": "phobos_viking_2k.jpg",
+      "bytes": 264051,
+      "credit": "NASA/JPL-Caltech/University of Arizona \u00b7 MRO HiRISE Color View of Phobos"
+    }
+  ],
+  "mars_pbr": [
+    {
+      "surface": "red_laterite_soil_stones",
+      "file": "albedo.jpg",
+      "bytes": 3593564
+    },
+    {
+      "surface": "red_laterite_soil_stones",
+      "file": "normal_gl.jpg",
+      "bytes": 5924499
+    },
+    {
+      "surface": "red_laterite_soil_stones",
+      "file": "roughness.jpg",
+      "bytes": 2819770
+    },
+    {
+      "surface": "red_laterite_soil_stones",
+      "file": "displacement.jpg",
+      "bytes": 2169376
+    },
+    {
+      "surface": "rock_face_03",
+      "file": "albedo.jpg",
+      "bytes": 3814362
+    },
+    {
+      "surface": "rock_face_03",
+      "file": "normal_gl.jpg",
+      "bytes": 4473242
+    },
+    {
+      "surface": "rock_face_03",
+      "file": "roughness.jpg",
+      "bytes": 2601552
+    },
+    {
+      "surface": "rock_face_03",
+      "file": "displacement.jpg",
+      "bytes": 798149
+    }
+  ]
+}

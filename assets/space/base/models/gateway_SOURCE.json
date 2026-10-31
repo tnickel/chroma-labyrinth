@@ -1,0 +1,30 @@
+{
+  "model": "Gateway Lunar Space Station, iHAB module (adapted extract)",
+  "credit": "NASA/JSC/Gateway Program Office; Alberto G. Bertolin and Bradley W. Reynolds, Graphics and Animation Lab, Johnson Space Center",
+  "asset_page": "https://science.nasa.gov/3d-resources/gateway-lunar-space-station/",
+  "source_url": "https://assets.science.nasa.gov/content/dam/science/cds/3d/resources/model/gateway/Gateway%20Core.glb",
+  "collection": "https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Gateway",
+  "usage_guidance": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "usage_notes": [
+    "NASA makes its 3D resources available for download and use subject to its Images and Media Usage Guidelines; this is not a claim that the asset is licensed under CC0.",
+    "Acknowledge NASA as the source and do not imply NASA endorsement. NASA identifiers and insignia have separate protections; marked third-party material may require separate permission."
+  ],
+  "source_bytes": 66214552,
+  "source_sha256": "2817a541047a30554dc8ecf489f82235c034ad034cfa65d75546330b1dae2e05",
+  "shipped_file": "gateway_ihab.glb",
+  "shipped_bytes": 10827012,
+  "shipped_sha256": "70c8b088f27143774540d42f7c429dcdfc81710a0e6e30988340c59a04398f6d",
+  "processing": [
+    "Read the original GLB with glTF Transform SDK 4.5.1 NodeIO and retain the iHAB node subtree and its referenced meshes and materials.",
+    "Remove the I-Hab Radiator node and the six NDS Shutter and NDS Shutter hinge nodes; retain the docking rings and hatches.",
+    "Reset the parent mover rotation to identity and the iHAB node translation to zero for local placement; remove unreachable nodes and apply prune() before writing the GLB.",
+    "No remeshing or additional lossy compression was applied."
+  ],
+  "rebuild": {
+    "script": "tools/extract_gateway_ihab.cjs",
+    "dependencies": "@gltf-transform/core@4.5.1, @gltf-transform/extensions@4.5.1, @gltf-transform/functions@4.5.1",
+    "command": "node tools/extract_gateway_ihab.cjs <Gateway Core.glb> <gateway_ihab.glb>",
+    "note": "Install the three dependencies outside the project and expose that node_modules directory through NODE_PATH. Rebuilding from the source above reproduced the shipped SHA-256 exactly."
+  },
+  "context": "The original depicts a planned lunar-orbit station. Its use as a surface habitat here is a fictional adaptation."
+}

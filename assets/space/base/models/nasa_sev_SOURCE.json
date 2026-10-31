@@ -1,0 +1,24 @@
+{
+  "model": "Space Exploration Vehicle (MMSEV), adapted for the surface display",
+  "credit": "NASA/LaRC/Advanced Concepts Lab",
+  "asset_page": "https://science.nasa.gov/3d-resources/space-exploration-vehicle/",
+  "source_url": "https://assets.science.nasa.gov/content/dam/science/cds/3d/resources/model/space-exploration-vehicle/Space%20Exploration%20Vehicle.glb",
+  "usage_guidance": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "usage_notes": "NASA 3D content is available under its media guidance; NASA marks and any third-party content are subject to separate protections. No endorsement implied.",
+  "source": {
+    "bytes": 22431576,
+    "sha256": "09dcfbd45a475440de4ca2405fe3be4f784dee6f12e752bad5faa9f6db6c4a8d"
+  },
+  "shipped_file": "nasa_sev.glb",
+  "shipped": {
+    "bytes": 11095908,
+    "sha256": "fe965006c6b4c6e3aad26fb0bf721d61d07de34a24ce7cc2b3463a1383c8a136"
+  },
+  "processing": [
+    "glTF Transform CLI 4.5.1: copy to decode original Draco geometry.",
+    "weld, then simplify --ratio 0.25 --error 0.002 (lossy); 413198 source triangles reduced to 103298.",
+    "resize --width 2048 --height 2048 (lossy texture resampling).",
+    "Prefer embedded PNG fallbacks over optional EXT_texture_webp and prune unused images for a Godot-compatible GLB."
+  ],
+  "context": "A NASA surface rover concept, used fictionally as a parked service rover."
+}

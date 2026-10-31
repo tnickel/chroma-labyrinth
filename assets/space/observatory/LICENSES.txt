@@ -1,0 +1,55 @@
+COSMIC OBSERVATORY — IMAGE CREDITS AND PRESENTATION
+Verified 2026-10-31. All three photographs are bundled for offline use.
+
+carina_webb.jpg
+NIRCam Image of the Cosmic Cliffs in Carina (weic2205a).
+Credit: NASA, ESA, CSA, and STScI
+https://esawebb.org/images/weic2205a/
+CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+https://esawebb.org/copyright/
+Infrared data mapped to visible colours, not a naked-eye view.
+
+jupiter_cassini.jpg
+Cassini Jupiter Portrait (PIA04866), 29 December 2000.
+Credit: NASA/JPL/Space Science Institute
+https://science.nasa.gov/photojournal/cassini-jupiter-portrait/
+True-colour mosaic assembled from 27 spacecraft camera images.
+
+saturn_cassini.jpg
+The Day the Earth Smiled (PIA17172), 19 July 2013.
+Credit: NASA/JPL-Caltech/SSI
+https://science.nasa.gov/resource/the-day-the-earth-smiled/
+Natural-colour mosaic assembled from 141 spacecraft camera images.
+
+NASA/JPL use policy for the Cassini images:
+https://www.jpl.nasa.gov/jpl-image-use-policy/
+https://www.nasa.gov/nasa-brand-center/images-and-media/
+Credits are retained. No NASA, ESA, CSA, STScI, JPL or SSI endorsement is implied.
+
+Files are distributed photographic image products, not AI-generated imagery.
+The NASA CDN supplies requested maximum dimensions without cropping. No local
+recolouring, retouching or invented planetary features were added. GPU texture
+compression, scene tone mapping and fade-in/out affect the displayed image.
+Planetary photographs are composited over the existing catalogue star field:
+dark background pixels reveal the stars, and image edges feather to transparent.
+The ring light contribution is preserved separately from background occultation.
+Elliptical mattes fitted to the photographic limbs keep the dark planetary bodies
+opaque. Jupiter's photograph crops the unlit hemisphere; its matte extends beyond
+that crop as plain black, without adding photographic surface detail. This is
+an illustrative silhouette estimate, not measured shape/topography. The Carina
+image retains its full rectangular presentation. Original JPEGs are unchanged.
+Aspect ratios are preserved; these remain archive projections, not real flybys.
+
+The surrounding sky uses the existing NASA SVS Deep Star Maps 2020 asset:
+https://svs.gsfc.nasa.gov/4851/
+Credit: NASA's Scientific Visualization Studio / Ernie Wright.
+It is a catalogue-derived visualization, not one all-sky photograph.
+See ../SOURCE.json for its original asset and conversion provenance.
+
+The observatory is a fictional exhibition during the compressed Mars transfer.
+Jupiter and Saturn are not physical flybys along that trajectory. Image
+directions, image scale and duration are exhibition choices, not an astronomical
+ephemeris. Planetary distances/timing in the flight are not a launch solution.
+
+Exact download URLs, SHA-256 checksums and byte sizes: SOURCE.json.
+Re-download: python tools/fetch_observatory_assets.py from the project root.

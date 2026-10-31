@@ -1,0 +1,4 @@
+Lunar habitat props from Poly Haven (https://polyhaven.com/)
+All listed models and textures are provided under CC0 1.0.
+License: https://polyhaven.com/license
+Individual asset pages, source URLs and checksums: model-sources.json

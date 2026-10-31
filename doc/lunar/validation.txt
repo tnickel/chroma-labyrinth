@@ -1,15 +1,93 @@
 CHROMA LUNAR - VALIDATION, 2026-10-30
 
+Latest update: landing, walkable base and lunar surface
+- The itinerary now has 21 phases and takes 847 seconds / 14:07, excluding
+  the optional interior visit. It includes lunar descent, a 45-second stop
+  on LandingPad2, and ascent. B opens the interior only on the ground. At
+  either marked airlock, E switches between the interior and walkable surface;
+  the surface HUD shows the direction and distance back. B or Escape returns
+  from either stage to the cabin. The entire visit pauses the flight clock.
+  Cabin, interior and surface are separate stages with transitions, not a
+  continuous walk from the ship to the habitat. During the surface visit an
+  Apollo-based scenic lander stands in for the aircraft's outer appearance.
+- LunarFlightRegression: 35,349 checks; AirportRegression: 9,723 checks;
+  LunarSurfaceWalkRegression: 72 checks; LunarBaseWalkabilityRegression:
+  51 checks; LunarExteriorGeometryRegression: 41 checks. All passed. These
+  include actual player movement, airlock inputs, jump and return, state
+  restoration, lighting layers, pad geometry and the observatory glazing.
+  LunarExteriorBoundaryRegression: 512 physics rays with no failure; the
+  boundary covers the measured terrain heights and the allowed jump.
+- A fresh Windows PCK (800,401,336 bytes) was exported and checked from
+  outside the source project: PackagedDemoSmoke passed 469 checks with no
+  failures, including the added models, scans and framed photographs.
+- The production-controller Forward+ review produced 32 captures and six
+  benchmarks with no reported failure on an RTX 4070 at 1920x1080. The
+  surface view measured a 4.46 ms median and 4.74 ms p95 frame time in that
+  run. These figures are specific to this configuration, not a hardware
+  requirement or a performance guarantee.
+- lunar_base_landed.png shows the actual cabin viewpoint; the exterior.png
+  overview uses a free diagnostic camera. lunar_base_surface.png shows a
+  genuine player view after walking from the airlock. lunar_base_mess.png,
+  lunar_base_greenhouse.png and lunar_base_dome.png show the interiors;
+  lunar_base_earth.png uses a player viewpoint inside the dome.
+- The landed Earth direction uses an idealised sub-Earth point at 0 N, 0 E;
+  it does not represent current libration or exact ephemerides.
+- Moon-simulant scans and scanned rocks add near-ground detail; these are
+  terrestrial analogues, not lunar samples or surface photographs. The framed
+  NASA and ESA/Hubble images have separate credits and sources documented in
+  assets/space/interior/art/image-sources.json. The compound remains a real-time
+  3D model: its architecture and soft near-ground detail still fall short of
+  the supplied photorealistic reference.
+
+The sections below document the earlier 19-phase build and its historical
+measurements. They are retained for provenance, not as current behaviour.
+
 Environment: Godot 4.7.2.stable.official.ed1daf0bf, Windows x64,
 Vulkan 1.4.341, Forward+, NVIDIA GeForce RTX 4070, 1920x1080.
 
 Production journey
-- 16 phases, 674 seconds / 11:14. Moon approach, 150-second Copernicus
-  survey, Earthrise, return to Earth and boarding at the original gate.
+- 19 phases, 770 seconds / 12:50. Moon approach, 150-second Copernicus
+  survey, three photographed lunar-base phases, Earthrise, return to Earth
+  and boarding at the original gate.
 - Closest altitude is 5 km above the lunar reference sphere (1737.4 km
-  radius), not a terrain-following clearance of exactly 5 km.
+  radius) during the crater sweep and 1.6 km during the base close pass,
+  not a terrain-following clearance of exactly those figures.
 - Scenic time compression and staged viewing attitude; no orbital mechanics
   or current astronomical constellation is claimed.
+
+Photographed lunar settlement
+- scripts/airport/LunarBase.gd places a real 3D compound at 10.324N/18.484W
+  inside the NAC strip: the flattest measured kilometre along the ground
+  track (24 m relief over the 1.1 km graded pad, LOLA/NAC stereo).
+- Placement mirrors the sky shader exactly: stage_origin +
+  moon_direction*(R+altitude) + world_to_geo^T*geo_dir*(R+site_elevation);
+  the site elevation is decoded on the CPU from moon_region_height.png.
+- Visible below 24 km altitude with lunar_mix > 0.55; the flight camera far
+  plane is 30 km and the sky dome 26 km so the true-scale compound renders
+  inside the depth-writing shell during its phases.
+- Textures are photographic crops of flown hardware: ISS Solar Array Wing
+  (s116e05970), JEM Kibo hull plating (s124e006729), Apollo 11 LM gold
+  blanket and white ascent panels (as11-40-5927). Sources, crop rectangles
+  and SHA256 in assets/space/SOURCE.json; no painted or generated detail.
+
+Walkable interior (B key during the three base phases)
+- scripts/airport/LunarBaseInterior.gd builds the settlement interior at an
+  offset stage 80 m below the airfield: airlock with suit racks, spine
+  corridor, mess hall (real CC0 lounge furniture), greenhouse with potted
+  plants and magenta grow lights, laboratory, control room and an entrance
+  ramp up to a 360-degree glass observation dome (ten-pane drum plus cone
+  roof to a lit hub).
+- Walls use the photographed Apollo white thermal panels; equipment uses the
+  gold blanket; floors and worktops reuse the bundled CC0 PBR scans with
+  world triplanar mapping. Ceiling light panels, emissive guide strips and
+  omni fills light the rooms; the low lunar Sun throws real window patches.
+- Windows and the dome look through the flight camera's own environment: the
+  raymarched terrain, catalog star sky and Earth stay live. The visit holds
+  the flight clock and hides the parked aircraft; B returns the visitor to
+  the exact prior seat or standing spot and restores the resumed phase.
+- LunarFlightRegression covers prompt visibility, teleport, held clock,
+  blocked phase jumps/early return while inside, floor landing and exact
+  return; lunar_review.gd captures mess, greenhouse and dome interiors.
 
 Actual images and heights
 - 16k global lunar color; 8k global LOLA height encoding.
@@ -22,10 +100,11 @@ Actual images and heights
   assets/space/SOURCE.json and LICENSES.txt. No runtime network requests.
 
 Automated checks
-- LunarFlightRegression: 13,327 checks, 0 failures. Endpoint continuity,
+- LunarFlightRegression: 16,034 checks, 0 failures. Endpoint continuity,
   full journey, interruptions during lunar phases, repeated departures,
-  original player position and camera/boarding restoration.
-- AirportRegression: 8,339 checks, 1,448 route samples, 16 phases,
+  TAB+arrow phase jumps, base visibility/placement, the walkable interior
+  excursion and docking restoration.
+- AirportRegression: 9,107 checks, 1,448 route samples, 19 phases,
   2 completed journeys, 0 failures.
 - AircraftDomeRegression: 1,518 checks, 201 route samples,
   144 deck samples, 13 optical rays, 0 failures.
@@ -44,7 +123,8 @@ tools/lunar_review.gd used the actual Main scene, player camera, cabin, glass
 and scenery. The production controller advanced through the whole journey;
 the journey clock paused only between screenshot samples. Benchmark windows
 ran the normal flight clock, passengers and flight HUD. No concurrent GPU
-test ran. Vsync was disabled. Thirteen captures and gate restoration passed.
+test ran. Vsync was disabled. Twenty captures (including four lunar-base
+exterior and three interior samples) and gate restoration passed.
 All final GPU/export logs were free of script/shader error and warning lines.
 
 View                                      Median FPS   Median ms   P95 ms

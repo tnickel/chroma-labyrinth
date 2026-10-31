@@ -326,6 +326,8 @@ func _world_entry_cases(scene: Node3D, player: CharacterBody3D) -> void:
 	shape_query.exclude = [player.get_rid()]
 	var worlds: Array = director.WORLDS
 	_check(worlds.size() == 8, "Showcase must retain seven gallery entries and add the airport")
+	var lunar_btn: Button = director._chooser.find_child("WorldButton_LunarBase", true, false)
+	_check(lunar_btn != null, "WorldChooser is missing direct jump button WorldButton_LunarBase")
 	for i in worlds.size():
 		director.set_menu_open(true)
 		_check(not player.is_physics_processing() and director._menu_open, "Open world chooser leaves first-person movement active")

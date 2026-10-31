@@ -42,6 +42,8 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
+if not exist "%~dp0build" mkdir "%~dp0build"
+>> "%~dp0build\launch.log" echo [%DATE% %TIME%] LAUNCH start.bat engine="%GODOT_EXE%" args=%*
 "%GODOT_EXE%" --path "%~dp0." %*
 set "CHROMA_EXIT=%ERRORLEVEL%"
 if not "%CHROMA_EXIT%"=="0" (

@@ -1,0 +1,347 @@
+{
+  "source": "Poly Haven Moon Collection, terrestrial lunar-simulation lab scans",
+  "license": "CC0-1.0",
+  "license_url": "https://polyhaven.com/license",
+  "collection": "https://polyhaven.com/collections/moon",
+  "note": "These are terrestrial analogues, not images or samples collected on the Moon.",
+  "assets": {
+    "moon_01": {
+      "asset_page": "https://polyhaven.com/a/moon_01",
+      "authors": {
+        "Greg Zaal": "Photography",
+        "Rico Cilliers": "Photography",
+        "Jenelle van Heerden": "Photography",
+        "Dario Barresi": "Processing"
+      },
+      "source_context": "Terrestrial lunar-simulant lab at Spaceport Rostock; not lunar samples.",
+      "files": {
+        "textures/moon_01/albedo.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_01/moon_01_diff_2k.jpg",
+          "bytes": 1486173,
+          "sha256": "9527d2c2abba5751c84df872514227e49f64e5041b7ee48178e5cb5da0a6b374"
+        },
+        "textures/moon_01/normal_gl.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_01/moon_01_nor_gl_2k.jpg",
+          "bytes": 5019429,
+          "sha256": "073f01d6540b346f338dd41eaf04f2d5594fb5e90ec0fec34d6c690e0b9b219f"
+        },
+        "textures/moon_01/roughness.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_01/moon_01_rough_2k.jpg",
+          "bytes": 616428,
+          "sha256": "0c9bb9389555cd39ee4a2940989fd3639d224070165d2f1880c9e8b3c60bff5c"
+        },
+        "textures/moon_01/displacement.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_01/moon_01_disp_2k.jpg",
+          "bytes": 1187495,
+          "sha256": "63f074dec515d82a45b890eb1d791f70785c81cf91bdd286df7caacc5f088cce"
+        }
+      }
+    },
+    "moon_dusted_02": {
+      "asset_page": "https://polyhaven.com/a/moon_dusted_02",
+      "authors": {
+        "Greg Zaal": "Photography",
+        "Rico Cilliers": "Photography",
+        "Jenelle van Heerden": "All"
+      },
+      "source_context": "Terrestrial lunar-simulant lab at Spaceport Rostock; not lunar samples.",
+      "files": {
+        "textures/moon_dusted_02/albedo.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_dusted_02/moon_dusted_02_diff_2k.jpg",
+          "bytes": 2066500,
+          "sha256": "fa382aa3541eb6fd6d62f0ec9f90b0c1babebe9a674de41d3c5b4852fb8f3576"
+        },
+        "textures/moon_dusted_02/normal_gl.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_dusted_02/moon_dusted_02_nor_gl_2k.jpg",
+          "bytes": 4344011,
+          "sha256": "81ced75846799e86209b17ae160d46301735061780439c1e34aa3fab5c56dd5b"
+        },
+        "textures/moon_dusted_02/roughness.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_dusted_02/moon_dusted_02_rough_2k.jpg",
+          "bytes": 1874995,
+          "sha256": "8a00c2042815ea67bf89f7bb02857006375b943c76faa309f6145b3b11aaf0cf"
+        },
+        "textures/moon_dusted_02/displacement.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_dusted_02/moon_dusted_02_disp_2k.jpg",
+          "bytes": 966984,
+          "sha256": "2410b5190ac1770d9e3fb7cdccff5a4b3f47851f466bd91b6f4849f9548f791d"
+        }
+      }
+    },
+    "moon_meteor_01": {
+      "asset_page": "https://polyhaven.com/a/moon_meteor_01",
+      "authors": {
+        "Greg Zaal": "Photography",
+        "Rico Cilliers": "Photography",
+        "Jenelle van Heerden": "Processing"
+      },
+      "source_context": "Terrestrial lunar-simulant lab at Spaceport Rostock; not lunar samples.",
+      "files": {
+        "textures/moon_meteor_01/albedo.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_meteor_01/moon_meteor_01_diff_2k.jpg",
+          "bytes": 1201970,
+          "sha256": "8c427897c2da0c856ef06e90582209f5286dfcc5ce244538dd9253b106ac08da"
+        },
+        "textures/moon_meteor_01/normal_gl.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_meteor_01/moon_meteor_01_nor_gl_2k.jpg",
+          "bytes": 4672564,
+          "sha256": "6ec72b3169864d382d2e06b7c1b5bcb4a40c7b02d4ea443a697df99bb5b53e9b"
+        },
+        "textures/moon_meteor_01/roughness.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_meteor_01/moon_meteor_01_rough_2k.jpg",
+          "bytes": 217832,
+          "sha256": "793ba8b49ad5afce84598fcdd74f570e22e7deac00dd4d15b27cd7600c7a28f3"
+        },
+        "textures/moon_meteor_01/displacement.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_meteor_01/moon_meteor_01_disp_2k.jpg",
+          "bytes": 764115,
+          "sha256": "6475ddf964ed9a987593a7acefb97b141dbecc33b244c59278ceb23c7c143f68"
+        }
+      }
+    },
+    "moon_footprints_01": {
+      "asset_page": "https://polyhaven.com/a/moon_footprints_01",
+      "authors": {
+        "Greg Zaal": "Photography",
+        "Rico Cilliers": "Photography",
+        "Jenelle van Heerden": "Photography",
+        "Dario Barresi": "Processing"
+      },
+      "source_context": "Terrestrial lunar-simulant lab at Spaceport Rostock; not lunar samples.",
+      "files": {
+        "textures/moon_footprints_01/albedo.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_footprints_01/moon_footprints_01_diff_2k.jpg",
+          "bytes": 2416770,
+          "sha256": "dd356f3205f39120b857464868fea664fff37fa4ad1a7c8724ba51e1e035e0c2"
+        },
+        "textures/moon_footprints_01/normal_gl.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_footprints_01/moon_footprints_01_nor_gl_2k.jpg",
+          "bytes": 6498015,
+          "sha256": "58bb8f99cf4f65e4faa027cd8ec540e3a614ef1d0317795d6360669190519e7b"
+        },
+        "textures/moon_footprints_01/roughness.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_footprints_01/moon_footprints_01_rough_2k.jpg",
+          "bytes": 1026933,
+          "sha256": "8179de13d16a2b218913523ff01fe5ea5916bde57a7cd80be3aec0e909983113"
+        },
+        "textures/moon_footprints_01/displacement.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_footprints_01/moon_footprints_01_disp_2k.jpg",
+          "bytes": 1106281,
+          "sha256": "22c1f3f80b36e25a87d5fdafc59a37a5a7f3233c8d9779e5e702e5556701c7a4"
+        }
+      }
+    },
+    "moon_track_01": {
+      "asset_page": "https://polyhaven.com/a/moon_track_01",
+      "authors": {
+        "Greg Zaal": "Photography",
+        "Jenelle van Heerden": "Processing",
+        "Rico Cilliers": "Photography"
+      },
+      "source_context": "Terrestrial lunar-simulant lab at Spaceport Rostock; not lunar samples.",
+      "files": {
+        "textures/moon_track_01/albedo.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_track_01/moon_track_01_diff_2k.jpg",
+          "bytes": 3177627,
+          "sha256": "21809eb0d45f05ae15efc39fca7cfb4951f98ee5c62f4746d71c69fee62cd2cd"
+        },
+        "textures/moon_track_01/normal_gl.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_track_01/moon_track_01_nor_gl_2k.jpg",
+          "bytes": 6101882,
+          "sha256": "dcf988fed873d7183fd4d490906dc210696151a2ed7224109f63a207676e82e9"
+        },
+        "textures/moon_track_01/roughness.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_track_01/moon_track_01_rough_2k.jpg",
+          "bytes": 2540294,
+          "sha256": "870d5bc8484ad7cf37118e642b3fd2ff77f20059648d54d3701c8542ace434d7"
+        },
+        "textures/moon_track_01/displacement.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/moon_track_01/moon_track_01_disp_2k.jpg",
+          "bytes": 1240153,
+          "sha256": "3753f707233f309258c80426064a7657ca8cc8fa3ddc5484b199a3df527771ae"
+        }
+      }
+    },
+    "moon_rock_01": {
+      "asset_page": "https://polyhaven.com/a/moon_rock_01",
+      "authors": {
+        "Greg Zaal": "Photography",
+        "Rico Cilliers": "Photography",
+        "Jenelle van Heerden": "Processing",
+        "Dario Barresi": "Processing"
+      },
+      "source_context": "Terrestrial lunar-simulant lab at Spaceport Rostock; not lunar samples.",
+      "files": {
+        "models/moon_rock_01/moon_rock_01_2k.gltf": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/moon_rock_01/moon_rock_01_2k.gltf",
+          "bytes": 7088,
+          "sha256": "d3cbe420cfb38d68aaf2c54433b734fb13a637ed1a8c6429137308483af12e04"
+        },
+        "models/moon_rock_01/textures/moon_rock_01_nor_gl_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_01/moon_rock_01_nor_gl_2k.jpg",
+          "bytes": 2202559,
+          "sha256": "9aaedd37f18031a7717207947cb5a211f91db21fe769d977ca0c13919bd36405"
+        },
+        "models/moon_rock_01/textures/moon_rock_01_diff_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_01/moon_rock_01_diff_2k.jpg",
+          "bytes": 928294,
+          "sha256": "9b2c7498bc62c00d8c8c4c8a52bcabbfbd6018464fdc6871af439513cf160c74"
+        },
+        "models/moon_rock_01/textures/moon_rock_01_arm_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_01/moon_rock_01_arm_2k.jpg",
+          "bytes": 1129038,
+          "sha256": "52da39356a69a827ad2abf6634a029079659bb29647daa1feccd97f59a3e8fa6"
+        },
+        "models/moon_rock_01/moon_rock_01.bin": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/moon_rock_01/moon_rock_01.bin",
+          "bytes": 448168,
+          "sha256": "c6671327046efd27ab1a97c4c716412f209a063184e65f0376e3be6583e8f52a"
+        }
+      }
+    },
+    "moon_rock_02": {
+      "asset_page": "https://polyhaven.com/a/moon_rock_02",
+      "authors": {
+        "Rico Cilliers": "Photography",
+        "Greg Zaal": "Photography",
+        "Jenelle van Heerden": "Processing"
+      },
+      "source_context": "Terrestrial lunar-simulant lab at Spaceport Rostock; not lunar samples.",
+      "files": {
+        "models/moon_rock_02/moon_rock_02_2k.gltf": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/moon_rock_02/moon_rock_02_2k.gltf",
+          "bytes": 2782,
+          "sha256": "8132b4687306af9e999980ef447eaa45f4acca4955f46f029037bc13f803e0ef"
+        },
+        "models/moon_rock_02/textures/moon_rock_02_nor_gl_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_02/moon_rock_02_nor_gl_2k.jpg",
+          "bytes": 2268581,
+          "sha256": "e73d82fc4e6a181dd4b0967fe8bcf25655e625376ac93cc1743449ecf554044a"
+        },
+        "models/moon_rock_02/textures/moon_rock_02_diff_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_02/moon_rock_02_diff_2k.jpg",
+          "bytes": 1505130,
+          "sha256": "68a8e4e8aae168760fe724dc2490ac2c9f4c537517ade6711ccd445f648f5abe"
+        },
+        "models/moon_rock_02/textures/moon_rock_02_arm_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_02/moon_rock_02_arm_2k.jpg",
+          "bytes": 1297689,
+          "sha256": "cc8cb97386a9840e2bb90425dc54e5193c51a540be7cfeabaa5008f0894992a4"
+        },
+        "models/moon_rock_02/moon_rock_02.bin": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/moon_rock_02/moon_rock_02.bin",
+          "bytes": 78928,
+          "sha256": "3ba6af10eebb46347e4e0c9d3e2a836d1328525d9d47e82b798a13d9ca2b216f"
+        }
+      }
+    },
+    "moon_rock_03": {
+      "asset_page": "https://polyhaven.com/a/moon_rock_03",
+      "authors": {
+        "Greg Zaal": "Photography",
+        "Rico Cilliers": "Photography",
+        "Jenelle van Heerden": "Processing"
+      },
+      "source_context": "Terrestrial lunar-simulant lab at Spaceport Rostock; not lunar samples.",
+      "files": {
+        "models/moon_rock_03/moon_rock_03_2k.gltf": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/moon_rock_03/moon_rock_03_2k.gltf",
+          "bytes": 2789,
+          "sha256": "f8db505c924ee208ba1976b0873197d5f231aaa5ba28f7ed6ce3ea95103167e4"
+        },
+        "models/moon_rock_03/textures/moon_rock_03_nor_gl_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_03/moon_rock_03_nor_gl_2k.jpg",
+          "bytes": 2414460,
+          "sha256": "6c8b6bdd4269a8265a5cee451420289ee5afeb72fbdfe50c7288c420140aff47"
+        },
+        "models/moon_rock_03/textures/moon_rock_03_diff_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_03/moon_rock_03_diff_2k.jpg",
+          "bytes": 1120682,
+          "sha256": "39263db4e93590abf0a3b295beca8e6920ae2c7e0828cad2958eea335b93d674"
+        },
+        "models/moon_rock_03/textures/moon_rock_03_arm_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_03/moon_rock_03_arm_2k.jpg",
+          "bytes": 1220691,
+          "sha256": "6c3678dd44f4fe2a72720064a8c7a47627022ae172d3b15fc3601fc76a9c38c7"
+        },
+        "models/moon_rock_03/moon_rock_03.bin": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/moon_rock_03/moon_rock_03.bin",
+          "bytes": 131060,
+          "sha256": "b9e79d1c12719515f48b8e27ddf692f9e2076ad4eafd1cf4a4d12d1bcc6d85df"
+        }
+      }
+    },
+    "moon_rock_05": {
+      "asset_page": "https://polyhaven.com/a/moon_rock_05",
+      "authors": {
+        "Greg Zaal": "Photography",
+        "Rico Cilliers": "Photography",
+        "Jenelle van Heerden": "Processing"
+      },
+      "source_context": "Terrestrial lunar-simulant lab at Spaceport Rostock; not lunar samples.",
+      "files": {
+        "models/moon_rock_05/moon_rock_05_2k.gltf": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/moon_rock_05/moon_rock_05_2k.gltf",
+          "bytes": 2789,
+          "sha256": "d1f362694a636dc4ef48aec60480459badedc4e3846e0279571122e03d577265"
+        },
+        "models/moon_rock_05/textures/moon_rock_05_nor_gl_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_05/moon_rock_05_nor_gl_2k.jpg",
+          "bytes": 2272391,
+          "sha256": "b4510dea5306b208aa408aa1e995717735a5b0b23a6b38033a05708ec0dc1a72"
+        },
+        "models/moon_rock_05/textures/moon_rock_05_diff_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_05/moon_rock_05_diff_2k.jpg",
+          "bytes": 1087919,
+          "sha256": "0e1f938ffb260e2a6ef84128e6e68907949017dbee381f72e18621b40950f7a0"
+        },
+        "models/moon_rock_05/textures/moon_rock_05_arm_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_05/moon_rock_05_arm_2k.jpg",
+          "bytes": 1198757,
+          "sha256": "10f1f3c01017404236323e714180bd3ad4727409c5f16a50492f6082946d97c5"
+        },
+        "models/moon_rock_05/moon_rock_05.bin": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/moon_rock_05/moon_rock_05.bin",
+          "bytes": 226972,
+          "sha256": "15fd7e9cc1a2636c432a5f7cf3112dcf60bca059068db0f18e212e693c7af07e"
+        }
+      }
+    },
+    "moon_rock_07": {
+      "asset_page": "https://polyhaven.com/a/moon_rock_07",
+      "authors": {
+        "Greg Zaal": "Photography",
+        "Rico Cilliers": "Photography",
+        "Jenelle van Heerden": "Processing"
+      },
+      "source_context": "Terrestrial lunar-simulant lab at Spaceport Rostock; not lunar samples.",
+      "files": {
+        "models/moon_rock_07/moon_rock_07_2k.gltf": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/moon_rock_07/moon_rock_07_2k.gltf",
+          "bytes": 2787,
+          "sha256": "30262e9e6f22a299db4413e89c8d776a17c1b41696220478a597e05f183e6c92"
+        },
+        "models/moon_rock_07/textures/moon_rock_07_nor_gl_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_07/moon_rock_07_nor_gl_2k.jpg",
+          "bytes": 2021557,
+          "sha256": "ebd519ca61242d5652b10796222e13aba78ca9e77ee1bc9f36baf50162a763b3"
+        },
+        "models/moon_rock_07/textures/moon_rock_07_diff_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_07/moon_rock_07_diff_2k.jpg",
+          "bytes": 1189913,
+          "sha256": "1609b7a926ae06d5322a82504e1bdd16533c5e2cbd6d1fe03b75bb11abfefbdc"
+        },
+        "models/moon_rock_07/textures/moon_rock_07_arm_2k.jpg": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/moon_rock_07/moon_rock_07_arm_2k.jpg",
+          "bytes": 1088318,
+          "sha256": "8432c709d4e48505decb4bf61f3f93e5b5e006233cd0b0c0e7b6971a0386ac61"
+        },
+        "models/moon_rock_07/moon_rock_07.bin": {
+          "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/moon_rock_07/moon_rock_07.bin",
+          "bytes": 162168,
+          "sha256": "86d82068bc2d7f65cf653e9e591cd14b40e3ef893924dba46a8c9747269f1e14"
+        }
+      }
+    }
+  }
+}

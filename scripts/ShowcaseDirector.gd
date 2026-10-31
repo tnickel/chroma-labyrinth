@@ -48,7 +48,7 @@ func configure(player: CharacterBody3D) -> void:
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo or _transition:
 		return
-	if _travel_locked and event.physical_keycode in [KEY_TAB, KEY_H, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8]:
+	if _travel_locked and event.physical_keycode in [KEY_TAB, KEY_H, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9, KEY_0, KEY_U, KEY_M]:
 		return
 	match event.physical_keycode:
 		KEY_TAB:
@@ -69,6 +69,22 @@ func _input(event: InputEvent) -> void:
 		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8:
 			if _menu_open:
 				visit_world(event.physical_keycode - KEY_1)
+		KEY_9:
+			if _menu_open:
+				visit_lunar_base()
+				get_viewport().set_input_as_handled()
+		KEY_0:
+			if _menu_open:
+				visit_mars_flight()
+				get_viewport().set_input_as_handled()
+		KEY_U:
+			if _menu_open:
+				visit_mars_flyover()
+				get_viewport().set_input_as_handled()
+		KEY_M:
+			if _menu_open:
+				visit_mars_base()
+				get_viewport().set_input_as_handled()
 
 func set_menu_open(open: bool) -> void:
 	if open and _travel_locked:
@@ -80,7 +96,7 @@ func set_menu_open(open: bool) -> void:
 	_player.set_physics_process(not open and not _transition and not _player.movement_locked)
 	_player.set_process_unhandled_input(not open and not _transition)
 	_player.velocity = Vector3.ZERO
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if open else Input.MOUSE_MODE_CAPTURED
+	_player.set_mouse_capture(not open and not _transition)
 	if open:
 		var first: Button = _chooser.find_child("WorldButton_0", true, false)
 		first.grab_focus()
@@ -116,6 +132,55 @@ func visit_world(index: int, animate := true) -> void:
 		await reveal.finished
 	_player.set_physics_process(not _player.movement_locked)
 	_player.set_process_unhandled_input(true)
+	_player.set_mouse_capture(true)
+	_transition = false
+
+func visit_lunar_base(animate := true) -> void:
+	_visit_airport_destination("jump_directly_to_lunar_base", "MONDBASIS", Color("ffd9a0"), "COPERNICUS STATION & GLASKUPPELN", animate)
+
+func visit_mars_flight(animate := true) -> void:
+	_visit_airport_destination("jump_directly_to_mars_flight", "MARSFLUG", Color("ff9e72"), "INTERPLANETARE REISE  ·  WELTRAUMARCHIV", animate)
+
+func visit_mars_flyover(animate := true) -> void:
+	_visit_airport_destination("jump_directly_to_mars_flyover", "MARS-ÜBERFLUG", Color("ff8052"), "TIEFFLUG ÜBER VALLES MARINERIS & LANDEANFLUG", animate)
+
+func visit_mars_base(animate := true) -> void:
+	_visit_airport_destination("jump_directly_to_mars_base", "MARSBASIS", Color("ff6b3d"), "ARES VALLIS TERA-KOLONIE & ROTER PLANET", animate)
+
+func _visit_airport_destination(method_name: String, banner_title: String, banner_color: Color, banner_sub: String, animate := true) -> void:
+	if _travel_locked or _transition:
+		return
+	var airport := get_parent().get_node_or_null("AirportSystem") if get_parent() != null else null
+	if airport == null or not airport.has_method(method_name):
+		return
+	_transition = true
+	set_menu_open(false)
+	_player.set_physics_process(false)
+	_player.set_process_unhandled_input(false)
+	if animate:
+		var darken := create_tween()
+		darken.tween_property(_fade, "color:a", 1.0, 0.22)
+		await darken.finished
+	airport.call(method_name)
+	_current_world = -1
+	_title.text = banner_title
+	_title.add_theme_color_override("font_color", banner_color)
+	_subtitle.text = banner_sub
+	if _title_tween:
+		_title_tween.kill()
+	_arrival.modulate.a = 0.0
+	_title_tween = create_tween()
+	_title_tween.tween_property(_arrival, "modulate:a", 1.0, 0.8)
+	_title_tween.tween_interval(3.8)
+	_title_tween.tween_property(_arrival, "modulate:a", 0.0, 1.2)
+	if animate:
+		await get_tree().process_frame
+		var reveal := create_tween()
+		reveal.tween_property(_fade, "color:a", 0.0, 0.55)
+		await reveal.finished
+	_player.set_physics_process(not _player.movement_locked)
+	_player.set_process_unhandled_input(true)
+	_player.set_mouse_capture(true)
 	_transition = false
 
 func _process(delta: float) -> void:
@@ -185,12 +250,12 @@ func _build_menu() -> void:
 	column.add_theme_constant_override("separation", 14)
 	margins.add_child(column)
 	column.add_child(_label("C H R O M A   /   SPACES IN MOTION", 28, Color("e2eaf0")))
-	column.add_child(_label("Drei Etagen. Sechs Galerien. Ein Flughafen mit Orbitalreise.", 15, Color("9caab9")))
+	column.add_child(_label("Drei Etagen. Sechs Galerien. Flughafen mit Wahl zwischen Mondflug & Marsflug sowie Direktsprüngen.", 15, Color("9caab9")))
 	var grid := GridContainer.new()
 	grid.columns = 4
 	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 14)
-	grid.add_theme_constant_override("v_separation", 14)
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 12)
 	column.add_child(grid)
 	for i in WORLDS.size():
 		var data: Dictionary = WORLDS[i]
@@ -198,7 +263,7 @@ func _build_menu() -> void:
 		button.name = "WorldButton_%d" % i
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		button.custom_minimum_size = Vector2(236, 178)
+		button.custom_minimum_size = Vector2(210, 118)
 		var style := StyleBoxFlat.new()
 		style.bg_color = Color(0.025, 0.038, 0.055)
 		style.border_color = Color(data.color, 0.42)
@@ -215,17 +280,93 @@ func _build_menu() -> void:
 		grid.add_child(button)
 		var text := VBoxContainer.new()
 		text.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		text.offset_left = 20
-		text.offset_right = -14
-		text.offset_top = 22
-		text.offset_bottom = -12
+		text.offset_left = 18
+		text.offset_right = -12
+		text.offset_top = 12
+		text.offset_bottom = -8
 		text.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		text.add_theme_constant_override("separation", 12)
+		text.add_theme_constant_override("separation", 6)
 		button.add_child(text)
 		text.add_child(_label("%02d / %s" % [i + 1, data.tag.substr(5)], 11, data.color))
-		text.add_child(_label(data.title, 23, Color("e6edf3")))
-		text.add_child(_label(data.detail, 12, Color("a4b3bf")))
-	column.add_child(_label("WASD gehen · F Licht · H HUD · F11 Vollbild    /    AIRPORT: E Fensterplatz · R Rundflug", 13, Color("9caab9")))
+		text.add_child(_label(data.title, 20, Color("e6edf3")))
+		text.add_child(_label(data.detail, 11, Color("a4b3bf")))
+	var extra_cards: Array[Dictionary] = [
+		{
+			"name": "WorldButton_LunarBase",
+			"tag": "09 / COPERNICUS STATION [9]",
+			"title": "MONDBASIS",
+			"detail": "Direktsprung in die Mondbasis,\nGlaskuppeln & Mondoberfläche.",
+			"color": Color("ffd9a0"),
+			"title_color": Color("fff4df"),
+			"bg": Color(0.035, 0.042, 0.058),
+			"callable": visit_lunar_base,
+		},
+		{
+			"name": "WorldButton_MarsFlight",
+			"tag": "10 / INTERPLANETARER FLUG [0]",
+			"title": "MARSFLUG",
+			"detail": "NASA-Archivbilder auf dem Weg\nzum Roten Planeten.",
+			"color": Color("ff9e72"),
+			"title_color": Color("ffe7db"),
+			"bg": Color(0.048, 0.028, 0.024),
+			"callable": visit_mars_flight,
+		},
+		{
+			"name": "WorldButton_MarsFlyover",
+			"tag": "11 / VALLES MARINERIS [U]",
+			"title": "MARS-ÜBERFLUG",
+			"detail": "Tiefflug über rote Canyons &\nLandeanflug zur Ares-Station.",
+			"color": Color("ff8052"),
+			"title_color": Color("ffe2d4"),
+			"bg": Color(0.052, 0.026, 0.020),
+			"callable": visit_mars_flyover,
+		},
+		{
+			"name": "WorldButton_MarsBase",
+			"tag": "12 / ARES VALLIS STATION [M]",
+			"title": "MARSBASIS",
+			"detail": "Direktsprung in die futuristische\nMars-Kolonie & Marsoberfläche.",
+			"color": Color("ff6438"),
+			"title_color": Color("ffdfd2"),
+			"bg": Color(0.058, 0.024, 0.018),
+			"callable": visit_mars_base,
+		},
+	]
+	for card: Dictionary in extra_cards:
+		var c_color: Color = card.color
+		var c_btn := Button.new()
+		c_btn.name = String(card.name)
+		c_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		c_btn.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		c_btn.custom_minimum_size = Vector2(210, 118)
+		var c_style := StyleBoxFlat.new()
+		c_style.bg_color = card.bg
+		c_style.border_color = Color(c_color, 0.65)
+		c_style.border_width_top = 2
+		c_style.set_corner_radius_all(3)
+		c_btn.add_theme_stylebox_override("normal", c_style)
+		var c_hover: StyleBoxFlat = c_style.duplicate()
+		c_hover.bg_color = Color(c_color * 0.14, 1.0)
+		c_hover.border_color = c_color
+		c_btn.add_theme_stylebox_override("hover", c_hover)
+		c_btn.add_theme_stylebox_override("focus", c_hover)
+		c_btn.add_theme_stylebox_override("pressed", c_hover)
+		var c_cb: Callable = card.callable
+		c_btn.pressed.connect(c_cb)
+		grid.add_child(c_btn)
+		var c_text := VBoxContainer.new()
+		c_text.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		c_text.offset_left = 18
+		c_text.offset_right = -12
+		c_text.offset_top = 12
+		c_text.offset_bottom = -8
+		c_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		c_text.add_theme_constant_override("separation", 6)
+		c_btn.add_child(c_text)
+		c_text.add_child(_label(String(card.tag), 11, c_color))
+		c_text.add_child(_label(String(card.title), 20, card.title_color))
+		c_text.add_child(_label(String(card.detail), 11, Color("d4c4be")))
+	column.add_child(_label("WASD gehen · F Licht · H HUD · F11 Vollbild   /   1–8 Galerien & Airport · 9 Mondbasis · 0 Marsflug · U Mars-Überflug · M Marsbasis", 13, Color("9caab9")))
 	var close := Button.new()
 	close.text = "ZURÜCK ZUM RUNDGANG     /     TAB"
 	close.custom_minimum_size.y = 42

@@ -44,6 +44,19 @@ func _run() -> void:
 		_resource("res://assets/people/%s.glb" % model, "PackedScene")
 	for entry in ["modern_arm_chair_01", "modern_coffee_table_01", "potted_plant_01"]:
 		_resource("res://assets/airport/models/%s/%s_1k.gltf" % [entry, entry], "PackedScene")
+	# These are preloaded by the actual lunar-base interior. Check their image
+	# maps separately, so a packaged but untextured model cannot pass silently.
+	for entry: String in ["chemistry_set", "industrial_microscope", "circuit_board", "plastic_container", "plastic_crate_02", "modular_electric_cables"]:
+		_resource("res://assets/space/interior/%s/%s_1k.gltf" % [entry, entry], "PackedScene")
+		for map: String in ["diff", "nor_gl", "arm"]:
+			_resource("res://assets/space/interior/%s/textures/%s_%s_1k.jpg" % [entry, entry, map], "Texture2D")
+	for map: String in ["diff", "nor_gl", "arm"]:
+		_resource("res://assets/space/interior/modular_electric_cables/textures/modular_electric_cables_boxes_%s_1k.jpg" % map, "Texture2D")
+	for surface: String in ["blue_metal_plate", "rubber_tiles"]:
+		for map: String in ["albedo", "normal", "roughness"]:
+			_resource("res://assets/space/interior/textures/%s/%s.jpg" % [surface, map], "Texture2D")
+	for picture: String in ["orion", "pillars", "earthrise", "blue_marble", "apollo11"]:
+		_resource("res://assets/space/interior/art/%s.jpg" % picture, "Texture2D")
 	for filename in ["daylight_2k.hdr", "earth_july_5400.jpg", "earth_mediterranean_500m.jpg", "ground/lancaster_naip_2022.jpg"]:
 		_resource("res://assets/airport/" + filename, "Texture2D")
 	for filename: String in ["moon_albedo_16k.jpg", "moon_height_8k.png", "moon_region_albedo.jpg", "moon_region_height.png", "moon_region_mask.png", "stars_8k.png", "moon_wac_copernicus_4k.jpg", "moon_wac_height.png", "earth_clouds_2k.jpg"]:
@@ -61,6 +74,28 @@ func _run() -> void:
 			elif filename == "earth_clouds_2k.jpg":
 				expected = Vector2i(2048, 1024)
 			_check(Vector2i(texture.get_width(), texture.get_height()) == expected, "Lunar texture was reduced or lost its source dimensions: " + filename)
+	for hardware: String in ["base/base_solar_cells.jpg", "base/base_module_hull.jpg", "base/base_gold_foil.jpg", "base/base_ascent_white.jpg"]:
+		_resource("res://assets/space/" + hardware, "Texture2D")
+	for map: String in ["albedo.jpg", "normal_gl.jpg", "roughness.jpg"]:
+		_resource("res://assets/space/base/regolith/" + map, "Texture2D")
+	_resource("res://assets/space/base/models/apollo_lunar_module.glb", "PackedScene")
+	_resource("res://assets/space/base/models/gateway_ihab.glb", "PackedScene")
+	_resource("res://assets/space/base/models/nasa_sev.glb", "PackedScene")
+	_resource("res://assets/space/base/models/greenhouse_plant_lod.glb", "PackedScene")
+	for texture_name: String in ["nasa_sev_MMSEV_Color_v2s.png", "nasa_sev_MMSEV_Bump_v1s.png", "nasa_sev_MMSEV_spec_color_v1s.png"]:
+		_resource("res://assets/space/base/models/" + texture_name, "Texture2D")
+	for part: String in ["pot", "leaves"]:
+		for map: String in ["diff", "nor_gl", "rough"]:
+			_resource("res://assets/space/base/models/greenhouse_plant_lod_potted_plant_01_%s_%s.jpg" % [part, map], "Texture2D")
+	for surface: String in ["moon_01", "moon_dusted_02"]:
+		for map: String in ["albedo.jpg", "normal_gl.jpg", "roughness.jpg", "displacement.jpg"]:
+			var texture := _resource("res://assets/space/lunar_analog/textures/%s/%s" % [surface, map], "Texture2D") as Texture2D
+			if texture != null and surface == "moon_01" and map in ["albedo.jpg", "normal_gl.jpg", "displacement.jpg"]:
+				_check(texture.get_image().has_mipmaps(), "Packed lunar panorama texture has no mipmaps: " + map)
+	for rock: String in ["moon_rock_01", "moon_rock_03", "moon_rock_05"]:
+		_resource("res://assets/space/lunar_analog/models/%s/%s_2k.gltf" % [rock, rock], "PackedScene")
+		for map: String in ["diff", "nor_gl", "arm"]:
+			_resource("res://assets/space/lunar_analog/models/%s/textures/%s_%s_2k.jpg" % [rock, rock, map], "Texture2D")
 	for folder in ["terrazzo", "wood", "leather", "fabric", "concrete", "apron_concrete", "asphalt", "terrain/grass", "terrain/rock"]:
 		for map in ["albedo", "normal", "roughness"]:
 			var extension := ".jpg"

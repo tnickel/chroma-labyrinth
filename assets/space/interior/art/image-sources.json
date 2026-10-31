@@ -1,0 +1,88 @@
+{
+  "images": [
+    {
+      "id": "orion",
+      "url": "https://cdn.esahubble.org/archives/images/screen/heic0601a.jpg",
+      "source": "https://esahubble.org/images/heic0601a/",
+      "md5": "fb45d877d1b51166498ff181fc7afadb",
+      "credit": "NASA, ESA, M. Robberto (Space Telescope Science Institute/ESA) and the Hubble Space Telescope Orion Treasury Project Team",
+      "license": "CC BY 4.0",
+      "license_url": "https://esahubble.org/copyright/",
+      "path": "orion.jpg",
+      "bytes": 218524,
+      "sha256": "545d43079d936bbce3ad3dac33145992b504327e74db8f30dd92b8da538d6aec"
+    },
+    {
+      "id": "pillars",
+      "url": "https://cdn.esahubble.org/archives/images/screen/heic1501a.jpg",
+      "source": "https://esahubble.org/images/heic1501a/",
+      "md5": "e0f9966f78fe54ba9b5752ba7ba5fc2a",
+      "credit": "NASA, ESA/Hubble and the Hubble Heritage Team",
+      "license": "CC BY 4.0",
+      "license_url": "https://esahubble.org/copyright/",
+      "path": "pillars.jpg",
+      "bytes": 296712,
+      "sha256": "285e1f921b1fc258f48532e83dcfd30a7f9bcc704e1af9b0fa2c6468e31bc39d"
+    },
+    {
+      "id": "earthrise",
+      "url": "https://images-assets.nasa.gov/image/as08-14-2383/as08-14-2383~large.jpg",
+      "source": "https://science.nasa.gov/resource/the-rising-earth-as-seen-by-apollo-8/",
+      "md5": "1b51ab1e7299112eb7165e6d99bcaf9a",
+      "credit": "NASA / Apollo 8",
+      "license": "NASA media usage guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "path": "earthrise.jpg",
+      "bytes": 139142,
+      "sha256": "3263385f29f5f511a4b9cb081d9fbf73e4dbf708ca2d99c823247b675e223ae9"
+    },
+    {
+      "id": "blue_marble",
+      "url": "https://images-assets.nasa.gov/image/as17-148-22727/as17-148-22727~large.jpg",
+      "source": "https://science.nasa.gov/resource/the-blue-marble/",
+      "md5": "93d994956081accfb69a29ead32027f7",
+      "credit": "NASA Johnson Space Center / Apollo 17",
+      "license": "NASA media usage guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "path": "blue_marble.jpg",
+      "bytes": 350623,
+      "sha256": "36dad3314b64319ea75465c4293719eb131d943566eb462e8bac3281e02c3bd4"
+    },
+    {
+      "id": "apollo11",
+      "url": "https://images-assets.nasa.gov/image/as11-40-5927/as11-40-5927~large.jpg",
+      "source": "https://images.nasa.gov/details-as11-40-5927",
+      "md5": "a6d7c450b96f137ca135d871dccda3e8",
+      "credit": "NASA / Apollo 11",
+      "license": "NASA media usage guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "path": "apollo11.jpg",
+      "bytes": 367171,
+      "sha256": "633d3ce52e9f78d378e3c49fb02f804229c51a3102115e386cfa918c0e077905"
+    },
+    {
+      "id": "apollo15_hadley",
+      "url": "https://images-assets.nasa.gov/image/as15-88-11866/as15-88-11866~large.jpg",
+      "source": "https://images.nasa.gov/details-as15-88-11866",
+      "md5": "2414d6d264a81d2ec0f6097095ba1d75",
+      "credit": "NASA / Apollo 15 (Dave Scott, Jim Irwin, Lunar Roving Vehicle & Mount Hadley)",
+      "license": "NASA media usage guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "path": "apollo15_hadley.jpg",
+      "bytes": 717234,
+      "sha256": "5daf1a5ac38243364cc3b94d5fca5aaf26c76e5654c2e13b7a871a9e05bbaa02"
+    },
+    {
+      "id": "apollo17_boulder",
+      "url": "https://images-assets.nasa.gov/image/as17-140-21496/as17-140-21496~large.jpg",
+      "source": "https://images.nasa.gov/details-as17-140-21496",
+      "md5": "481a33268c1f1115ecf892ca28443a29",
+      "credit": "NASA / Apollo 17 (Gene Cernan, Harrison Schmitt & Taurus-Littrow Split Rock Boulder)",
+      "license": "NASA media usage guidelines",
+      "license_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "path": "apollo17_boulder.jpg",
+      "bytes": 419329,
+      "sha256": "10578ede17266c2de2bf2e6ee1c0f7df2c33db287cff8c89c77c4ef7fa57b192"
+    }
+  ]
+}

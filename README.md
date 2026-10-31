@@ -89,10 +89,10 @@ Geschossabstand, Figurengröße und Laufgeschwindigkeit bleiben erhalten.
 - **Maus:** umsehen; **F:** Taschenlampe an/aus
 - **Esc:** Maus freigeben; **Linksklick:** Maus wieder einfangen
 - **F3:** Bildratenanzeige ein-/ausblenden
-- **Tab:** Welt-Auswahl öffnen/schließen; dort **1–8** oder eine Karte anklicken
+- **Tab:** Welt-Auswahl öffnen/schließen; dort **1–9**, **0**, **U**, **M** oder eine Karte wählen
 - **H:** HUD und Minimap für eine freie Ansicht ein-/ausblenden
 - **F11:** Vollbild ein-/ausschalten
-- **Im Flugzeug:** **E** Fensterplatz/Aufstehen; **R** Rundflug starten; **L** vorzeitige Rückkehr ab der Wolkenreise; **M** Fluggeräusch stummschalten
+- **Im Flugzeug:** **V** Ziel Mond/Mars wählen, **R** Flug starten oder **T** Marsflug direkt starten; **Tab + ←/→** Flugphase wechseln; **B** nach der Landung Basis betreten/verlassen; **E** Fensterplatz/Aufstehen oder an der Basisschleuse Oberfläche betreten; **L** vorzeitige Rückkehr; **M** Fluggeräusch stummschalten
 
 Die Welt-Auswahl setzt den Spieler mit einer kurzen Überblendung an einen
 geprüften Aussichtspunkt im echten Labyrinth. Von dort ist jeder Bereich frei
@@ -193,9 +193,10 @@ flugmechanisch oder strukturell validierte Flugzeugentwicklung.
    Der Start ist nur an Bord möglich und setzt den Spieler nötigenfalls an
    einen Fensterplatz. **In der Heckkuppel startet R den Flug direkt im Stehen**;
    Position und freie Bewegung bleiben erhalten. Der Mausblick bleibt frei.
-4. Die **11:14 Minuten** lange Reise führt über Start, Wolken und Erdorbit zum
-   Mond, über die Copernicus-Region, zum Erdaufgang und zurück zum Gate. **E** erlaubt auch
-   währenddessen das Aufstehen und Gehen in der geschlossenen Kabine.
+4. Die **14:07 Minuten** lange Reise führt über Start, Wolken und Erdorbit zum
+   Mond, über die Copernicus-Region zur Landung an der Basis und nach dem
+   Erdaufgang zurück zum Gate. **E** erlaubt auch währenddessen das Aufstehen
+   und Gehen in der geschlossenen Kabine. Die Zeit für den Basisbesuch kommt hinzu.
 5. Nach dem Andocken öffnet die Tür. Mit **E** aufstehen und denselben Weg durch
    Brücke und Terminal zurück ins Labyrinth gehen. Weitere Flüge sind möglich.
 
@@ -218,6 +219,9 @@ liefern die gröberen LOLA-Messungen das Gelände. Die Karten werden räumlich
 ineinander überblendet und behalten ihre dokumentierten geografischen Grenzen.
 Der lange Kraterüberflug senkt sich von 15 auf fünf Kilometer Höhe und steigt
 anschließend für den Erdaufgang wieder an (Höhen relativ zur Mond-Referenzkugel).
+Dazwischen liegt die modellierte Mondbasis: Die Reise zeigt zunächst den Anflug
+und Nahüberflug, anschließend den Abstieg zum Landeplatz, den Aufenthalt am
+Boden und den Wiederaufstieg.
 Relief, wechselnde Perspektive und
 gerichtetes Sonnenlicht ergänzen die fotografische Oberfläche. Beim Anflug
 wächst der Mond kontinuierlich, während die Erde auf der Rückreise größer wird.
@@ -234,11 +238,76 @@ physikalisch mögliche Reisegeschwindigkeit eines Verkehrsflugzeugs nach.
 
 `scripts/airport/LunarFlightPlan.gd` enthält den von der Grafik getrennten
 Reiseverlauf. `Tests/LunarFlightRegression.gd` prüft Übergänge und Rückreisen.
+Während des Flugs springt **Tab + Pfeiltaste** direkt in die nächste bzw.
+vorherige der 21 Phasen (rundum); der Spieler bleibt sitzen bzw. stehen und ein
+begonnener vorzeitiger Rückflug wird beim Sprung verworfen. Zwischen
+Kraterüberflug und Erdaufgang liegen fünf Mondbasis-Phasen. Die Siedlung auf
+dem Copernicus-Hang ist ein gestaltetes 3D-Modell mit Habitatmodulen,
+Gewächshauskuppel, Solarfeldern und Landeplattformen. Der Standort verwendet
+gemessene Mondhöhen; die kleinskaligen Boden- und Felsdetails verwenden
+irdische Mondsimulant-Scans und sind keine Mondfotografien
+(`assets/space/lunar_analog/SOURCE.json`; ältere Bodentextur:
+`assets/space/base/regolith/SOURCE.json`).
+Außenhabitate verwenden ein für die fiktive Bodenstation angepasstes
+Gateway-iHAB-Modell; die Rover basieren auf einem NASA-Entwurf. Herkunft und
+Verarbeitung stehen in `assets/space/base/models/gateway_SOURCE.json` und
+`assets/space/base/models/nasa_sev_SOURCE.json`.
+Nach dem Aufsetzen öffnet **B** den Innenbesuch. Ein Szenenwechsel bringt den
+Besucher in die begehbaren Räume mit Schleuse, Korridor, Messe, Gewächshaus,
+Labor, Kontrollraum und Aussichtskuppel. An der markierten Außenschleuse
+wechselt **E** mit einer kurzen Abblendung zum begehbaren Mondgelände und an
+derselben Schleuse wieder zurück. Der Außenbereich hat Geländekollision,
+geringere Mondschwerkraft und einen begrenzten Erkundungsradius von etwa
+620 m um die Station. Die Flugzeit pausiert während des gesamten Besuchs;
+**B** führt an den vorherigen Platz in der Kabine zurück; **Esc** gibt die Maus frei. Kabine,
+Innenraum und Mondoberfläche sind dabei getrennte Szenenbereiche, nicht ein
+durchgehend begehbarer Weg zwischen Raumfahrzeug und Innenmodell. Während des
+Außengangs steht eine szenisch angepasste Apollo-basierte Fährenhülle auf dem
+Besucherpad; sie ist nicht die tatsächliche äußere Geometrie der Flugkabine.
+Gerahmte Raumfahrt- und Astronomiebilder mit Credits hängen in den Räumen;
+Herkunft und Nutzungsbedingungen stehen in
+`assets/space/interior/art/image-sources.json`.
+
+### Marsflug und Marsbasis
+
+Die Welt-Auswahl bietet direkte Einstiege in **Marsflug** (0), **Mars-Überflug**
+(U) und **Marsbasis** (M). Alternativ im Flugzeug mit **V** Mars als Ziel wählen
+und mit **R** starten; **T** startet dort ebenfalls den Marsflug. In der
+Heckkuppel zeigt das als solches beschriftete Weltraumarchiv auf Hin- und
+Rückflug echte Aufnahmen von Webb und Cassini sowie den katalogbasierten
+Sternhimmel. Jupiter und Saturn werden dabei nicht als reale Vorbeiflüge auf
+dem Weg zum Mars ausgegeben. Die Infrarotdaten des Webb-Bilds sind in sichtbare
+Farben übersetzt. Bildquellen und Nutzungsbedingungen stehen in
+[`assets/space/observatory/SOURCE.json`](assets/space/observatory/SOURCE.json)
+und [`assets/space/observatory/LICENSES.txt`](assets/space/observatory/LICENSES.txt).
+Die Bilder liegen lokal vor; eine Internetverbindung ist beim Spielen nicht nötig.
+
+Die Marsbasis ist eine fiktive Gestaltung mit begehbaren Räumen, Kuppeln und
+Oberfläche. Der Boden und die Canyons sind aus Texturen und Geometrie gestaltet,
+keine fotografisch genaue Rekonstruktion eines Mars-Landeplatzes. **E** wechselt
+an der Schleuse zwischen Innen- und Außenbereich, **B** kehrt zur Fähre zurück.
+In der **südöstlichen Kuppel** führt ein ausgeschilderter Glasgang zum Aufzug
+des Aussichtsturms. **E** am Aufzug fährt nach oben oder zurück. In der oberen
+Glaskuppel lässt sich das Panorama mit dem **Mausrad** vergrößern; beim Verlassen
+wird die normale Kamerasicht wiederhergestellt. Der begehbare Innenbereich und
+die außen sichtbare Turmkuppel sind getrennt gestaltete Szenenbereiche.
+
+Dort umgibt ein echtes [Curiosity-Mastcam-Panorama vom Gediz-Vallis-Kanal](https://science.nasa.gov/photojournal/curiosity-takes-a-360-degree-view-of-gediz-vallis-channel/)
+den Aussichtspunkt. NASA setzte es 2024 aus 336 Einzelbildern zusammen und passte
+die Farben an irdische Beleuchtung an. Es ist eine historische Aufnahme, kein
+Livebild und kein Foto vom Standort der fiktiven Station. Die leeren Ränder des
+Originalmosaiks werden durch Randfarben überblendet; die dargestellten Rovermodelle
+der Station sind zusätzliche 3D-Modelle. Details zur Quelle, Bildaufbereitung und
+zum Offline-Betrieb stehen in [`assets/space/mars_observation/SOURCE.json`](assets/space/mars_observation/SOURCE.json).
 `tools/lunar_review.gd` erstellt Forward+-Aufnahmen aus der echten Kabine und
 Kuppel sowie Messungen mit laufenden Passagieren und normalem Flugdisplay.
 Der geprüfte Stand und seine Grenzen stehen in
 [doc/lunar/validation.txt](doc/lunar/validation.txt).
 
+![Blick aus der Panoramakuppel nach der Mondlandung](doc/lunar/lunar_base_landed.png)
+![Blick zurück zur Schleuse beim Mondspaziergang](doc/lunar/lunar_base_surface.png)
+![Gemeinschaftsraum mit gerahmtem Orionnebel](doc/lunar/lunar_base_mess.png)
+![Begehbares Gewächshaus der Mondbasis](doc/lunar/lunar_base_greenhouse.png)
 ![Copernicus-Überflug aus der echten Heckkuppel](doc/lunar/lunar_copernicus_panorama.png)
 ![NASA-Sternkarte durch das Dach der Panoramakuppel](doc/lunar/lunar_stars_roof.png)
 
@@ -265,7 +334,7 @@ Das vollständige Konzept steht in [doc/Flugterminal-Konzept.txt](doc/Flugtermin
 Module: `scripts/airport/`; Außenwelt- und Terminal-Shader: `shaders/airport_*.gdshader`.
 `Tests/AirportRegression.gd` prüft den realen Hin-/Rückweg mit der Player-Kapsel,
 E/R/L/Tab-Eingaben, alle Flugphasen, zwei Flüge und die vollständige Rückkehr.
-Der Abschlusslauf mit Heckkuppel bestand 4.147 Prüfungen mit 1.448 Wegproben. Zusätzlich sind
+Der Abschlusslauf mit Heckkuppel bestand 9.107 Prüfungen mit 1.448 Wegproben. Zusätzlich sind
 Flugstart während eines Weltwechsels und die Sitzsperre beim Menüschließen
 abgedeckt. Die Weltenauswahl bestand weitere 3.278 Prüfungen mit acht Zielen.
 `Tests/AircraftPanoramaRegression.gd` bestand 459 Prüfungen echter Mesh-Dreiecke

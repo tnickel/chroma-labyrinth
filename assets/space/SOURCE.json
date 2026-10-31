@@ -55,6 +55,24 @@
       "bytes": 829367,
       "sha256": "daddaad84d7a33bbbc86cdda3f591099f57cee8607b7bcf3b67eb7e4f7a1c793",
       "verified_utc_date": "2026-10-30"
+    },
+    {
+      "name": "s116e05970~orig.jpg",
+      "url": "https://images-assets.nasa.gov/image/s116e05970/s116e05970~orig.jpg",
+      "bytes": 2319915,
+      "sha256": "8d747182f58f0a082ce5fcf3ad87f8477723c50077db6ce002018bf325df986d"
+    },
+    {
+      "name": "s124e006729~orig.jpg",
+      "url": "https://images-assets.nasa.gov/image/s124e006729/s124e006729~orig.jpg",
+      "bytes": 779751,
+      "sha256": "e8146b1e38575551b44b918dddfb673c2b9b8bc0394c844b0bf92fc68c1aa49d"
+    },
+    {
+      "name": "as11-40-5927~orig.jpg",
+      "url": "https://images-assets.nasa.gov/image/as11-40-5927/as11-40-5927~orig.jpg",
+      "bytes": 2599856,
+      "sha256": "cb240465a122bb9ab3531b315f40ae6297ae42250a17439c1cf63734418b95c4"
     }
   ],
   "outputs": [
@@ -277,6 +295,82 @@
       "transformation": "Exact NASA download bytes, no resizing or image manipulation",
       "limitation": "Historical Blue Marble composite cloud pattern; not current or simulated live weather.",
       "verified_utc_date": "2026-10-30"
+    },
+    {
+      "file": "base/base_solar_cells.jpg",
+      "bytes": 920046,
+      "sha256": "c1185251c71615b819ab24ff62f7ca87baa8344d0bcdaf3214dfc2b8cadc2e9b",
+      "dimensions": [
+        1706,
+        877
+      ],
+      "color_space": "sRGB",
+      "source": "s116e05970~orig.jpg",
+      "subject": "STS-116 photograph of an ISS Solar Array Wing, face-on photovoltaic cells",
+      "crop_rectangle_pixels": [
+        83,
+        379,
+        1789,
+        1256
+      ],
+      "transformation": "Single crop of the clean cell field at original 3032x2008 pixels; no resize, sharpening or synthesis."
+    },
+    {
+      "file": "base/base_module_hull.jpg",
+      "bytes": 406793,
+      "sha256": "cc7fe76e5130bc57b3437b3db7f9aa510998a0d5999c6d3cc4b49caea427fb9d",
+      "dimensions": [
+        1330,
+        1150
+      ],
+      "color_space": "sRGB",
+      "source": "s124e006729~orig.jpg",
+      "subject": "STS-124 photograph of the JEM Kibo pressurized module micrometeoroid shielding and rails",
+      "crop_rectangle_pixels": [
+        720,
+        300,
+        2050,
+        1450
+      ],
+      "transformation": "Single crop of the plated hull at original 3072x2098 pixels; no resize, sharpening or synthesis."
+    },
+    {
+      "file": "base/base_gold_foil.jpg",
+      "bytes": 59989,
+      "sha256": "3f70cece5bbd8fa5f50486051a7632772921d8656266533e53cf0aa55865a1d2",
+      "dimensions": [
+        384,
+        608
+      ],
+      "color_space": "sRGB",
+      "source": "as11-40-5927~orig.jpg",
+      "subject": "Apollo 11 photograph AS11-40-5927 of the LM descent stage crinkled gold thermal blanket",
+      "crop_rectangle_pixels": [
+        1113,
+        1648,
+        1497,
+        2256
+      ],
+      "transformation": "Single crop at original 4095x4095 pixels plus +18% exposure normalization for space lighting; no resize or synthesis."
+    },
+    {
+      "file": "base/base_ascent_white.jpg",
+      "bytes": 93109,
+      "sha256": "eb91407bb05e25b558f1b9eae5d472bf7f6008c0e6d975a4697375d4ff626446",
+      "dimensions": [
+        864,
+        598
+      ],
+      "color_space": "sRGB",
+      "source": "as11-40-5927~orig.jpg",
+      "subject": "Apollo 11 photograph AS11-40-5927 of the LM ascent stage white thermal panels and black boxes",
+      "crop_rectangle_pixels": [
+        1913,
+        560,
+        2777,
+        1158
+      ],
+      "transformation": "Single crop at original 4095x4095 pixels; no resize, sharpening or synthesis."
     }
   ],
   "documentation": [
@@ -286,7 +380,8 @@
     "https://data.lroc.im-ldi.com/lroc/view_rdr/NAC_DTM_COPRNICUS01",
     "https://astrogeology.usgs.gov/search/map/moon_lro_lroc_wac_global_morphology_mosaic_100m",
     "https://svs.gsfc.nasa.gov/30614/",
-    "https://science.nasa.gov/earth/earth-observatory/the-blue-marble-true-color-global-imagery-at-1km-resolution/"
+    "https://science.nasa.gov/earth/earth-observatory/the-blue-marble-true-color-global-imagery-at-1km-resolution/",
+    "https://www.nasa.gov/nasa-brand-center/images-and-media/"
   ],
   "license_evidence": [
     "https://svs.gsfc.nasa.gov/help/",

@@ -1,13 +1,18 @@
 extends Node3D
-## Window-flight stage. The passenger and cabin stay at ordinary coordinates;
-## only the scenery moves. No colliders, camera teleport or far-away physics.
+## Window-flight stage. The cabin stays at ordinary coordinates while the
+## scenery moves. At the landed base a bounded, collidable exterior lets the
+## player walk on the Moon; the airlock switches to the separate interior.
 const SKY_SHADER = preload("res://shaders/airport_flight_sky.gdshader")
 const GROUND_SHADER = preload("res://shaders/airport_flight_ground.gdshader")
 const CloudVolume = preload("res://scripts/airport/FlightCloudVolume.gd")
 const LunarWorld = preload("res://scripts/airport/LunarScenery.gd")
+const LunarSettlement = preload("res://scripts/airport/LunarBase.gd")
+const FlybyScenery = preload("res://scripts/airport/InterplanetaryFlyby.gd")
 const LAYER := 16
 const CABIN_LIGHT_MASK := 112 # scenery16 + cabin32 + cabin roof64
-const DOME_RADIUS := 6000.0
+# Large enough that the photographed base at its 15-17 km lunar phases stays
+# inside this depth-writing sky shell (6000 m previously clipped it).
+const DOME_RADIUS := 26000.0
 # Brightest solar pixel (1218,239) in the shipped 2048x1024 HDR panorama,
 # converted with the exact spherical UV convention used by the flight shader.
 const DAYLIGHT_SUN_DIRECTION := Vector3(-0.376731, 0.741980, 0.554562)
@@ -36,6 +41,12 @@ var _orbital_sky: Sky
 var _orbital_reflections := false
 var lunar_state: Dictionary = {}
 var _roll := 0.0
+var base: Node3D
+var lunar_base: Node3D
+var mars_base: Node3D
+var flyby: Node3D
+var _interior_panorama_active := false
+var _interior_saved_base_visible := false
 
 func build() -> void:
 	if _built:
@@ -74,6 +85,19 @@ func build() -> void:
 	_sun.directional_shadow_max_distance = 55.0
 	_sun.light_angular_distance = 0.8
 	add_child(_sun)
+	lunar_base = LunarSettlement.new()
+	add_child(lunar_base)
+	lunar_base.build()
+	var mars_script := load("res://scripts/airport/MarsBase.gd") as GDScript
+	if mars_script != null:
+		mars_base = mars_script.new()
+		add_child(mars_base)
+		mars_base.build()
+		mars_base.visible = false
+	base = lunar_base
+	flyby = FlybyScenery.new()
+	add_child(flyby)
+	flyby.build()
 	reset_to_airport()
 	set_active(false)
 	set_process(false)
@@ -268,24 +292,78 @@ func set_flight_sample(height: float, airspeed: float, distance: float, bank: fl
 	environment.background_energy_multiplier = lerpf(0.7, 0.15, darkening)
 	_sun.light_energy = lerpf(1.25, 1.5, darkening)
 
+func set_destination_mode(is_mars: bool) -> void:
+	if is_mars and mars_base != null:
+		base = mars_base
+		if lunar_base != null:
+			lunar_base.visible = false
+	else:
+		base = lunar_base
+		if mars_base != null:
+			mars_base.visible = false
+
 func set_lunar_sample(parameters: Dictionary) -> void:
 	if not _built or _sky_material == null:
 		return
-	lunar_state = LunarWorld.apply(_sky_material, parameters)
+	var is_mars := float(parameters.get("mars_mode", 0.0)) > 0.5
+	set_destination_mode(is_mars)
+	# The authored itinerary uses height above the local landing area. The
+	# lunar/Martian globe is referenced to the mean radius, so provide the measured
+	# site elevation when resolving the landing view and leave the plan intact.
+	var scenery_parameters := parameters.duplicate()
+	scenery_parameters["site_elevation"] = base.elevation
+	lunar_state = LunarWorld.apply(_sky_material, scenery_parameters)
+	base.place(lunar_state, _world_origin)
+	# The settlement frames only during its dedicated itinerary leg; outside
+	# it the camera track runs west of the site and the far off-axis base
+	# would hang on the horizon (place() still reports its own altitude gates).
+	if bool(parameters.get("settlement_leg", false)) == false:
+		base.visible = false
 	if not is_instance_valid(_sun):
 		return
+	# Fit the cascaded shadow frustum to the current view. A fixed 6 km frustum
+	# covers the approach, but wastes most of the shadow map after touchdown:
+	# near the pad a much shorter range gives the habitat and nearby structures
+	# materially sharper contact shadows. Keep the tight cabin frustum elsewhere.
+	var settlement_visible: bool = not parameters.is_empty() \
+		and float(parameters.get("lunar_mix", 0.0)) > 0.55 \
+		and float(parameters.get("lunar_altitude", 1e12)) < 24000.0
+	var base_height := maxf(float(parameters.get("lunar_altitude", 0.0)), 0.0)
+	_sun.directional_shadow_max_distance = lerpf(700.0, 6000.0, smoothstep(300.0, 4000.0, base_height)) if settlement_visible else 55.0
 	var transfer: float = lunar_state.transfer
 	var sunlight_mix := smoothstep(0.0, 0.72, transfer)
 	var sunlight := DAYLIGHT_SUN_DIRECTION.normalized().slerp(LunarWorld.LUNAR_SUN.normalized(), sunlight_mix)
 	_sun.basis = Basis(Vector3.BACK, -_roll) * Basis.looking_at(-sunlight)
 	_sky_material.set_shader_parameter("sun_direction_world", _sun.global_basis.z.normalized())
-	_sun.light_color = Color("fff0d6").lerp(Color("fffaf0"), sunlight_mix)
+	var target_sun_col := Color("ffe5c4") if is_mars else Color("fffaf0")
+	_sun.light_color = Color("fff0d6").lerp(target_sun_col, sunlight_mix)
+	if flyby != null:
+		flyby.update_flyby(parameters, _world_origin, _sun.global_basis.z.normalized())
 	if transfer > 0.001:
-		# No blue atmospheric fill over the Moon. Modest neutral cabin exposure
-		# keeps faces readable without washing out the black sky and crater shade.
-		environment.ambient_light_color = Color("6d87b7").lerp(Color("a5a4a1"), sunlight_mix)
-		environment.ambient_light_energy = lerpf(0.12, 0.095, sunlight_mix)
+		# Modest cabin exposure keeps faces readable without washing out the sky.
+		var target_amb_col := Color("c68462") if is_mars else Color("a5a4a1")
+		environment.ambient_light_color = Color("6d87b7").lerp(target_amb_col, sunlight_mix)
+		environment.ambient_light_energy = lerpf(0.12, 0.13 if is_mars else 0.095, sunlight_mix)
 		_ground.visible = false
 		_cloud_volume.visible = false
 		_markers.visible = false
 		_trees.visible = false
+
+func set_base_interior_view(enabled: bool, interior_origin := Vector3.ZERO) -> void:
+	if enabled == _interior_panorama_active:
+		return
+	_interior_panorama_active = enabled
+	if enabled:
+		_interior_saved_base_visible = base.visible
+		# The walkable habitat is an isolated scene below the airfield. Keeping
+		# the cabin's ray origin there places its roof *under* the lunar surface,
+		# making the terrain and the underside of the outside base appear above
+		# the glass. Re-anchor the lunar panorama to the habitat, and hide the
+		# separate exterior model during the visit. The 12 m clearance is a
+		# scenic raised viewpoint, not a claim about the modelled station height.
+		var cabin_height_above_site: float = float(lunar_state.get("lunar_altitude", base.elevation)) - float(base.elevation)
+		_sky_material.set_shader_parameter("stage_origin", interior_origin + Vector3(0, cabin_height_above_site - 12.0, 0))
+		base.visible = false
+	else:
+		_sky_material.set_shader_parameter("stage_origin", _world_origin)
+		base.visible = _interior_saved_base_visible

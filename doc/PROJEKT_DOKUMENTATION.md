@@ -66,13 +66,15 @@ Im Erdgeschoss führt eine beschilderte Ostachse vom Atrium durch einen realen D
 
 ### 4.2 Die Passagiermaschine & der Orbit-Rundflug
 - **Kabine:** 36 Sitze, 18 reale Fensterplätze mit Blick nach außen, Gepäckablagen, Mittelgang und physisch schließbare Einstiegstür.
-- **Flugablauf (~150 Sekunden):**
+- **Flugablauf (14:07 Minuten, 21 Phasen; zuzüglich Basisbesuch):**
   1. *Boarding & Tür schließen:* Einstiegstür schließt automatisch.
   2. *Rollen & Start:* Beschleunigung auf der Startbahn und Abheben mit Triebwerkssound.
   3. *Wolkenreise:* Fünf gestaffelte Wolkenschichten mit GPU-Batching.
   4. *Orbitalpanorama:* Aufstieg bis in den Weltraum mit sichtbarer Erdkrümmung, Sternenhintergrund und Erdoberfläche.
-  5. *Sinkflug & Landung:* Wiedereintritt, Landeanflug und sanftes Aufsetzen.
-  6. *Andocken am Gate:* Tür öffnet wieder, Spieler kann aufstehen und ins Labyrinth zurückkehren.
+  5. *Mondanflug & Copernicus:* Annäherung an den Mond, 150-sekündiger Kraterüberflug auf echten LROC-Daten.
+  6. *Mondbasis:* Anflug, Nahüberflug, Abstieg, Aufenthalt am Landeplatz und Aufstieg; Phasenwechsel mit **Tab + Pfeiltasten**. Nach dem Aufsetzen öffnet **B** per Szenenwechsel die begehbare Basis mit Schleuse, Messe, Gewächshaus, Labor, Kontrollraum und Aussichtskuppel. An der Außenschleuse wechselt **E** auf das begehbare Mondgelände und dort wieder zurück. Der Außenbereich ist auf etwa 620 m Radius begrenzt; eine Richtungs- und Entfernungsanzeige führt zur Schleuse. Die Flugzeit pausiert während des Besuchs; **B** oder **Esc** bringt aus beiden Bereichen zurück an den vorherigen Kabinenplatz. Innenraum, Außengelände und Kabine sind getrennte Szenenbereiche.
+  7. *Erdaufgang & Rückkehr:* Wiedereintritt, Landeanflug und sanftes Aufsetzen.
+  8. *Andocken am Gate:* Tür öffnet wieder, Spieler kann aufstehen und ins Labyrinth zurückkehren.
 - **Physikalisches Konzept:** Die Kabinenkollision bleibt ortsfest, um Floating-Point-Präzisionsfehler und komplexe Mitbewegungs-Physik zu vermeiden. Der Flug wird durch eine rotierende und sich bewegende Außenszenerie, adaptive Himmelsshader und Lichtstimmungen inszeniert.
 
 ---
@@ -93,6 +95,9 @@ Im Erdgeschoss führt eine beschilderte Ostachse vom Atrium durch einen realen D
 | **F3** | FPS- und Performance-Anzeige |
 | **F11** | Vollbild umschalten |
 | **E (im Flugzeug)** | Am Fensterplatz hinsetzen / im Mittelgang aufstehen |
+| **B (nach der Mondlandung)** | Den begehbaren Mondbasis-Innenraum besuchen |
+| **E (an der Mondbasis-Schleuse)** | Zwischen Innenraum und Mondoberfläche wechseln |
+| **B / Esc (während des Basisbesuchs)** | Direkt an den vorherigen Platz in der Flugkabine zurückkehren |
 | **R (im Flugzeug)** | Orbit-Rundflug starten |
 | **L (im Flug)** | Vorzeitige Rückkehr einleiten (ab Wolkenreise) |
 | **M (im Flug)** | Triebwerks-Sound stummschalten |

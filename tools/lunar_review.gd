@@ -2,6 +2,7 @@ extends SceneTree
 ## Actual Main/Forward+ lunar journey, sampled through the production controller.
 ## Godot --path . --resolution 1920x1080 --script res://tools/lunar_review.gd
 ## Writes user://lunar_*.png and lunar_review.json. Run alone on the GPU.
+const Plan = preload("res://scripts/airport/LunarFlightPlan.gd")
 var _scene: Node3D
 var _player: CharacterBody3D
 var _airport: Node3D
@@ -43,19 +44,19 @@ func _run() -> void:
 		_failure("Real flight start rejected the visitor in the observation dome.")
 		await _finish()
 		return
-	_seek(5, 0.85)
+	_seek(Plan.Phase.EARTH_ORBIT, 0.85)
 	_dome_view(Vector3(0.5, -0.8, 1.0))
 	await _capture("earth_orbit")
-	_seek(6, 0.7)
+	_seek(Plan.Phase.OUTBOUND, 0.7)
 	_dome_view(Vector3(0, -0.15, 1))
 	await _capture("translunar")
-	_seek(7, 0.8)
+	_seek(Plan.Phase.LUNAR_APPROACH, 0.8)
 	_dome_view(Vector3(0, -0.4, 1))
 	await _capture("moon_approach")
-	_seek(8, 0.2)
+	_seek(Plan.Phase.LOW_PASS, 0.2)
 	_dome_view(Vector3(0, -0.65, 1))
 	await _capture("lunar_horizon")
-	_seek(8, 0.5)
+	_seek(Plan.Phase.LOW_PASS, 0.5)
 	_dome_view(Vector3(0, -0.6, 1))
 	await _capture("copernicus_panorama")
 	await _capture("copernicus_hud", true)
@@ -72,7 +73,117 @@ func _run() -> void:
 	await _capture("lunar_window_seat")
 	_airport.stand_up()
 	_player.set_physics_process(false)
-	_seek(9, 0.72)
+	# Follow the actual production itinerary from orbit through the touchdown.
+	_seek(Plan.Phase.BASE_ORBIT, 0.93)
+	_dome_view(Vector3(0, -0.85, -0.55))
+	await _capture("base_orbit")
+	_seek(Plan.Phase.BASE_CLOSE, 0.93)
+	_dome_view(Vector3(0, -0.92, -0.4))
+	await _capture("base_close")
+	_dome_view(Vector3(0.4, -0.8, -0.45))
+	await _capture("base_close_pan")
+	_seek(Plan.Phase.BASE_LANDING, 0.55)
+	_dome_view(Vector3(0, -0.5, -0.8))
+	_look_at_base()
+	await _capture("base_descent")
+	# An actual standing position near the side of the passenger dome gives a
+	# less obstructed look at the settlement during the approach.
+	_seek(Plan.Phase.BASE_LANDING, 0.70)
+	_dome_view(Vector3(0, -0.5, -0.8), Vector3(3.2, 0.04, 19.5))
+	_look_at_base()
+	await _capture("base_approach_side")
+	_seek(Plan.Phase.BASE_LANDING, 0.85)
+	_dome_view(Vector3(0, -0.5, -0.8))
+	_look_at_base()
+	await _capture("base_final_approach")
+	_seek(Plan.Phase.BASE_SURFACE, 0.35)
+	_dome_view(Vector3(0, 0, -1))
+	_look_at_base()
+	await _capture("base_landed")
+	await _benchmark("Lunar landing pad")
+	# Close flyby diagnostic: the settlement silhouette at ~230 m standoff.
+	var base_node: Node3D = _airport.scenery.base
+	_player.global_position = base_node.to_global(Vector3(190, 70, 190))
+	_look((base_node.to_global(Vector3(0, 22, 18)) - _player.global_position).normalized())
+	await _capture("base_closeup")
+	# The diagnostic leaves the cabin; return to the real passenger view before
+	# exercising the normal visit and return path.
+	_dome_view(Vector3(0, 0, -1))
+	# Walk the actual interior: mess, greenhouse and the 360-degree dome.
+	if _airport.visit_base():
+		var interior: Node3D = _airport.interior
+		_interior_view(interior, Vector3(0, 0, 1.6), Vector3(0, 0.02, -1))
+		await _capture("base_interior_airlock")
+		_interior_view(interior, Vector3(0, 0, -7.0), Vector3(0, 0.02, -1))
+		await _capture("base_interior_corridor")
+		_interior_view(interior, Vector3(-3.2, 0, -3.4), Vector3(-0.85, -0.05, -0.5))
+		await _capture("base_interior_mess")
+		_interior_view(interior, Vector3(2.3, 0, -4.4), Vector3(0.75, 0.04, -0.62))
+		await _capture("base_interior_greenhouse")
+		_interior_view(interior, Vector3(0, 2.2, -44.0), Vector3(0.35, 0.42, -0.85))
+		await _capture("base_interior_dome")
+		await _benchmark("Lunar base observation dome")
+		# The landed near-side location should also reveal Earth above the
+		# horizon. Step sideways so a dome strut does not cover the disc, and
+		# keep the ordinary player FOV for this view.
+		var earth_direction: Vector3 = _airport.scenery.lunar_state.earth_direction
+		_interior_view(interior, Vector3(-2.0, 2.2, -44.0), earth_direction)
+		await _capture("base_interior_earth")
+		_interior_view(interior, Vector3(2.4, 2.2, -44.2), Vector3(-0.75, 0.28, -0.6))
+		await _capture("base_interior_lounge")
+		_interior_view(interior, Vector3(0, 0, -26.0), Vector3(0, 0.05, -1))
+		await _capture("base_interior_control")
+		# Exercise the production airlock transition and capture an ordinary
+		# first-person view from its walkable exterior anchor.
+		var indoor_anchor := interior.get_node_or_null("SurfaceAirlockAnchor") as Node3D
+		var outdoor_anchor := base_node.get_node_or_null("ExteriorAirlockAnchor") as Node3D
+		if indoor_anchor == null or outdoor_anchor == null:
+			_failure("A surface airlock anchor is missing.")
+		else:
+			_player.global_position = indoor_anchor.global_position
+			_player.head.position.y = 1.62
+			_player.reset_physics_interpolation()
+			if not _airport.toggle_surface_airlock():
+				_failure("Surface airlock rejected the visitor on the inside.")
+			else:
+				await create_timer(0.65).timeout
+				if not _airport.base_outside:
+					_failure("Surface airlock did not switch to the exterior.")
+				else:
+					_look((base_node.to_global(Vector3(0, 12, 18)) - _player.view_camera.global_position).normalized())
+					await _capture("base_outside_airlock")
+					# Walk out along the same verified route as the gameplay test,
+					# then look back at the station from a genuine surface position.
+					_player.global_rotation = Vector3(0, outdoor_anchor.global_rotation.y, 0)
+					_player.head.rotation = Vector3.ZERO
+					_player.set_physics_process(true)
+					var surface_start := _player.global_position
+					Input.action_press("move_forward")
+					for frame in 90:
+						await physics_frame
+					Input.action_release("move_forward")
+					for frame in 20:
+						await physics_frame
+					if _player.global_position.distance_to(surface_start) < 3.0:
+						_failure("Surface player could not walk away from the airlock.")
+					_look((base_node.to_global(Vector3(0, 12, 18)) - _player.view_camera.global_position).normalized())
+					await _capture("base_outside_walk")
+					await _benchmark("Lunar surface walk")
+					_player.global_position = outdoor_anchor.global_position
+					_player.reset_physics_interpolation()
+					if not _airport.toggle_surface_airlock():
+						_failure("Surface airlock rejected the visitor on the outside.")
+					else:
+						await create_timer(0.65).timeout
+						if _airport.base_outside:
+							_failure("Surface airlock did not return to the habitat.")
+		_airport.leave_base()
+	else:
+		_failure("Interior visit rejected during the close pass.")
+	_seek(Plan.Phase.BASE_DEPART, 0.45)
+	_dome_view(Vector3(0, -0.3, -0.95))
+	await _capture("base_depart")
+	_seek(Plan.Phase.EARTHRISE, 0.72)
 	_dome_view(Vector3(0, 0.08, 1))
 	await _capture("earthrise")
 	# Inspect the physically small disc at optical zoom, then restore the
@@ -84,7 +195,7 @@ func _run() -> void:
 	_player.view_camera.fov = original_fov
 	_dome_view(Vector3(0, 0.08, 1))
 	await _benchmark("Earthrise panorama")
-	_seek(10, 0.72)
+	_seek(Plan.Phase.HOMEBOUND, 0.72)
 	_dome_view(Vector3(0, -0.1, 1))
 	await _capture("earth_return")
 	_airport.advance_simulation(_airport._remaining_time() + 1.0)
@@ -113,6 +224,18 @@ func _dome_view(direction: Vector3, foot := Vector3(0, 0.04, 19.5)) -> void:
 	_player.head.position.y = 1.7
 	_player.velocity = Vector3.ZERO
 	_look(direction)
+
+func _interior_view(interior: Node3D, local: Vector3, look: Vector3) -> void:
+	_player.set_physics_process(false)
+	_player.global_position = interior.to_global(local)
+	_player.head.position.y = 1.62
+	_player.velocity = Vector3.ZERO
+	_look(look)
+
+func _look_at_base() -> void:
+	var base: Node3D = _airport.scenery.base
+	var target := base.to_global(Vector3(0, 12, 18))
+	_look((target - _player.view_camera.global_position).normalized())
 
 func _look(direction: Vector3) -> void:
 	var d := direction.normalized()

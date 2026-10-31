@@ -1,0 +1,18 @@
+{
+  "model": "Potted Plant 01, simplified exterior greenhouse LOD",
+  "credit": "Poly Haven, CC0 1.0",
+  "asset_page": "https://polyhaven.com/a/potted_plant_01",
+  "license": "CC0-1.0",
+  "license_url": "https://polyhaven.com/license",
+  "source_manifest": "assets/airport/models/model-sources.json",
+  "source": "assets/airport/models/potted_plant_01/potted_plant_01_1k.gltf",
+  "shipped_file": "greenhouse_plant_lod.glb",
+  "shipped": {
+    "bytes": 1367580,
+    "sha256": "2b1fc59c913e9348551abf3dacf3f2814344f60e236f3b313fc092b3d8911ef4"
+  },
+  "processing": [
+    "glTF Transform CLI 4.5.1 weld followed by simplify --ratio 0.04 --error 0.015 (lossy).",
+    "Exterior greenhouses instance the leaves/stem meshes using their original embedded material maps."
+  ]
+}

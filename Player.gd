@@ -1,5 +1,7 @@
 extends CharacterBody3D
 const GalleryHUD = preload("res://scripts/GalleryHUD.gd")
+const OBSERVATION_MIN_FOV := 22.0
+const OBSERVATION_ZOOM_STEP := 1.18
 
 ## The body origin is at floor level. Floor positions must match the generator.
 @export var floor_height := 6.0
@@ -23,6 +25,12 @@ var _minimap_elapsed := 0.0
 var _gallery_hud := GalleryHUD.new()
 ## A seated passenger keeps mouse-look, but menu changes must not restart walking.
 var movement_locked := false
+var _window_focused := true
+var _observation_zoom_enabled := false
+var _observation_normal_fov := 75.0
+var _observation_target_fov := 75.0
+var _observation_hud: CanvasLayer
+var _observation_hint: Label
 
 
 func _ready() -> void:
@@ -34,7 +42,82 @@ func _ready() -> void:
 	floor_max_angle = deg_to_rad(55.0)
 	view_camera.cull_mask = 15 # Architecture (1), ceilings (2), visitors (4), mirror (8).
 	_create_minimap()
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	set_mouse_capture(true)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		_window_focused = false
+		set_mouse_capture(false)
+	elif what == NOTIFICATION_WM_WINDOW_FOCUS_IN:
+		_window_focused = true
+		# A click in the game resumes capture; returning from another app must
+		# not immediately steal its cursor or rotate the camera.
+
+
+func set_mouse_capture(capture: bool) -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if capture and _window_focused and is_processing_unhandled_input() else Input.MOUSE_MODE_VISIBLE
+
+
+func _mouse_look_active() -> bool:
+	return _window_focused and is_processing_unhandled_input() and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+
+
+## The Mars observation area owns this switch. Repeated calls are harmless;
+## leaving it restores the exact pre-observation lens, including flight FOVs.
+func set_observation_zoom_enabled(enabled: bool) -> void:
+	if enabled == _observation_zoom_enabled:
+		return
+	_observation_zoom_enabled = enabled
+	if enabled:
+		_observation_normal_fov = view_camera.fov
+		_observation_target_fov = view_camera.fov
+		if _observation_hud == null:
+			_create_observation_hint()
+	else:
+		view_camera.fov = _observation_normal_fov
+		_observation_target_fov = _observation_normal_fov
+	_update_observation_hint()
+
+
+func _observation_look_scale() -> float:
+	if not _observation_zoom_enabled:
+		return 1.0
+	# Keep on-screen aiming speed predictable through the magnified lens.
+	return tan(deg_to_rad(view_camera.fov * 0.5)) / tan(deg_to_rad(_observation_normal_fov * 0.5))
+
+
+func _create_observation_hint() -> void:
+	# The gallery HUD is hidden on Mars, so the lens has its own small overlay.
+	_observation_hud = CanvasLayer.new()
+	_observation_hud.name = "ObservationHUD"
+	_observation_hud.layer = 6
+	add_child(_observation_hud)
+	_observation_hint = Label.new()
+	_observation_hint.name = "ZoomHint"
+	_observation_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_observation_hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	_observation_hint.offset_left = -285
+	_observation_hint.offset_right = 285
+	_observation_hint.offset_top = 18
+	_observation_hint.offset_bottom = 70
+	_observation_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_observation_hint.add_theme_font_size_override("font_size", 16)
+	_observation_hint.add_theme_color_override("font_color", Color("f6e4cf"))
+	_observation_hint.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+	_observation_hint.add_theme_constant_override("shadow_offset_x", 1)
+	_observation_hint.add_theme_constant_override("shadow_offset_y", 2)
+	_observation_hud.add_child(_observation_hint)
+
+
+func _update_observation_hint() -> void:
+	if _observation_hud == null:
+		return
+	_observation_hud.visible = _observation_zoom_enabled and is_processing_unhandled_input()
+	if _observation_zoom_enabled:
+		var magnification := 1.0 / _observation_look_scale()
+		var controls := "MAUSRAD  ZOOM   ·   ESC  MAUS FREIGEBEN" if _mouse_look_active() else "LINKSKLICK INS BILD  ·  MAUSBLICK UND ZOOM"
+		_observation_hint.text = "MARS-PANORAMA  ·  %.1f×\n%s" % [magnification, controls]
 
 
 func _setup_inputs() -> void:
@@ -58,19 +141,40 @@ func _add_key(action: StringName, key: Key) -> void:
 		InputMap.action_add_event(action, event)
 
 
+func _input(event: InputEvent) -> void:
+	if not _mouse_look_active():
+		return
+	if _observation_zoom_enabled and event is InputEventMouseButton and event.pressed:
+		if event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+			var direction := -1.0 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0
+			var wheel_steps: float = event.factor if event.factor > 0.0 else 1.0
+			var half_angle := tan(deg_to_rad(_observation_target_fov * 0.5))
+			_observation_target_fov = clampf(rad_to_deg(2.0 * atan(half_angle * pow(OBSERVATION_ZOOM_STEP, direction * wheel_steps))), minf(OBSERVATION_MIN_FOV, _observation_normal_fov), _observation_normal_fov)
+			get_viewport().set_input_as_handled()
+			return
+	if event is InputEventMouseMotion:
+		var motion := event as InputEventMouseMotion
+		# Physical relative motion remains consistent across window sizes and
+		# captured-cursor warps. Absolute positions cannot support endless turns.
+		var delta_pos := motion.screen_relative
+		if delta_pos.is_finite():
+			var look_sensitivity := mouse_sensitivity * _observation_look_scale()
+			rotate_y(-delta_pos.x * look_sensitivity)
+			head.rotation.x = clampf(head.rotation.x - delta_pos.y * look_sensitivity, deg_to_rad(-89.0), deg_to_rad(89.0))
+
+
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("release_mouse"):
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	if event.is_action_pressed("release_mouse") and not event.is_echo():
+		set_mouse_capture(false)
+		get_viewport().set_input_as_handled()
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		# Only unhandled clicks resume play, so UI buttons stay clickable.
+		set_mouse_capture(true)
+		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("flashlight") and not event.is_echo():
 		flashlight.visible = not flashlight.visible
 	elif event.is_action_pressed("show_stats") and not event.is_echo():
 		_gallery_hud.toggle_stats()
-	elif event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		rotate_y(-event.relative.x * mouse_sensitivity)
-		head.rotate_x(-event.relative.y * mouse_sensitivity)
-		head.rotation.x = clampf(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
 
 
 func _physics_process(delta: float) -> void:
@@ -92,6 +196,23 @@ func _physics_process(delta: float) -> void:
 
 
 func _process(delta: float) -> void:
+	if _observation_zoom_enabled:
+		view_camera.fov = lerpf(view_camera.fov, _observation_target_fov, 1.0 - exp(-12.0 * delta))
+		if absf(view_camera.fov - _observation_target_fov) < 0.01:
+			view_camera.fov = _observation_target_fov
+	_update_observation_hint()
+	if _mouse_look_active():
+		# Arrow keys provide smooth camera look at any time (when TAB is not held).
+		if not Input.is_key_pressed(KEY_TAB) and not Input.is_physical_key_pressed(KEY_TAB):
+			var yaw_input := (1.0 if Input.is_physical_key_pressed(KEY_LEFT) else 0.0) \
+				- (1.0 if Input.is_physical_key_pressed(KEY_RIGHT) else 0.0)
+			var pitch_input := (1.0 if Input.is_physical_key_pressed(KEY_UP) else 0.0) \
+				- (1.0 if Input.is_physical_key_pressed(KEY_DOWN) else 0.0)
+			if yaw_input != 0.0:
+				rotate_y(yaw_input * 1.85 * delta)
+			if pitch_input != 0.0:
+				head.rotate_x(pitch_input * 1.35 * delta)
+				head.rotation.x = clampf(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
 	if minimap_camera == null:
 		return
 	minimap_arrow.rotation = -global_rotation.y
@@ -119,6 +240,7 @@ func _create_minimap() -> void:
 	add_child(hud)
 	var frame := Panel.new()
 	frame.name = "MinimapFrame"
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	frame.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	frame.offset_left = 20.0
 	frame.offset_top = -286.0

@@ -64,7 +64,11 @@ void fragment() {
     vec3 celestial = mat3(vec3(1.0, 0.0, 0.0), vec3(0.0, 0.62, 0.7846), vec3(0.0, -0.7846, 0.62)) * d;
     vec2 stellar_uv = vec2(fract(atan(celestial.x, -celestial.z) / 6.2831853 + 0.18), acos(clamp(celestial.y, -1.0, 1.0)) / 3.14159265);
     vec3 stars = texture(stellar_panorama, stellar_uv).rgb;
-    color += stars * orbital * 2.8;
+    // A sunlit lunar surface and its habitats need a much shorter exposure
+    // than deep space. Keep the catalogue sky, but dim it progressively near
+    // the Moon so the Milky Way does not compete with the lit terrain.
+    float surface_exposure = lunar_mix * (1.0 - smoothstep(10000.0, 120000.0, lunar_altitude));
+    color += stars * orbital * mix(2.8, 0.12, surface_exposure);
 
     // Normalized planet radius avoids million-metre vertex coordinates.
     // A ray/sphere intersection gives the correct lowering curved horizon.
@@ -157,11 +161,29 @@ void fragment() {
     // The photograph already contains the real solar disc. Introduce its
     // aligned analytic replacement only as that photograph fades into space.
     color += vec3(1.0, 0.87, 0.67) * (solar_disc * 7.0 + corona) * procedural_sky_mix;
-    // Moon depth is analytic in normalized units. The near pass intersects
+    // Moon/Mars depth is analytic in normalized units. The near pass intersects
     // NASA stereo/laser-altimetry relief instead of enlarging a flat picture.
     if (orbital > 0.1) {
         vec3 lunar_observer = CAMERA_POSITION_WORLD - stage_origin;
         lunar_observer.xy = mat2(vec2(cos(bank), sin(bank)), vec2(-sin(bank), cos(bank))) * lunar_observer.xy;
+        if (mars_mode > 0.5) {
+            float m_atmo_mix = lunar_mix * (1.0 - smoothstep(4000.0, 55000.0, lunar_altitude));
+            if (m_atmo_mix > 0.001) {
+                float hz = pow(1.0 - clamp(abs(d.y), 0.0, 1.0), 2.4);
+                vec3 mars_zenith = vec3(0.16, 0.075, 0.045);
+                vec3 mars_horizon = vec3(0.76, 0.44, 0.25);
+                // Authentic Curiosity blue forward-scattering halo near the solar disc on Mars
+                vec3 mars_sun_halo = vec3(0.42, 0.54, 0.68) * pow(sun_alignment, 12.0) * 0.45;
+                vec3 mars_sky = mix(mars_zenith, mars_horizon, hz) + mars_sun_halo;
+                color = mix(color, mars_sky, m_atmo_mix * 0.88);
+            }
+            // Orbital Martian atmospheric limb glow around the approaching Red Planet
+            float m_ang_rad = asin(clamp(1.0 / max(moon_distance_radii, 1.0001), 0.0, 1.0));
+            float m_angle = acos(clamp(dot(d, moon_direction), -1.0, 1.0));
+            float m_rim_w = max(m_ang_rad * 0.032, 0.0012);
+            float m_rim = exp(-abs(m_angle - m_ang_rad) / m_rim_w) * smoothstep(25000.0, 180000.0, lunar_altitude) * lunar_mix;
+            color += vec3(0.92, 0.38, 0.16) * m_rim * 0.65;
+        }
         vec4 moon = lunar_trace(d, lunar_observer);
         if (moon.w > 0.5) {
             color = mix(color, lunar_radiance(moon.xyz, d, sun_direction), orbital);

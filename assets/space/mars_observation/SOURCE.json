@@ -1,0 +1,19 @@
+{
+  "title": "Curiosity Takes a 360-Degree View of Gediz Vallis Channel",
+  "source_page": "https://science.nasa.gov/photojournal/curiosity-takes-a-360-degree-view-of-gediz-vallis-channel/",
+  "source_image": "https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia26/pia26363/PIA26363.jpg",
+  "image_id": "PIA26363",
+  "credit": "NASA/JPL-Caltech/MSSS",
+  "license_guidance": "https://www.jpl.nasa.gov/jpl-image-use-policy/",
+  "instrument": "Curiosity Mastcam",
+  "acquired": "2024-06-19",
+  "description": "360-degree panorama stitched by NASA from 336 Curiosity frames. NASA adjusted the colors to resemble lighting as seen by the human eye on Earth.",
+  "original_dimensions": [29240, 8311],
+  "original_sha256": "58db0615b139293c52d1dd8c374e4ba9a4595ee3367de6b45a1a2bef892dcb0b",
+  "local_file": "gediz_vallis_360.jpg",
+  "local_dimensions": [14000, 3979],
+  "local_sha256": "e69727029ab44ad9e6e4901fea86a4932a378b9f2edb6be88aca85f97ebdc17f",
+  "derivation": "Uncropped Lanczos downsampling and JPEG recompression to fit common GPU texture limits. A separate mask identifies border-connected missing pixels, and the game fills those gaps with colors sampled at the photograph's edges. Dark rover parts and shadows are not intentionally keyed out. The game displays the image on a cylindrical surface and applies engine tone mapping. This is a historical rover panorama, not a live view from the fictional station.",
+  "rebuild": "python tools/fetch_mars_observation_panorama.py && python tools/build_mars_observation_mask.py",
+  "offline_runtime": true
+}

@@ -1,0 +1,14 @@
+{
+  "model": "Apollo Lunar Module",
+  "credit": "NASA / Michael D. Carbajal",
+  "asset_page": "https://science.nasa.gov/3d-resources/apollo-lunar-module/",
+  "source_url": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models/Apollo%20Lunar%20Module/Apollo%20Lunar%20Module.glb",
+  "collection": "https://github.com/nasa/NASA-3D-Resources",
+  "usage_guidance": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "source_bytes": 716840,
+  "source_sha256": "379101dfcee399267addf771709107c35e826b0b9e5233272f123e4c8a585c4e",
+  "shipped_bytes": 2703900,
+  "shipped_sha256": "1ce4ea5349df130f504490994f1a97929a5569bef884439be25a7da9323a8bba",
+  "processing": "Decoded the source GLB Draco geometry with glTF Transform CLI 4.5.1; no additional mesh quantization was requested.",
+  "reproduce": "npx -y @gltf-transform/cli@4.5.1 copy <original.glb> <decoded.glb>"
+}

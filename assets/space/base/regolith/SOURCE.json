@@ -1,0 +1,24 @@
+{
+  "asset": "Ground091",
+  "author": "ambientCG",
+  "asset_url": "https://ambientcg.com/a/Ground091",
+  "download_url": "https://ambientcg.com/get?file=Ground091_2K-JPG.zip",
+  "license": "CC0-1.0",
+  "license_url": "https://docs.ambientcg.com/license/",
+  "source_type": "terrestrial ground scan used for illustrative lunar surface detail",
+  "download_sha256": "8f59e011d0bc326254b040d1e27e3673afae2027eb27504e5d2ff73beadef93c",
+  "files": {
+    "albedo.jpg": {
+      "sha256": "f55f93401c24966427bd9886756c5ddb1072512fa4bffd62d77afc3218649a52",
+      "bytes": 7437416
+    },
+    "normal_gl.jpg": {
+      "sha256": "c8984bde90c9de4e6b6615ed2f6183f5b3ae6e70274da980c1adac8613f5f320",
+      "bytes": 10306473
+    },
+    "roughness.jpg": {
+      "sha256": "00b857b346070a5802397270c40677eb3eb2475987fdcfea26860f4277cccc4e",
+      "bytes": 3328102
+    }
+  }
+}

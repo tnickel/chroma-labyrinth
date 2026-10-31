@@ -1,0 +1,51 @@
+{
+  "retrieved_utc_date": "2026-10-31",
+  "offline_runtime": true,
+  "presentation": "Virtual archive projections during a fictional, time-compressed Mars voyage. Not objects along a physical trajectory.",
+  "stars": "Existing assets/space/stars_8k.png: NASA SVS catalogue-derived sky; see ../SOURCE.json and https://svs.gsfc.nasa.gov/4851/.",
+  "sources": [
+    {
+      "file": "carina_webb.jpg",
+      "title": "NIRCam Image of the Cosmic Cliffs in Carina",
+      "url": "https://cdn.esawebb.org/archives/images/publicationjpg/weic2205a.jpg",
+      "page": "https://esawebb.org/images/weic2205a/",
+      "credit": "NASA, ESA, CSA, and STScI",
+      "image_id": "weic2205a",
+      "interpretation": "Infrared observations mapped to visible colours; not a naked-eye view.",
+      "license": "CC BY 4.0",
+      "license_url": "https://esawebb.org/copyright/",
+      "bytes": 2433041,
+      "sha256": "0c36eb0d1d7ccb097652895e9597cc0678a35148ab494697a387f1a55889230f",
+      "transformation": "No local image edits. NASA CDN requests a maximum resolution, preserving aspect ratio; ESA publication JPEG used as distributed. Scene keeps image aspect ratio; engine tone mapping applies."
+    },
+    {
+      "file": "jupiter_cassini.jpg",
+      "title": "Cassini Jupiter Portrait",
+      "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/photojournal/pia/pia04/pia04866/PIA04866.jpg?w=1920&h=2400&fit=max",
+      "page": "https://science.nasa.gov/photojournal/cassini-jupiter-portrait/",
+      "credit": "NASA/JPL/Space Science Institute",
+      "image_id": "PIA04866",
+      "interpretation": "27-frame true-colour mosaic, Cassini, 29 December 2000.",
+      "license": "NASA/JPL image use guidelines; retain credit; no endorsement implied",
+      "license_url": "https://www.jpl.nasa.gov/jpl-image-use-policy/",
+      "bytes": 180463,
+      "sha256": "9bb59de5096d690278848822efdb9c16d59d293d5ec5d261f4c1139cf53da1d4",
+      "transformation": "No local image edits. NASA CDN requests a maximum resolution, preserving aspect ratio; ESA publication JPEG used as distributed. Scene keeps image aspect ratio; engine tone mapping applies."
+    },
+    {
+      "file": "saturn_cassini.jpg",
+      "title": "The Day the Earth Smiled",
+      "url": "https://assets.science.nasa.gov/dynamicimage/assets/science/psd/solar/2023/09/1/185_PIA17172.jpg?w=4096&fit=max",
+      "page": "https://science.nasa.gov/resource/the-day-the-earth-smiled/",
+      "credit": "NASA/JPL-Caltech/SSI",
+      "image_id": "PIA17172",
+      "interpretation": "Natural-colour mosaic of 141 Cassini frames, 19 July 2013.",
+      "license": "NASA/JPL image use guidelines; retain credit; no endorsement implied",
+      "license_url": "https://www.jpl.nasa.gov/jpl-image-use-policy/",
+      "bytes": 167610,
+      "sha256": "1855c1e11d4f2067ce3529358df6eaac8083930d98349450a8d73c498235762e",
+      "transformation": "No local image edits. NASA CDN requests a maximum resolution, preserving aspect ratio; ESA publication JPEG used as distributed. Scene keeps image aspect ratio; engine tone mapping applies."
+    }
+  ],
+  "runtime_compositing": "Planet photographs use transparent dark backgrounds and feathered image edges over the catalogue sky. Elliptical limb mattes occult stars on the dark bodies; Jupiter's cropped unlit hemisphere is extended as a black geometric matte. Ring light contribution is preserved independently of coverage. Carina is unmasked. Source JPEGs remain unchanged; no surface detail is generated."
+}

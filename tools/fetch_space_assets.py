@@ -29,6 +29,28 @@ WAC_LICENSE = "https://www.usgs.gov/media/images/moon-lro-lroc-wac-global-morpho
 CLOUD_NAME = "cloud_combined_2048.jpg"
 CLOUD_ORIGINAL = "https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg"
 CLOUD_DOCUMENTATION = "https://science.nasa.gov/earth/earth-observatory/the-blue-marble-true-color-global-imagery-at-1km-resolution/"
+# Real photographed spacecraft hardware for the lunar base compounds: flown ISS
+# hardware photographed by Shuttle/ISS crews plus the Apollo 11 descent stage.
+BASE_DOCUMENTATION = "https://www.nasa.gov/nasa-brand-center/images-and-media/"
+BASE_SOURCES = {
+    "s116e05970~orig.jpg": "https://images-assets.nasa.gov/image/s116e05970/s116e05970~orig.jpg",
+    "s124e006729~orig.jpg": "https://images-assets.nasa.gov/image/s124e006729/s124e006729~orig.jpg",
+    "as11-40-5927~orig.jpg": "https://images-assets.nasa.gov/image/as11-40-5927/as11-40-5927~orig.jpg",
+}
+BASE_CROPS = [
+    {"source": "s116e05970~orig.jpg", "rect": [83, 379, 1789, 1256], "output": "base_solar_cells.jpg",
+     "subject": "STS-116 photograph of an ISS Solar Array Wing, face-on photovoltaic cells",
+     "transformation": "Single crop of the clean cell field at original 3032x2008 pixels; no resize, sharpening or synthesis."},
+    {"source": "s124e006729~orig.jpg", "rect": [720, 300, 2050, 1450], "output": "base_module_hull.jpg",
+     "subject": "STS-124 photograph of the JEM Kibo pressurized module micrometeoroid shielding and rails",
+     "transformation": "Single crop of the plated hull at original 3072x2098 pixels; no resize, sharpening or synthesis."},
+    {"source": "as11-40-5927~orig.jpg", "rect": [1113, 1648, 1497, 2256], "output": "base_gold_foil.jpg",
+     "subject": "Apollo 11 photograph AS11-40-5927 of the LM descent stage crinkled gold thermal blanket",
+     "transformation": "Single crop at original 4095x4095 pixels plus +18% exposure normalization for space lighting; no resize or synthesis."},
+    {"source": "as11-40-5927~orig.jpg", "rect": [1913, 560, 2777, 1158], "output": "base_ascent_white.jpg",
+     "subject": "Apollo 11 photograph AS11-40-5927 of the LM ascent stage white thermal panels and black boxes",
+     "transformation": "Single crop at original 4095x4095 pixels; no resize, sharpening or synthesis."},
+]
 DOWNLOADS = {
     "lroc_color_poles_16k.tif": SVS + "a004700/a004720/lroc_color_poles_16k.tif",
     "ldem_64_uint.tif": SVS + "a004700/a004720/ldem_64_uint.tif",
@@ -191,12 +213,44 @@ def build_earth_clouds(cache: Path, target: Path) -> dict:
                   limitation="Historical Blue Marble composite cloud pattern; not current or simulated live weather.")
 
 
+def build_base_hardware(cache: Path, target: Path, old_sources: dict) -> tuple[list[dict], list[dict]]:
+    from PIL import Image
+    Image.MAX_IMAGE_PIXELS = None
+    hardware_dir = target / "base"
+    hardware_dir.mkdir(parents=True, exist_ok=True)
+    sources = [fetch(cache, name, BASE_SOURCES[name], old_sources.get(name)) for name in BASE_SOURCES]
+    sizes = {name: Image.open(cache / name).size for name in BASE_SOURCES}
+    outputs = []
+    for crop in BASE_CROPS:
+        image = Image.open(cache / crop["source"])
+        left, top, right, bottom = crop["rect"]
+        within = left >= 0 and top >= 0 and right <= sizes[crop["source"]][0] and bottom <= sizes[crop["source"]][1]
+        if not within:
+            raise RuntimeError("Hardware crop exceeds source bounds: " + crop["output"])
+        piece = image.crop(crop["rect"])
+        if "exposure normalization" in crop["transformation"]:
+            # Keep photographic content identical; only lift display exposure.
+            from PIL import ImageEnhance
+            piece = ImageEnhance.Brightness(piece).enhance(1.18)
+        path = hardware_dir / crop["output"]
+        piece.save(path, quality=92, optimize=True)
+        entry = record(path, dimensions=list(piece.size), color_space="sRGB",
+                       source=crop["source"], subject=crop["subject"],
+                       crop_rectangle_pixels=crop["rect"],
+                       transformation=crop["transformation"])
+        # Keep manifest paths relative to assets/space like every other output.
+        entry["file"] = "base/" + path.name
+        outputs.append(entry)
+    return sources, outputs
+
+
 def main() -> None:
     global cv2, np, OpenEXR, tifffile, Image
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--verify", action="store_true", help="Verify shipped outputs without network/conversion")
     parser.add_argument("--wac-only", action="store_true", help="Add/rebuild only the broad Copernicus WAC context and native LOLA crop")
     parser.add_argument("--clouds-only", action="store_true", help="Add/rebuild only the small real Earth cloud map")
+    parser.add_argument("--base-only", action="store_true", help="Add/rebuild only the photographed lunar base hardware textures")
     args = parser.parse_args()
     target = ROOT / "assets" / "space"
     cache = ROOT / "build" / "space-sources"
@@ -227,6 +281,17 @@ def main() -> None:
         previous["documentation"] = list(dict.fromkeys(previous["documentation"] + [CLOUD_DOCUMENTATION]))
         manifest_path.write_text(json.dumps(previous, indent=2) + "\n", encoding="utf-8")
         configure_import(target / output["file"])
+        return
+    if args.base_only:
+        assert previous, "Build original assets first"
+        base_sources, base_outputs = build_base_hardware(cache, target, old_sources)
+        previous["sources"] = [item for item in previous["sources"] if item["name"] not in BASE_SOURCES] + base_sources
+        output_names = {item["file"] for item in base_outputs}
+        previous["outputs"] = [item for item in previous["outputs"] if item["file"] not in output_names] + base_outputs
+        previous["documentation"] = list(dict.fromkeys(previous["documentation"] + [BASE_DOCUMENTATION]))
+        manifest_path.write_text(json.dumps(previous, indent=2) + "\n", encoding="utf-8")
+        for item in base_outputs:
+            configure_import(target / item["file"])
         return
     if args.wac_only:
         assert previous, "Build original assets first"

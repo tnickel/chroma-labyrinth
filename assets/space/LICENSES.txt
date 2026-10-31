@@ -81,6 +81,86 @@ https://www.nasa.gov/nasa-brand-center/images-and-media/
    https://science.nasa.gov/earth/earth-observatory/the-blue-marble-true-color-global-imagery-at-1km-resolution/
    NASA media-use guidance applies as linked above; no endorsement is implied.
 
+5. Photographed lunar base hardware (base/ subdirectory)
+   Real flown-spacecraft photographs from the NASA Image and Video Library,
+   cropped at original pixels (rectangles and SHA256 in SOURCE.json). Only
+   brightness normalization is documented; no resizing, AI or painted detail.
+   a) base_solar_cells.jpg
+      Source: s116e05970 (STS-116) - ISS Solar Array Wing face-on.
+      https://images.nasa.gov/details/s116e05970
+   b) base_module_hull.jpg
+      Source: s124e006729 (STS-124) - JEM Kibo module hull shielding/rails.
+      https://images.nasa.gov/details/s124e006729
+   c) base_gold_foil.jpg and base_ascent_white.jpg
+      Source: as11-40-5927 (Apollo 11) - LM Eagle descent-stage blanket and
+      ascent-stage white thermal panels.
+      https://images.nasa.gov/details/as11-40-5927
+   NASA photographs are not protected by copyright unless noted (NASA media
+   guidance: https://www.nasa.gov/nasa-brand-center/images-and-media/).
+   No NASA logo or endorsement is implied.
+
+6. Illustrative close-up regolith detail (base/regolith/)
+   Ground091 2K-JPG, by ambientCG, https://ambientcg.com/a/Ground091
+   Licensed under CC0 1.0: https://docs.ambientcg.com/license/
+   The colour, OpenGL normal and roughness maps are an Earth ground scan,
+   used to add plausible small-scale surface detail. They are not photographs
+   of the lunar surface. Exact source URL and SHA256 hashes: base/regolith/SOURCE.json.
+
+7. Apollo Lunar Module 3D model (base/models/)
+   NASA / Michael D. Carbajal, NASA 3D Resources:
+   https://science.nasa.gov/3d-resources/apollo-lunar-module/
+   https://github.com/nasa/NASA-3D-Resources
+   The GLB is Draco-decoded for Godot. Source URL, processing and both
+   checksums: base/models/SOURCE.json.
+   NASA media guidance applies; no NASA endorsement is implied.
+
+8. Gateway iHAB visualization (base/models/gateway_ihab.glb)
+   NASA/JSC/Gateway Program Office; Alberto G. Bertolin and Bradley W.
+   Reynolds, https://science.nasa.gov/3d-resources/gateway-lunar-space-station/
+   An isolated module from the published Gateway Core model, adapted for the
+   fictional surface base. Source, processing, checksums and the reproducible
+   extraction tool are documented in base/models/gateway_SOURCE.json.
+   NASA media guidance applies; no NASA endorsement is implied.
+
+9. Lunar-simulation scans (lunar_analog/)
+   Moon Collection, Poly Haven, https://polyhaven.com/collections/moon
+   Licensed under CC0 1.0: https://polyhaven.com/license
+   Includes the moon_01 and moon_dusted_02 ground materials and the
+   moon_rock_01, moon_rock_03 and moon_rock_05 scanned models.
+   These are terrestrial lunar-simulant lab scans, not lunar samples or
+   photographs taken on the Moon. Authors, source links, checksums and
+   acquisition information are recorded in lunar_analog/SOURCE.json and
+   tools/fetch_lunar_analog_assets.py.
+
+10. Habitat equipment (interior/)
+    Poly Haven 3D models and textures, https://polyhaven.com/models
+    Licensed under CC0 1.0: https://polyhaven.com/license
+    Individual asset pages, source URLs and checksums are recorded in
+    interior/model-sources.json and interior/LICENSES.txt.
+
+11. Framed astronomy and mission photographs (interior/art/)
+    Orion Nebula: NASA, ESA, M. Robberto (Space Telescope Science Institute/ESA)
+    and the Hubble Space Telescope Orion Treasury Project Team.
+    https://esahubble.org/images/heic0601a/
+    Pillars of Creation: NASA, ESA/Hubble and the Hubble Heritage Team.
+    https://esahubble.org/images/heic1501a/
+    Both ESA/Hubble images are licensed under CC BY 4.0:
+    https://esahubble.org/copyright/
+    The Earthrise, Blue Marble and Apollo 11 images are NASA mission imagery;
+    NASA's media-use guidance applies. Individual image sources, credits,
+    conditions and SHA256 hashes: interior/art/image-sources.json.
+
+12. Space Exploration Vehicle model (base/models/nasa_sev.glb)
+    NASA/LaRC/Advanced Concepts Lab:
+    https://science.nasa.gov/3d-resources/space-exploration-vehicle/
+    A reduced, adapted version is used as a fictional surface rover. Source,
+    processing, checksums and usage guidance: base/models/nasa_sev_SOURCE.json.
+
+13. Greenhouse plant model (base/models/greenhouse_plant_lod.glb)
+    Poly Haven Potted Plant 01, https://polyhaven.com/a/potted_plant_01
+    CC0 1.0: https://polyhaven.com/license. The simplified exterior version
+    and its processing are documented in base/models/greenhouse_plant_SOURCE.json.
+
 SCIENTIFIC LIMITS
 The global color map was prepared by NASA for visualization. The regional
 photograph contains baked sunlight and shadows. The 5 m stereo DEM covers a
