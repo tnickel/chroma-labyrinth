@@ -19,7 +19,14 @@ func _run() -> void:
 	root.add_child(observatory)
 	observatory.build()
 	observatory.build()
-	_check(observatory.get_child_count() == 3, "Build must be idempotent")
+	_check(observatory.get_child_count() == 0, "Normal flight must not allocate archival billboards")
+	for phase in Plan.PHASES.size():
+		for fraction in [0.0, 0.5, 1.0]:
+			observatory.update_flyby(Plan.sample(phase, fraction), Vector3.ZERO, Vector3.UP)
+			_check(not observatory.visible, "Archive appeared without opt-in in phase %d" % phase)
+	observatory.set_archive_enabled(true)
+	observatory.set_archive_enabled(true)
+	_check(observatory.get_child_count() == 3, "Explicit archive loading must be idempotent")
 	for exhibit: Dictionary in Observatory.EXHIBITS:
 		var panel: Node3D = observatory.get_node(str(exhibit.id))
 		var photo := panel.get_node("ArchivePhotograph") as MeshInstance3D
@@ -55,6 +62,9 @@ func _run() -> void:
 	_check(is_equal_approx(float(observatory._materials[0].get_shader_parameter("opacity")), 1.0), "Seek did not restore photo opacity")
 	observatory.update_flyby({"mars_mode": 0.0, "phase_index": 6, "phase_fraction": 0.5}, origin, Vector3.UP)
 	_check(not observatory.visible, "Mars archive leaked into lunar flight")
+	observatory.set_archive_enabled(false)
+	observatory.update_flyby(Plan.sample(Plan.Phase.OUTBOUND, 0.5), origin, Vector3.UP)
+	_check(not observatory.visible, "Disabling the archive must restore the natural sky")
 	observatory.queue_free()
 	await process_frame
 	print("MarsObservatoryRegression: %d checks, %d failures" % [checks, failures.size()])

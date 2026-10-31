@@ -308,8 +308,9 @@ func _controller_checks() -> void:
 		var restored_sky_origin: Vector3 = airport.scenery._sky_material.get_shader_parameter("stage_origin")
 		_check(base.visible and restored_sky_origin.distance_to(cabin_sky_origin) < 0.01,
 			"Returning to the aircraft does not restore the exterior lunar view")
-		# Every exit path from the settlement: B (checked above), ESC, and the
-		# early-return action which ends the visit and arms the descent.
+		# Escape releases the cursor in place; B (above) and an early return
+		# leave the settlement. Exercise dispatch so the player's mouse handler
+		# participates instead of sending Escape to only the flight controller.
 		var reenter := InputEventKey.new()
 		reenter.physical_keycode = KEY_B
 		reenter.pressed = true
@@ -317,10 +318,17 @@ func _controller_checks() -> void:
 		_check(airport.base_visit, "Second interior visit refused")
 		var esc := InputEventKey.new()
 		esc.physical_keycode = KEY_ESCAPE
+		esc.keycode = KEY_ESCAPE
 		esc.pressed = true
-		airport._input(esc)
-		_check(not airport.base_visit and player.global_position.distance_to(dome_spot) < 0.01, "ESC does not step out of the base interior")
-		airport._input(reenter)
+		var interior_position := player.global_position
+		Input.parse_input_event(esc)
+		var release := esc.duplicate() as InputEventKey
+		release.pressed = false
+		Input.parse_input_event(release)
+		Input.flush_buffered_events()
+		_check(airport.base_visit and player.global_position.distance_to(interior_position) < 0.01,
+			"Escape moves the visitor out of the base instead of releasing the cursor")
+		_check(Input.mouse_mode == Input.MOUSE_MODE_VISIBLE, "Escape does not release the cursor in the lunar base")
 		var base_position_before_abort: Vector3 = base.global_position
 		_check(airport.request_return(), "Early return refuses while visiting the interior")
 		_check(not airport.base_visit and player.global_position.distance_to(dome_spot) < 0.01, "Early return strands the visitor inside the base")

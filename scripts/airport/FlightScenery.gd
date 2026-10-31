@@ -83,7 +83,7 @@ func build() -> void:
 	_sun.shadow_caster_mask = CABIN_LIGHT_MASK
 	_sun.shadow_enabled = true
 	_sun.directional_shadow_max_distance = 55.0
-	_sun.light_angular_distance = 0.8
+	_sun.light_angular_distance = 0.533
 	add_child(_sun)
 	lunar_base = LunarSettlement.new()
 	add_child(lunar_base)
@@ -291,6 +291,7 @@ func set_flight_sample(height: float, airspeed: float, distance: float, bank: fl
 	environment.ambient_light_energy = lerpf(0.28, 0.12, darkening)
 	environment.background_energy_multiplier = lerpf(0.7, 0.15, darkening)
 	_sun.light_energy = lerpf(1.25, 1.5, darkening)
+	_sun.light_angular_distance = 0.533
 
 func set_destination_mode(is_mars: bool) -> void:
 	if is_mars and mars_base != null:
@@ -335,8 +336,10 @@ func set_lunar_sample(parameters: Dictionary) -> void:
 	var sunlight := DAYLIGHT_SUN_DIRECTION.normalized().slerp(LunarWorld.LUNAR_SUN.normalized(), sunlight_mix)
 	_sun.basis = Basis(Vector3.BACK, -_roll) * Basis.looking_at(-sunlight)
 	_sky_material.set_shader_parameter("sun_direction_world", _sun.global_basis.z.normalized())
-	var target_sun_col := Color("ffe5c4") if is_mars else Color("fffaf0")
+	var near_mars_surface := 1.0 - smoothstep(4000.0, 55000.0, float(lunar_state.lunar_altitude))
+	var target_sun_col := Color("fffaf0").lerp(Color("ffe5c4"), near_mars_surface) if is_mars else Color("fffaf0")
 	_sun.light_color = Color("fff0d6").lerp(target_sun_col, sunlight_mix)
+	_sun.light_angular_distance = lerpf(0.533, 0.350, transfer) if is_mars else 0.533
 	if flyby != null:
 		flyby.update_flyby(parameters, _world_origin, _sun.global_basis.z.normalized())
 	if transfer > 0.001:

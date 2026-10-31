@@ -122,7 +122,8 @@ def fetch_usgs_mars_maps() -> list[dict]:
     records.append({"file": region_path.name, "bytes": region_path.stat().st_size})
     print("Mars regional Valles Marineris map:", region_path.name, region_path.stat().st_size)
 
-    # 3. Generate 16-bit packed Mars global & regional DEM heightmaps aligned with the imagery
+    # 3. Illustrative colour-derived relief, NOT a measured DEM or MOLA altimetry.
+    # Dark/bright surface materials do not uniquely determine elevation.
     global_height_path = MARS_DIR / "mars_height_4k.png"
     if not global_height_path.exists():
         img = Image.open(global_path).convert("RGB").resize((2048, 1024), Image.Resampling.BILINEAR)
@@ -269,6 +270,7 @@ def main() -> None:
     PLANETS_DIR.mkdir(parents=True, exist_ok=True)
 
     manifest = {
+        "relief_note": "mars_height_4k.png and mars_region_height.png are illustrative relief generated from image luminance/colour in tools/fetch_mars_assets.py. They are not MOLA data or surveyed Mars elevations. The fictional colony and its aircraft approach are deliberately graded flat.",
         "mars_maps": fetch_usgs_mars_maps(),
         "mars_art": fetch_nasa_mars_art(),
         "planets": fetch_interplanetary_flyby_textures(),

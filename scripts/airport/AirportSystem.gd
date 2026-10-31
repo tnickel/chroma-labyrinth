@@ -470,7 +470,7 @@ func _jump_directly_to_base_mode(target_mode: String) -> bool:
 		lighting.update_view()
 	return ok
 
-## Direct jump into the Mars transfer and its space-archive observatory.
+## Direct jump into the Mars transfer and its panoramic view of space.
 func jump_directly_to_mars_flight() -> bool:
 	return _jump_directly_to_mars_phase(MarsPlan.Phase.OUTBOUND, 1.5)
 
@@ -921,7 +921,7 @@ func _update_ui() -> void:
 	if flight_active:
 		_viewing_hint.text = MarsPlan.viewing_hint(phase_index) if is_mars else FlightPlan.viewing_hint(phase_index)
 	else:
-		_viewing_hint.text = "Erde → Weltraumarchiv → Valles Marineris → Ares-Marsbasis" if is_mars else "Erde → Copernicus → Erdaufgang → Gate A01"
+		_viewing_hint.text = "Erde → Sternenpanorama → Mars → Ares-Marsbasis" if is_mars else "Erde → Copernicus → Erdaufgang → Gate A01"
 	if base_visit:
 		if _mars_tower_active:
 			_viewing_hint.text = "NASA-Fotopanorama · Curiosity / Gediz Vallis · Mausrad: Zoom"
@@ -950,7 +950,7 @@ func _update_ui() -> void:
 	_progress.value = 100.0 * flight_elapsed / maxf(0.001, flight_elapsed + _remaining_time()) if flight_active else 0.0
 	if _dest_button != null:
 		_dest_button.visible = not flight_active
-		_dest_button.text = "ZIEL: MARS (WELTRAUMARCHIV & ARES-BASIS)  [V]" if is_mars else "ZIEL: MOND (COPERNICUS-STATION)  [V]"
+		_dest_button.text = "ZIEL: MARS (PLANETENPANORAMA & ARES-BASIS)  [V]" if is_mars else "ZIEL: MOND (COPERNICUS-STATION)  [V]"
 	_start_button.visible = not flight_active
 	_start_button.disabled = not on_board
 	_start_button.text = (("MARSFLUG STARTEN  [R]" if is_mars else "MONDREISE STARTEN  [R]") if on_board else "ZUERST ÜBER GATE A01 EINSTEIGEN")

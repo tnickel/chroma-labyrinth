@@ -272,15 +272,23 @@ Herkunft und Nutzungsbedingungen stehen in
 
 Die Welt-Auswahl bietet direkte Einstiege in **Marsflug** (0), **Mars-Überflug**
 (U) und **Marsbasis** (M). Alternativ im Flugzeug mit **V** Mars als Ziel wählen
-und mit **R** starten; **T** startet dort ebenfalls den Marsflug. In der
-Heckkuppel zeigt das als solches beschriftete Weltraumarchiv auf Hin- und
-Rückflug echte Aufnahmen von Webb und Cassini sowie den katalogbasierten
-Sternhimmel. Jupiter und Saturn werden dabei nicht als reale Vorbeiflüge auf
-dem Weg zum Mars ausgegeben. Die Infrarotdaten des Webb-Bilds sind in sichtbare
-Farben übersetzt. Bildquellen und Nutzungsbedingungen stehen in
+und mit **R** starten; **T** startet dort ebenfalls den Marsflug. Die Heckkuppel
+zeigt Erde und Mars als beleuchtete Kugeln mit fotografischen Oberflächenkarten
+vor dem katalogbasierten NASA-Sternhimmel. Große Archivbilder werden auf Hin-
+und Rückflug nicht mehr automatisch vor die Fenster projiziert. Der zeitlich
+und räumlich verkürzte Erlebnisflug ist keine berechnete interplanetare Flugbahn;
+Jupiter und Saturn liegen nicht als nahe Zwischenstationen auf dieser Route.
+Die mitgelieferten Webb- und Cassini-Archivbilder bleiben als getrennt aktivierbare
+Präsentation im Projekt erhalten. Die Infrarotdaten des Webb-Bilds sind in
+sichtbare Farben übersetzt. Bildquellen und Nutzungsbedingungen stehen in
 [`assets/space/observatory/SOURCE.json`](assets/space/observatory/SOURCE.json)
 und [`assets/space/observatory/LICENSES.txt`](assets/space/observatory/LICENSES.txt).
 Die Bilder liegen lokal vor; eine Internetverbindung ist beim Spielen nicht nötig.
+
+Der Marsanflug richtet die Maschine über einer freien Landefläche aus und lässt
+sie nach dem Aufsetzen ausrollen. Gelände, Berge und Flugzeug verwenden dabei
+denselben Marsbezug. Kontrollaufnahmen und Prüfungen stehen in
+[`doc/mars-flight/validation.md`](doc/mars-flight/validation.md).
 
 Die Marsbasis ist eine fiktive Gestaltung mit begehbaren Räumen, Kuppeln und
 Oberfläche. Der Boden und die Canyons sind aus Texturen und Geometrie gestaltet,

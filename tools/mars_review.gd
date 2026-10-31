@@ -36,9 +36,14 @@ func _run() -> void:
 	var cabin: Node3D = _airport.cabin
 	var tower_only := OS.get_cmdline_user_args().has("--tower-only")
 	if not tower_only:
+		# Archive captures are an explicit tool-only presentation. Normal flights
+		# keep their unobstructed sky and never enable these photographic panels.
+		_airport.scenery.flyby.set_archive_enabled(true)
+		_airport._sync_flight_scenery()
 		await _capture("archive_carina", cabin, Vector3(0, 0.04, 19.5), Vector3(0, 0.22, 1))
 		await _capture("archive_jupiter", cabin, Vector3(0, 0.04, 19.5), Vector3(-0.94, 0.22, -0.342))
 		await _capture("archive_saturn", cabin, Vector3(0, 0.04, 19.5), Vector3(0.94, 0.22, -0.342))
+		_airport.scenery.flyby.set_archive_enabled(false)
 	if OS.get_cmdline_user_args().has("--archive-only"):
 		_scene.queue_free()
 		for frame in 4:

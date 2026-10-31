@@ -139,7 +139,7 @@ func visit_lunar_base(animate := true) -> void:
 	_visit_airport_destination("jump_directly_to_lunar_base", "MONDBASIS", Color("ffd9a0"), "COPERNICUS STATION & GLASKUPPELN", animate)
 
 func visit_mars_flight(animate := true) -> void:
-	_visit_airport_destination("jump_directly_to_mars_flight", "MARSFLUG", Color("ff9e72"), "INTERPLANETARE REISE  ·  WELTRAUMARCHIV", animate)
+	_visit_airport_destination("jump_directly_to_mars_flight", "MARSFLUG", Color("ff9e72"), "INTERPLANETARE REISE  ·  ERDE, STERNE & MARS", animate)
 
 func visit_mars_flyover(animate := true) -> void:
 	_visit_airport_destination("jump_directly_to_mars_flyover", "MARS-ÜBERFLUG", Color("ff8052"), "TIEFFLUG ÜBER VALLES MARINERIS & LANDEANFLUG", animate)
@@ -305,7 +305,7 @@ func _build_menu() -> void:
 			"name": "WorldButton_MarsFlight",
 			"tag": "10 / INTERPLANETARER FLUG [0]",
 			"title": "MARSFLUG",
-			"detail": "NASA-Archivbilder auf dem Weg\nzum Roten Planeten.",
+			"detail": "Sternenpanorama & Planeten\nauf dem Weg zum Mars.",
 			"color": Color("ff9e72"),
 			"title_color": Color("ffe7db"),
 			"bg": Color(0.048, 0.028, 0.024),

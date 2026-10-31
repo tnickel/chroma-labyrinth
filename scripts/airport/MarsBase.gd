@@ -11,11 +11,9 @@ const DomeGeometry = preload("res://scripts/airport/MarsDomeGeometry.gd")
 const Botany = preload("res://scripts/airport/MarsBotany.gd")
 const COLLISION_LAYER := 128
 const BOUNDARY_RADIUS := 88.0
-# Shares the raymarcher's normalized sphere + regional heightfield with the lunar
-# settlement so the landed Mars colony sits exactly on the raymarched canyon floor.
-const LunarRef = preload("res://scripts/airport/LunarBase.gd")
+const Terrain = preload("res://scripts/airport/MarsTerrain.gd")
 const MarsLandscape = preload("res://scripts/airport/MarsLandscape.gd")
-const PLANET_RADIUS := 1737400.0
+const PLANET_RADIUS := Terrain.RADIUS
 const VISIBILITY_ALTITUDE := 24000.0
 
 const ROCK_MODEL_PATHS: Array[String] = [
@@ -43,12 +41,13 @@ func build() -> void:
 	_built = true
 	name = "MarsBase"
 	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
-	elevation = _sample_site_elevation(LunarRef.SITE_LATITUDE, LunarRef.SITE_LONGITUDE)
+	elevation = Terrain.site_elevation()
 	_load_mars_pbr_materials()
 	_load_rock_prototypes()
 	_build_materials()
 	_build_surface_collision()
 	_build_surface_patch()
+	_build_landing_strip()
 	_build_valles_marineris_canyon_range()
 	_build_landing_complex()
 	_build_surface_ferry_exterior()
@@ -66,8 +65,7 @@ func build() -> void:
 	_rock_prototypes.clear()
 	visible = false
 
-## Same placement contract as LunarBase.place(): the sky shader raymarches
-## stage_origin + planet_direction*(R+altitude) + geo_dir*(R+elevation).
+## Shares the Mars shader datum, using metre offsets for stable touchdown.
 func place(state: Dictionary, stage_origin: Vector3) -> void:
 	if not _built or state.is_empty():
 		visible = false
@@ -78,13 +76,17 @@ func place(state: Dictionary, stage_origin: Vector3) -> void:
 	if not show:
 		return
 	var world_to_geo: Basis = state.moon_world_to_geo
-	var radial: Vector3 = world_to_geo.transposed() * _geo_unit(LunarRef.SITE_LATITUDE, LunarRef.SITE_LONGITUDE)
-	var north: Vector3 = world_to_geo.transposed() * _geo_north(LunarRef.SITE_LATITUDE, LunarRef.SITE_LONGITUDE)
+	var radial: Vector3 = world_to_geo.transposed() * _geo_unit(Terrain.SITE_LATITUDE, Terrain.SITE_LONGITUDE)
+	var north: Vector3 = world_to_geo.transposed() * _geo_north(Terrain.SITE_LATITUDE, Terrain.SITE_LONGITUDE)
 	var up := radial.normalized()
 	var east := north.cross(up).normalized()
-	global_position = stage_origin + (state.moon_direction as Vector3) * (PLANET_RADIUS + height) \
-		+ radial * (PLANET_RADIUS + elevation)
 	global_basis = Basis(east, up, east.cross(up)).orthonormalized()
+	# Resolve metre offsets before converting to Vector3. Subtracting two
+	# 3,396 km vectors quantized touchdown by ~25 cm and made the gear float.
+	var east_offset := deg_to_rad(float(state.longitude) - Terrain.SITE_LONGITUDE) * PLANET_RADIUS * cos(deg_to_rad(Terrain.SITE_LATITUDE))
+	var north_offset := deg_to_rad(float(state.latitude) - Terrain.SITE_LATITUDE) * PLANET_RADIUS
+	var local_observer := Vector3(east_offset, height - elevation, -north_offset)
+	global_position = stage_origin - global_basis * local_observer
 
 func _geo_unit(latitude_deg: float, longitude_deg: float) -> Vector3:
 	var latitude := deg_to_rad(latitude_deg)
@@ -95,29 +97,6 @@ func _geo_north(latitude_deg: float, longitude_deg: float) -> Vector3:
 	var latitude := deg_to_rad(latitude_deg)
 	var longitude := deg_to_rad(longitude_deg)
 	return Vector3(-sin(latitude) * cos(longitude), cos(latitude), -sin(latitude) * sin(longitude))
-
-func _sample_site_elevation(latitude_deg: float, longitude_deg: float) -> float:
-	var tex := _load_tex(LunarRef.REGION_HEIGHT_PATH)
-	if tex == null:
-		return 0.0
-	var image: Image = tex.get_image()
-	if image.is_compressed():
-		image.decompress()
-	var region: Vector4 = LunarRef.LUNAR_REGION
-	var uv := Vector2((longitude_deg - region.x) / (region.z - region.x),
-		(region.w - latitude_deg) / (region.w - region.y))
-	var fx := clampf(uv.x * image.get_width() - 0.5, 0.0, image.get_width() - 1.0)
-	var fy := clampf(uv.y * image.get_height() - 0.5, 0.0, image.get_height() - 1.0)
-	var x0 := int(floor(fx))
-	var y0 := int(floor(fy))
-	var x1 := mini(x0 + 1, image.get_width() - 1)
-	var y1 := mini(y0 + 1, image.get_height() - 1)
-	var tx := fx - float(x0)
-	var ty := fy - float(y0)
-	var top := image.get_pixel(x0, y0).lerp(image.get_pixel(x1, y0), tx)
-	var bottom := image.get_pixel(x0, y1).lerp(image.get_pixel(x1, y1), tx)
-	var pixel := top.lerp(bottom, ty)
-	return (pixel.r * 65280.0 + pixel.g * 255.0) * 0.5 - 10000.0
 
 func set_approach_state(phase_index: int, phase_fraction: float, altitude: float) -> void:
 	var proximity := clampf(1.0 - altitude / 24000.0, 0.0, 1.0)
@@ -239,8 +218,11 @@ func _build_surface_patch() -> void:
 	var patch := MeshInstance3D.new()
 	patch.name = "SurfacePatch"
 	patch.layers = LAYER
+	patch.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var plane := PlaneMesh.new()
-	plane.size = Vector2(210.0, 210.0)
+	# Continue the soil under the entire mesa basin. A 210 m patch stopped
+	# before the mountain toes and exposed gaps above the distant sky terrain.
+	plane.size = Vector2(1400.0, 1400.0)
 	plane.subdivide_width = 160
 	plane.subdivide_depth = 160
 	patch.mesh = plane
@@ -256,7 +238,6 @@ uniform sampler2D soil_normal : hint_normal, filter_linear_mipmap_anisotropic, r
 uniform sampler2D soil_rough : hint_default_white, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D cliff_albedo : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D cliff_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
-uniform sampler2D region_albedo : source_color, filter_linear_mipmap, repeat_enable;
 
 varying vec3 v_local;
 
@@ -296,7 +277,12 @@ void vertex() {
 	float dist = length(VERTEX.xz);
 	// The walkable collision slab is flat; relief only begins beyond the EVA
 	// boundary so that the visual surface and feet cannot drift apart.
-	float safe_zone = smoothstep(89.0, 102.0, dist);
+	// One full 8.75 m grid cell separates displacement from the 88 m EVA wall.
+	float safe_zone = smoothstep(100.0, 120.0, dist);
+	// The aircraft strip crosses the outer scenic dunes: keep that overlap
+	// graded too, otherwise its vertex displacement protrudes through the strip.
+	float outside_strip = smoothstep(28.0, 34.0, abs(VERTEX.x)) + step(-20.0, VERTEX.z);
+	safe_zone *= clamp(outside_strip, 0.0, 1.0);
 	float dune = sin(VERTEX.x * 0.14 + VERTEX.z * 0.09) * 0.42 + fbm5(VERTEX.xz * 0.06) * 1.15;
 	VERTEX.y += dune * safe_zone;
 }
@@ -304,7 +290,7 @@ void vertex() {
 void fragment() {
 	vec2 wp = v_local.xz;
 	float dist = length(wp);
-	float edge_fade = 1.0 - smoothstep(91.0, 104.0, dist);
+	float edge_fade = 1.0 - smoothstep(620.0, 690.0, dist);
 
 	vec2 uv_fine = wp * 0.28;
 	vec2 uv_med = wp * 0.065;
@@ -313,7 +299,6 @@ void fragment() {
 	vec3 s_fine = texture(soil_albedo, uv_fine).rgb;
 	vec3 s_med = texture(soil_albedo, uv_med).rgb;
 	vec3 c_rock = texture(cliff_albedo, uv_med * 1.35).rgb;
-	vec3 reg = texture(region_albedo, wp * 0.0022 + vec2(0.5)).rgb;
 
 	float n_macro = fbm5(uv_macro);
 	float n_outcrop = smoothstep(0.52, 0.76, fbm5(wp * 0.045));
@@ -326,7 +311,8 @@ void fragment() {
 	vec3 base_col = mix(s_fine, s_med, 0.45) * rust_ochre * 1.55;
 	base_col = mix(base_col, c_rock * dark_basalt * 2.2, n_outcrop * 0.65);
 	base_col = mix(base_col, dust_salmon, smoothstep(0.58, 0.88, n_macro) * 0.35);
-	base_col = mix(base_col, reg * vec3(1.15, 0.85, 0.72), 0.22);
+	// Metre-scale ground uses soil and rock scans. Projecting the orbital
+	// mosaic here shrank entire canyons into blurry stains on the apron.
 	base_col *= (0.92 + 0.14 * dune_ripples);
 
 	vec3 n1 = texture(soil_normal, uv_fine).rgb * 2.0 - 1.0;
@@ -348,7 +334,6 @@ void fragment() {
 	mat.set_shader_parameter("soil_rough", _load_tex("res://assets/space/mars/textures/red_laterite_soil_stones/roughness.jpg"))
 	mat.set_shader_parameter("cliff_albedo", _load_tex("res://assets/space/mars/textures/rock_face_03/albedo.jpg"))
 	mat.set_shader_parameter("cliff_normal", _load_tex("res://assets/space/mars/textures/rock_face_03/normal_gl.jpg"))
-	mat.set_shader_parameter("region_albedo", _load_tex("res://assets/space/mars/mars_region_valles_4k.jpg"))
 	patch.material_override = mat
 	add_child(patch)
 	_build_surface_pebbles()
@@ -383,7 +368,10 @@ func _build_surface_pebbles() -> void:
 		var size := rng.randf_range(0.06, 0.27)
 		var scale := Vector3(size * rng.randf_range(0.8, 1.5), size * rng.randf_range(0.3, 0.7), size)
 		var basis := Basis(Vector3.UP, rng.randf_range(0.0, TAU)).scaled(scale)
-		instances.set_instance_transform(i, Transform3D(basis, Vector3(cos(angle) * distance, scale.y * 0.2, sin(angle) * distance)))
+		var position := Vector3(cos(angle) * distance, scale.y * 0.2, sin(angle) * distance)
+		if Terrain.CORRIDOR.has_point(Vector2(position.x, position.z)):
+			position.x = 72.0 if position.x >= 0.0 else -72.0
+		instances.set_instance_transform(i, Transform3D(basis, position))
 		instances.set_instance_color(i, Color(0.42, 0.25, 0.19).lerp(Color(0.72, 0.43, 0.29), rng.randf()))
 	pebbles.multimesh = instances
 	add_child(pebbles)
@@ -453,7 +441,38 @@ void fragment() {
 		mesa.position = Vector3(cos(angle) * ring_dist, -height * 0.08 - 4.0, sin(angle) * ring_dist)
 		mesa.rotation_degrees = Vector3(float((i % 3) - 1) * 1.8, float(i * 37), float(((i + 1) % 3) - 1) * 1.5)
 		mesa.scale = Vector3(1.0, 1.0, lerpf(0.75, 1.38, float(i % 4) / 3.0))
+		# Test the transformed mesh, including asymmetric erosion and tilt.
+		# A centre/radius test missed lobes that intruded into the flight path.
+		var bounds := mesa.transform * mesa.get_aabb()
+		var corridor := AABB(Vector3(-42.0, -30.0, -1600.0), Vector3(84.0, 300.0, 1580.0))
+		if bounds.intersects(corridor):
+			mesa.position.x += (42.0 - bounds.position.x + 8.0) if mesa.position.x >= 0.0 else (-42.0 - bounds.end.x - 8.0)
 		mountains.add_child(mesa)
+
+func _build_landing_strip() -> void:
+	# Flat graded approach, touchdown and rollout, with the colony still within
+	# the existing walkable boundary. The small central pad serves the EVA ferry.
+	var strip := MeshInstance3D.new()
+	strip.name = "AircraftLandingStrip"
+	strip.layers = LAYER
+	var plane := PlaneMesh.new()
+	plane.size = Terrain.CORRIDOR.size
+	strip.mesh = plane
+	strip.position = Vector3(0.0, 0.005, Terrain.CORRIDOR.get_center().y)
+	var soil := _mars_soil_mat.duplicate() as StandardMaterial3D
+	soil.uv1_scale = Vector3(14.0, 395.0, 1.0)
+	strip.material_override = soil
+	add_child(strip)
+	for index in 15:
+		var marking := MeshInstance3D.new()
+		marking.name = "LandingCenterline_%02d" % index
+		marking.layers = LAYER
+		var box := BoxMesh.new()
+		box.size = Vector3(0.3, 0.015, 4.0)
+		marking.mesh = box
+		marking.position = Vector3(0.0, 0.018, -62.0 - float(index) * 12.0)
+		marking.material_override = _pad_light_mat
+		add_child(marking)
 
 func _build_landing_complex() -> void:
 	var pad := MeshInstance3D.new()
@@ -1211,6 +1230,8 @@ func _build_mars_boulder_fields() -> void:
 		var angle := (float(i) / float(count)) * TAU + float(i % 3) * 0.11
 		var dist := lerpf(27.0, 82.0, float((i * 7 + 3) % 19) / 18.0)
 		var pos := Vector3(cos(angle) * dist, -0.08, sin(angle) * dist)
+		if Terrain.CORRIDOR.grow(7.0).has_point(Vector2(pos.x, pos.z)):
+			continue
 		# Keep airlock walkway, plaza, and central structures clear
 		if pos.distance_to(Vector3(-12.5, 0.0, 16.5)) < 11.0:
 			continue

@@ -1,4 +1,5 @@
 {
+  "relief_note": "mars_height_4k.png and mars_region_height.png are illustrative relief generated from image luminance/colour in tools/fetch_mars_assets.py. They are not MOLA data or surveyed Mars elevations. The fictional colony and its aircraft approach are deliberately graded flat.",
   "mars_maps": [
     {
       "file": "mars_viking_global_4k.jpg",

@@ -1,6 +1,7 @@
 extends RefCounted
-## Fictional, time-compressed Mars journey with a virtual photographic
-## observatory during transfer, a stylized canyon flyover and Ares Base landing.
+const Terrain = preload("res://scripts/airport/MarsTerrain.gd")
+## Fictional, time-compressed Mars journey with a natural transfer sky,
+## a stylized canyon flyover and Ares Base landing.
 ## Durations and interpolation are staging choices, not orbital mechanics.
 enum Phase { DOORS, TAXI, TAKEOFF, CLIMB, CLOUDS, EARTH_ORBIT, OUTBOUND,
 	LUNAR_APPROACH, LOW_PASS, BASE_ORBIT, BASE_CLOSE, BASE_LANDING, BASE_SURFACE, BASE_DEPART,
@@ -11,7 +12,7 @@ const DURATIONS := [4.0, 8.0, 12.0, 24.0, 18.0, 40.0, 110.0, 48.0,
 const PHASES := [
 	"TÜREN SCHLIESSEN", "ROLLEN", "START", "STEIGFLUG",
 	"ÜBER DEN WOLKEN", "ERDE / ORBITALPANORAMA",
-	"MARSTRANSFER / KOSMISCHES OBSERVATORIUM",
+	"MARSTRANSFER / ERDE & STERNENHIMMEL",
 	"MARS-ANFLUG / ROTER PLANET",
 	"MARS-ÜBERFLUG / VALLES MARINERIS & JEZERO",
 	"MARSBASIS / CANYON-ORBITALPANORAMA",
@@ -25,7 +26,7 @@ const PHASES := [
 ]
 const MARS_FAR_ALTITUDE := 376291600.0
 const EARTH_MARS_ALTITUDE := 376291600.0
-const LANDED_SITE_HEIGHT := 6.5
+const LANDED_SITE_HEIGHT := Terrain.CABIN_FLOOR_HEIGHT
 const KEYS := ["earth_altitude", "speed", "transfer", "lunar_altitude", "orbit_angle", "lunar_mix", "landing_blend"]
 
 const POINTS := [
@@ -73,6 +74,25 @@ static func sample(index: int, fraction: float) -> Dictionary:
 		var close_pass := smoothstep(0.0, 0.22, fraction) * (1.0 - smoothstep(0.78, 1.0, fraction))
 		result.lunar_altitude = lerpf(15000.0, 3800.0, close_pass)
 		result.earth_altitude = EARTH_MARS_ALTITUDE - float(result.lunar_altitude)
+	if index == Phase.BASE_LANDING:
+		# Touch down before stopping: the last 22% rolls along the cleared strip.
+		var touchdown := interpolate(_point(index), _point(index + 1), fraction / 0.78)
+		result.lunar_altitude = touchdown.lunar_altitude
+		result.earth_altitude = EARTH_MARS_ALTITUDE - float(result.lunar_altitude)
+		# Align above every scenic mesa before descending into the colony.
+		# Touchdown and the short forward rollout occupy the cleared north apron.
+		var approach_south := deg_to_rad(0.024) * Terrain.RADIUS
+		var touchdown_south := Terrain.PARK_POSITION.z + 12.0
+		var south := lerpf(approach_south, touchdown_south, smoothstep(0.0, 0.22, fraction))
+		south = lerpf(south, Terrain.PARK_POSITION.z, smoothstep(0.78, 1.0, fraction))
+		result["mars_ground_position"] = Vector2(0.0, south)
+	elif index == Phase.BASE_SURFACE:
+		result["mars_ground_position"] = Vector2(Terrain.PARK_POSITION.x, Terrain.PARK_POSITION.z)
+	elif index == Phase.BASE_DEPART:
+		# Climb clear of buildings and mesas before moving across the colony.
+		var south := lerpf(Terrain.PARK_POSITION.z, deg_to_rad(0.024) * Terrain.RADIUS,
+			smoothstep(220.0, 1200.0, float(result.lunar_altitude)))
+		result["mars_ground_position"] = Vector2(0.0, south)
 	result["settlement_leg"] = index >= Phase.BASE_ORBIT and index <= Phase.BASE_DEPART
 	result["returning"] = index >= Phase.HOMEBOUND
 	result["mars_mode"] = 1.0
@@ -95,6 +115,13 @@ static func return_sample(origin: Dictionary, fraction: float) -> Dictionary:
 	var destination := _point(Phase.HOMEBOUND + 1)
 	destination.orbit_angle = float(origin.orbit_angle) + 0.04
 	var result := interpolate(origin, destination, fraction)
+	if origin.has("mars_ground_position"):
+		# An abort initially preserves the exact touchdown/approach position;
+		# horizontal departure waits until the aircraft clears the local mesas.
+		var position: Vector2 = origin.mars_ground_position
+		var weight := smoothstep(maxf(float(origin.lunar_altitude), 220.0), maxf(float(origin.lunar_altitude) + 1000.0, 1200.0), float(result.lunar_altitude))
+		var geographic_south := deg_to_rad(0.024) * Terrain.RADIUS
+		result["mars_ground_position"] = position.lerp(Vector2(0.0, geographic_south), weight)
 	result["returning"] = true
 	result["mars_mode"] = 1.0
 	result["phase_index"] = Phase.HOMEBOUND
@@ -113,7 +140,7 @@ static func viewing_hint(index: int) -> String:
 		Phase.EARTH_ORBIT:
 			return "Glasboden: Erdkrümmung  ·  Aufbruch zum Roten Planeten"
 		Phase.OUTBOUND:
-			return "Archivprojektion: Webb voraus · Jupiter links · Saturn rechts · freie Sicht aus der Heckkuppel"
+			return "Erde im Rückblick · Mars voraus · freier Sternenhimmel aus der Heckkuppel"
 		Phase.LUNAR_APPROACH:
 			return "Heckkuppel: Der Rote Planet wächst am Horizont · zeitgeraffte Inszenierung"
 		Phase.LOW_PASS:
@@ -131,6 +158,6 @@ static func viewing_hint(index: int) -> String:
 		Phase.EARTHRISE:
 			return "Heckkuppel: Der rostrote Marshorizont · Aufbruch zur Erde"
 		Phase.HOMEBOUND:
-			return "Rückreise · Archivprojektionen von Webb und Cassini in der Panoramakuppel"
+			return "Rückreise zur Erde · Mars im Rückblick · freier Sternenhimmel"
 		_:
 			return "Fenster, Glasboden und 360°-Panoramakuppel frei erkunden"

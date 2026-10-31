@@ -1,5 +1,5 @@
 extends Node3D
-## Virtual observatory outside the passenger dome, not a physical itinerary.
+## Optional archival exhibit, never part of the natural flight view.
 ## Real, locally shipped archival photographs retain aspect ratios and credits.
 ## The historical filename preserves FlightScenery's existing integration.
 const LAYER := 16
@@ -47,6 +47,7 @@ var _panels: Array[Node3D] = []
 var _materials: Array[ShaderMaterial] = []
 var _labels: Array[Label3D] = []
 var _built := false
+var archive_enabled := false
 
 func build() -> void:
 	if _built:
@@ -54,9 +55,16 @@ func build() -> void:
 	_built = true
 	name = "InterplanetaryFlyby"
 	visible = false
-	for exhibit: Dictionary in EXHIBITS:
-		_build_exhibit(exhibit)
 	set_process(false)
+
+func set_archive_enabled(enabled: bool) -> void:
+	archive_enabled = enabled
+	visible = false
+	# Photos and their labels are loaded only for an explicit archival view.
+	# A phase change alone must never insert giant pictures into the sky.
+	if enabled and _panels.is_empty():
+		for exhibit: Dictionary in EXHIBITS:
+			_build_exhibit(exhibit)
 
 func _build_exhibit(exhibit: Dictionary) -> void:
 	var panel := Node3D.new()
@@ -128,7 +136,7 @@ func _position_panel(panel: Node3D, azimuth: float, drift: float) -> void:
 
 func update_flyby(parameters: Dictionary, stage_origin: Vector3, _sun_dir: Vector3) -> void:
 	var phase_idx := int(parameters.get("phase_index", -1))
-	var enabled := float(parameters.get("mars_mode", 0.0)) > 0.5 and phase_idx in [6, 15]
+	var enabled := archive_enabled and float(parameters.get("mars_mode", 0.0)) > 0.5 and phase_idx in [6, 15]
 	visible = enabled
 	if not enabled:
 		return

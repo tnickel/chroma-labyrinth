@@ -1,5 +1,6 @@
-// NASA LROC photographs + LOLA/NAC stereo heights. No procedural craters.
-// Units here are lunar radii to retain float precision at astronomical range.
+// Moon: NASA LROC photographs + LOLA/NAC stereo heights.
+// Mars: Viking imagery and explicitly illustrative image-derived relief.
+// Units use the selected body's radius to retain astronomical float precision.
 uniform sampler2D moon_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
 uniform sampler2D moon_height : repeat_enable, filter_linear;
 uniform sampler2D moon_region_albedo : source_color, repeat_disable, filter_linear_mipmap_anisotropic;
@@ -14,6 +15,9 @@ uniform sampler2D lunar_detail_albedo : source_color, repeat_enable, filter_line
 uniform sampler2D lunar_detail_normal : repeat_enable, filter_linear_mipmap_anisotropic;
 uniform sampler2D mars_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
 uniform sampler2D mars_region_albedo : source_color, repeat_disable, filter_linear_mipmap_anisotropic;
+uniform sampler2D mars_height : repeat_enable, filter_linear;
+uniform sampler2D mars_region_height : repeat_disable, filter_linear;
+uniform float mars_site_elevation = 0.0;
 uniform sampler2D mars_detail_albedo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
 uniform sampler2D mars_detail_normal : repeat_enable, filter_linear_mipmap_anisotropic;
 uniform float mars_mode = 0.0;
@@ -26,7 +30,7 @@ uniform vec3 earth_direction = vec3(0.0, -1.0, 0.0);
 uniform mat3 moon_world_to_geo;
 // W/E/S/N from the source GeoTIFF. UV convention is identical to CGI Moon Kit.
 const vec4 LUNAR_REGION = vec4(-19.305144567, 9.245515290, -18.169577049, 11.094585370);
-const float LUNAR_RADIUS = 1737400.0;
+uniform float celestial_radius = 1737400.0;
 const float LUNAR_PI = 3.14159265359;
 
 vec2 lunar_uv(vec3 normal) {
@@ -54,8 +58,40 @@ float decode_lunar_height(vec2 packed) {
 	return (packed.x * 65280.0 + packed.y * 255.0) * 0.5 - 10000.0;
 }
 
+vec2 mars_region_uv(vec2 uv) {
+	vec2 lon_lat = vec2(uv.x * 360.0 - 180.0, 90.0 - uv.y * 180.0);
+	return vec2((lon_lat.x + 78.0) / 16.0, (-2.0 - lon_lat.y) / 16.0);
+}
+
+vec2 mars_site_metres(vec2 uv) {
+	vec2 lon_lat = vec2(uv.x * 360.0 - 180.0, 90.0 - uv.y * 180.0);
+	return vec2(radians(lon_lat.x + 70.0) * celestial_radius * cos(radians(-10.0)),
+		-radians(lon_lat.y + 10.0) * celestial_radius);
+}
+
+float mars_elevation(vec2 uv) {
+	// These bundled maps are generated scenic relief, not MOLA altimetry.
+	float height = decode_lunar_height(textureLod(mars_height, uv, 0.0).rg);
+	vec2 region = mars_region_uv(uv);
+	float weight = lunar_region_weight(region);
+	if (weight > 0.0) {
+		height = mix(height, decode_lunar_height(textureLod(mars_region_height, region, 0.0).rg), weight);
+	}
+	// Keep the shader ground and physical base's graded landing corridor in
+	// agreement. Only this fictional colony site is flattened, with a soft edge.
+	vec2 metres = mars_site_metres(uv);
+	// All near mesas sit in this same basin, not only the small walkable pad.
+	// A kilometre-scale blend avoids a vertical wall at the edge of grading.
+	float field_gap = length(metres) - 650.0;
+	vec2 corridor_gap = max(vec2(abs(metres.x) - 48.0,
+		max(-1600.0 - metres.y, metres.y + 20.0)), vec2(0.0));
+	float grading = 1.0 - smoothstep(0.0, 2000.0, min(field_gap, length(corridor_gap)));
+	return mix(height, mars_site_elevation, grading);
+}
+
 float lunar_elevation(vec3 surface_direction) {
 	vec2 uv = lunar_uv(moon_world_to_geo * normalize(surface_direction));
+	if (mars_mode > 0.5) { return mars_elevation(uv); }
 	float global_height = decode_lunar_height(textureLod(moon_height, uv, 0.0).rg);
 	vec2 wide_uv = lunar_wac_uv(uv);
 	float wide_blend = lunar_region_weight(wide_uv);
@@ -74,8 +110,8 @@ float lunar_elevation(vec3 surface_direction) {
 
 float lunar_sphere_entry(vec3 relative_origin, vec3 direction, float radius) {
 	float b = dot(relative_origin, direction);
-	float c = dot(relative_origin, relative_origin) - radius * radius;
-	float discriminant = b * b - c;
+	vec3 closest = cross(relative_origin, direction);
+	float discriminant = radius * radius - dot(closest, closest);
 	if (b >= 0.0 || discriminant < 0.0) { return -1.0; }
 	return -b - sqrt(discriminant);
 }
@@ -94,18 +130,18 @@ vec4 lunar_trace_near_horizon(vec3 origin, vec3 direction) {
 	float previous_distance = 0.0;
 	float distance = 4.0;
 	for (int step = 0; step < 34; step++) {
-		vec3 point = origin + direction * (distance / (horizontal * LUNAR_RADIUS));
-		float gap = (length(point) - 1.0) * LUNAR_RADIUS - lunar_elevation(point);
+		vec3 point = origin + direction * (distance / (horizontal * celestial_radius));
+		float gap = (length(point) - 1.0) * celestial_radius - lunar_elevation(point);
 		if (gap <= 0.0) {
 			// A positive/negative bracket, not a proximity hit: refine the first
 			// terrain crossing and retain the correct foreground occlusion.
 			for (int refine = 0; refine < 8; refine++) {
 				float middle = (previous_distance + distance) * 0.5;
-				vec3 candidate = origin + direction * (middle / (horizontal * LUNAR_RADIUS));
-				float middle_gap = (length(candidate) - 1.0) * LUNAR_RADIUS - lunar_elevation(candidate);
+				vec3 candidate = origin + direction * (middle / (horizontal * celestial_radius));
+				float middle_gap = (length(candidate) - 1.0) * celestial_radius - lunar_elevation(candidate);
 				if (middle_gap > 0.0) { previous_distance = middle; } else { distance = middle; }
 			}
-			return vec4(origin + direction * (distance / (horizontal * LUNAR_RADIUS)), 1.0);
+			return vec4(origin + direction * (distance / (horizontal * celestial_radius)), 1.0);
 		}
 		previous_distance = distance;
 		distance *= 1.4;
@@ -117,7 +153,7 @@ vec4 lunar_trace_near_horizon(vec3 origin, vec3 direction) {
 // self-occlusion and parallax. Empty sky never pays for terrain marching.
 vec4 lunar_trace(vec3 direction, vec3 observer_offset) {
 	vec3 center = moon_direction * moon_distance_radii;
-	vec3 origin = observer_offset / LUNAR_RADIUS - center;
+	vec3 origin = observer_offset / celestial_radius - center;
 	// The walkable settlement is intentionally graded flat, whereas the
 	// distant panorama uses the original elevation data. At some ground points
 	// that grading lies below the measured height field: without correction a
@@ -126,9 +162,9 @@ vec4 lunar_trace(vec3 direction, vec3 observer_offset) {
 	// player, base geometry and collision/physics positions are never changed.
 	if (lunar_altitude < 5000.0) {
 		vec3 observer_up = normalize(origin);
-		float clearance = (length(origin) - 1.0) * LUNAR_RADIUS - lunar_elevation(origin);
+		float clearance = (length(origin) - 1.0) * celestial_radius - lunar_elevation(origin);
 		if (clearance < 2.0) {
-			origin += observer_up * ((2.0 - clearance) / LUNAR_RADIUS);
+			origin += observer_up * ((2.0 - clearance) / celestial_radius);
 		}
 	}
 	// The geometric-distance trace resolves ground-level horizons without
@@ -150,7 +186,7 @@ vec4 lunar_trace(vec3 direction, vec3 observer_offset) {
 	for (int step = 0; step < 48; step++) {
 		point = origin + direction * distance;
 		float radial = length(point);
-		float height = lunar_elevation(point) / LUNAR_RADIUS;
+		float height = lunar_elevation(point) / celestial_radius;
 		float separation = radial - 1.0 - height;
 		// Five metres of spherical-radius tolerance is useful at orbital scale,
 		// but would classify the observer's eye (only ~1.7 m above the local
@@ -168,14 +204,14 @@ vec4 lunar_trace(vec3 direction, vec3 observer_offset) {
 		// returning sky after a fixed step budget would punch holes in the Moon.
 		float closest = max(-dot(origin, direction), distance);
 		vec3 inner_point = origin + direction * closest;
-		float inner_gap = length(inner_point) - 1.0 - lunar_elevation(inner_point) / LUNAR_RADIUS;
+		float inner_gap = length(inner_point) - 1.0 - lunar_elevation(inner_point) / celestial_radius;
 		if (inner_gap > 0.0) { return vec4(0.0); }
 		previous_distance = distance;
 		distance = closest;
 		for (int step = 0; step < 18; step++) {
 			float middle = (previous_distance + distance) * 0.5;
 			vec3 candidate = origin + direction * middle;
-			float gap = length(candidate) - 1.0 - lunar_elevation(candidate) / LUNAR_RADIUS;
+			float gap = length(candidate) - 1.0 - lunar_elevation(candidate) / celestial_radius;
 			if (gap > 0.0) { previous_distance = middle; } else { distance = middle; }
 		}
 	}
@@ -183,7 +219,7 @@ vec4 lunar_trace(vec3 direction, vec3 observer_offset) {
 	for (int step = 0; step < 4; step++) {
 		float middle = (previous_distance + distance) * 0.5;
 		vec3 candidate = origin + direction * middle;
-		float difference = length(candidate) - 1.0 - lunar_elevation(candidate) / LUNAR_RADIUS;
+		float difference = length(candidate) - 1.0 - lunar_elevation(candidate) / celestial_radius;
 		if (difference > 0.0) { previous_distance = middle; } else { distance = middle; }
 	}
 	return vec4(origin + direction * distance, 1.0);
@@ -201,14 +237,17 @@ vec3 lunar_normal(vec3 point) {
 	float fine_weight = lunar_region_weight(fine_uv);
 	// Derivative footprints follow each measured product's ground spacing:
 	// NAC stereo, native regional LOLA, then the downsampled global LOLA map.
-	float spacing = mix(mix(1600.0, 650.0, wide_weight), 18.0, fine_weight) / LUNAR_RADIUS;
+	float spacing = mix(mix(1600.0, 650.0, wide_weight), 18.0, fine_weight) / celestial_radius;
+	if (mars_mode > 0.5) {
+		spacing = mix(4500.0, 900.0, lunar_region_weight(mars_region_uv(uv))) / celestial_radius;
+	}
 	vec3 tangent = normalize(cross(normal, abs(normal.z) < 0.95 ? vec3(0.0, 0.0, 1.0) : vec3(0.0, 1.0, 0.0)));
 	vec3 bitangent = normalize(cross(normal, tangent));
 	float east = lunar_elevation(normal + tangent * spacing);
 	float west = lunar_elevation(normal - tangent * spacing);
 	float north = lunar_elevation(normal + bitangent * spacing);
 	float south = lunar_elevation(normal - bitangent * spacing);
-	float baseline = 2.0 * spacing * LUNAR_RADIUS;
+	float baseline = 2.0 * spacing * celestial_radius;
 	return normalize(normal - tangent * (east - west) / baseline - bitangent * (north - south) / baseline);
 }
 
@@ -217,15 +256,55 @@ float lunar_shadow(vec3 point, vec3 sun_direction) {
 	float visibility = 1.0;
 	float spacing = 160.0;
 	for (int step = 0; step < 7; step++) {
-		vec3 sample_point = point + sun_direction * spacing / LUNAR_RADIUS;
-		float gap = (length(sample_point) - 1.0) * LUNAR_RADIUS - lunar_elevation(sample_point);
+		vec3 sample_point = point + sun_direction * spacing / celestial_radius;
+		float gap = (length(sample_point) - 1.0) * celestial_radius - lunar_elevation(sample_point);
 		visibility = min(visibility, smoothstep(-25.0, 65.0 + spacing * 0.008, gap));
 		spacing *= 2.1;
 	}
 	return visibility;
 }
 
+vec3 mars_radiance(vec3 point, vec3 direction, vec3 sunlight) {
+	vec3 radial = normalize(point);
+	vec2 uv = lunar_uv(moon_world_to_geo * radial);
+	vec2 region = mars_region_uv(uv);
+	float regional_weight = lunar_region_weight(region) * (1.0 - smoothstep(250000.0, 800000.0, lunar_altitude));
+	vec3 albedo = mix(texture(mars_albedo, uv).rgb,
+		texture(mars_region_albedo, clamp(region, vec2(0.0), vec2(1.0))).rgb, regional_weight);
+	vec2 metres = mars_site_metres(uv);
+	// At the fictional colony, orbital imagery cannot resolve the ground.
+	// Blend to the same terrestrial soil scan as its modeled surface patch.
+	float local_soil = (1.0 - smoothstep(650.0, 3000.0, length(metres)))
+		* (1.0 - smoothstep(2500.0, 10000.0, lunar_altitude));
+	if (local_soil > 0.001) {
+		vec3 soil = mix(texture(mars_detail_albedo, metres * 0.28).rgb,
+			texture(mars_detail_albedo, metres * 0.065).rgb, 0.45);
+		albedo = mix(albedo, soil * vec3(0.76, 0.34, 0.19) * 1.55, local_soil);
+	}
+	// The photographic mosaic already contains small-scale shadows. Restrain
+	// extra relief shading instead of superimposing lunar craters onto Mars.
+	vec3 normal = radial;
+	if (lunar_altitude < 450000.0) { normal = normalize(mix(radial, lunar_normal(point), 0.35)); }
+	float incidence = max(dot(normal, sunlight), 0.0);
+	float direct = incidence * lunar_shadow(point, sunlight);
+	float surface_view = 1.0 - smoothstep(4000.0, 55000.0, lunar_altitude);
+	vec3 color = albedo * (0.004 + surface_view * 0.10 + direct * 1.45);
+	if (lunar_altitude < 3500.0) {
+		float footprint = max(length(dFdx(metres)), length(dFdy(metres)));
+		float detail = (1.0 - smoothstep(2.0, 14.0, footprint)) * (1.0 - smoothstep(250.0, 3500.0, lunar_altitude));
+		vec3 soil = texture(mars_detail_albedo, metres / 2.4).rgb;
+		float grain = clamp(dot(soil, vec3(0.2126, 0.7152, 0.0722)) / 0.187, 0.65, 1.45);
+		color *= mix(1.0, grain, detail * 0.65);
+	}
+	float day = smoothstep(-0.08, 0.24, dot(radial, sunlight));
+	float limb = pow(1.0 - clamp(dot(radial, -direction), 0.0, 1.0), 5.0);
+	color += vec3(0.22, 0.12, 0.075) * limb * day * 0.15;
+	float haze = surface_view * pow(1.0 - abs(direction.y), 3.0) * 0.30;
+	return mix(color, vec3(0.38, 0.22, 0.14) * day, haze);
+}
+
 vec3 lunar_radiance(vec3 point, vec3 direction, vec3 sunlight) {
+	if (mars_mode > 0.5) { return mars_radiance(point, direction, sunlight); }
 	vec3 radial = normalize(point);
 	vec2 uv = lunar_uv(moon_world_to_geo * radial);
 	vec3 albedo = texture(moon_albedo, uv).rgb;
@@ -271,8 +350,8 @@ vec3 lunar_radiance(vec3 point, vec3 direction, vec3 sunlight) {
 		vec3 geographic = normalize(moon_world_to_geo * radial);
 		float latitude = asin(clamp(geographic.y, -1.0, 1.0));
 		float longitude = atan(geographic.z, geographic.x);
-		vec2 metres = vec2((longitude - radians(-18.484)) * LUNAR_RADIUS * cos(latitude),
-			(latitude - radians(10.324)) * LUNAR_RADIUS);
+		vec2 metres = vec2((longitude - radians(-18.484)) * celestial_radius * cos(latitude),
+			(latitude - radians(10.324)) * celestial_radius);
 		float footprint = max(length(dFdx(metres)), length(dFdy(metres)));
 		float detail_weight = (1.0 - smoothstep(2.0, 14.0, footprint))
 			* (1.0 - smoothstep(250.0, 3500.0, lunar_altitude));
@@ -295,21 +374,6 @@ vec3 lunar_radiance(vec3 point, vec3 direction, vec3 sunlight) {
 			float micro_light = clamp(1.0 + dot(micro, vec2(dot(sun_geo, east_geo), dot(sun_geo, north_geo))) * 0.52, 0.68, 1.35);
 			color *= mix(1.0, texture_gain * micro_light, detail_weight * 0.78);
 		}
-	}
-	if (mars_mode > 0.5) {
-		vec3 m_global = texture(mars_albedo, uv).rgb;
-		vec3 m_wide = texture(mars_region_albedo, clamp(wide_uv, vec2(0.0), vec2(1.0))).rgb;
-		vec3 m_reg = texture(mars_region_albedo, clamp(regional, vec2(0.0), vec2(1.0))).rgb;
-		vec3 m_tex = mix(m_global, m_wide, wide_weight * (1.0 - smoothstep(450000.0, 1000000.0, lunar_altitude)));
-		m_tex = mix(m_tex, m_reg, photo_weight * (1.0 - smoothstep(120000.0, 300000.0, lunar_altitude)));
-		float luma_relief = clamp(dot(color, vec3(0.3333)) / 0.16, 0.18, 2.4);
-		vec3 mars_lit = m_tex * (0.22 + 1.35 * direct * shadow) * mix(0.85, 1.22, clamp(luma_relief * 0.5, 0.0, 1.0));
-		// Martian iron-oxide dust scattering in canyon troughs and along the limb
-		float limb_mu = clamp(dot(normal, -direction), 0.0, 1.0);
-		float mars_atmo_limb = pow(1.0 - limb_mu, 3.2) * (0.35 + 0.65 * max(dot(radial, sunlight), 0.0));
-		float low_alt_haze = (1.0 - smoothstep(1000.0, 45000.0, lunar_altitude)) * pow(1.0 - abs(direction.y), 3.0) * 0.52;
-		vec3 dust_scatter = vec3(0.86, 0.44, 0.24) * (mars_atmo_limb * 0.75 + low_alt_haze);
-		color = mix(mars_lit, vec3(0.82, 0.46, 0.28), clamp(low_alt_haze, 0.0, 0.62)) + dust_scatter * 0.38;
 	}
 	return color;
 }
